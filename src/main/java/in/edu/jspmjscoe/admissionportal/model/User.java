@@ -44,6 +44,7 @@ public class User {
     @ToString.Exclude
     private Role role;
 
+    @Column(name = "first_login")
     private boolean firstLogin = true;
 
     @CreationTimestamp
