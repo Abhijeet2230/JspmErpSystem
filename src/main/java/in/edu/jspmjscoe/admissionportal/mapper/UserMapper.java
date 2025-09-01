@@ -16,6 +16,7 @@ public class UserMapper {
         dto.setCreatedDate(user.getCreatedDate());
         dto.setFirstLoginDate(user.getFirstLoginDate());
         dto.setLastLoginDate(user.getLastLoginDate());
+        dto.setStudentId(user.getStudent() != null ? user.getStudent().getStudentId() : null);
 
         return dto;
     }
