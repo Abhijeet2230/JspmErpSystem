@@ -25,6 +25,6 @@ public class CET {
     @Column(name = "roll_no", nullable = false, unique = true)
     private String rollNo;
 
-    @Column(name = "percentile", nullable = false)
+    @Column(name = "percentile")
     private Double percentile;
 }

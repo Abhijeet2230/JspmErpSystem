@@ -1,8 +1,8 @@
 package in.edu.jspmjscoe.admissionportal.controllers;
 
 import in.edu.jspmjscoe.admissionportal.model.User;
-import in.edu.jspmjscoe.admissionportal.repository.RoleRepository;
-import in.edu.jspmjscoe.admissionportal.repository.UserRepository;
+import in.edu.jspmjscoe.admissionportal.repositories.RoleRepository;
+import in.edu.jspmjscoe.admissionportal.repositories.UserRepository;
 import in.edu.jspmjscoe.admissionportal.security.jwt.JwtUtils;
 import in.edu.jspmjscoe.admissionportal.security.response.LoginResponse;
 import in.edu.jspmjscoe.admissionportal.security.request.LoginRequest;

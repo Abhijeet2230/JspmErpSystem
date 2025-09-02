@@ -84,6 +84,41 @@
 			<version>0.13.0</version>
 			<scope>runtime</scope>
 		</dependency>
+
+		<dependency>
+			<groupId>org.mapstruct</groupId>
+			<artifactId>mapstruct</artifactId>
+			<version>1.5.5.Final</version>
+
+		</dependency>
+		<!-- Apache POI for Excel (.xlsx) files -->
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml</artifactId>
+			<version>5.4.0</version>
+		</dependency>
+
+		<!-- Apache Commons Compress (upgraded to safe version) -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.18.0</version>
+		</dependency>
+		<!-- Required by POI -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-collections4</artifactId>
+			<version>4.4</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.xmlbeans</groupId>
+			<artifactId>xmlbeans</artifactId>
+			<version>5.1.1</version>
+		</dependency>
+
+
+
 	</dependencies>
 
 	<build>
@@ -96,6 +131,11 @@
 						<path>
 							<groupId>org.projectlombok</groupId>
 							<artifactId>lombok</artifactId>
+						</path>
+						<path>
+							<groupId>org.mapstruct</groupId>
+							<artifactId>mapstruct-processor</artifactId>
+							<version>1.5.5.Final</version>
 						</path>
 					</annotationProcessorPaths>
 				</configuration>

@@ -1,15 +1,14 @@
 package in.edu.jspmjscoe.admissionportal.services;
 
 import in.edu.jspmjscoe.admissionportal.dtos.UserDTO;
-import in.edu.jspmjscoe.admissionportal.model.User;
-
 import java.util.List;
 
 public interface UserService {
-
-    List<User> getAllUsers();
-
+    List<UserDTO> getAllUsers();
     UserDTO getUserById(Long id);
-
-    User findByUsername(String username);
+    UserDTO createUser(UserDTO userDTO);
+    UserDTO updateUser(Long id, UserDTO userDTO);
+    void deleteUser(Long id);
+    // NEW METHOD for password update
+    void updatePassword(Long id, String newPassword);
 }

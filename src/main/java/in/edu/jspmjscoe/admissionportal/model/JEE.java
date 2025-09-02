@@ -21,9 +21,9 @@ public class JEE {
     @JsonBackReference
     private Student student;   // FK → Student.student_id
 
-    @Column(name = "application_no", nullable = false, unique = true)
+    @Column(name = "application_no", unique = true)
     private String applicationNo;
 
-    @Column(nullable = false)
+
     private Double percentile;
 }

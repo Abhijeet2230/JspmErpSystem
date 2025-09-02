@@ -1,4 +1,4 @@
-package in.edu.jspmjscoe.admissionportal.repository;
+package in.edu.jspmjscoe.admissionportal.repositories;
 
 import in.edu.jspmjscoe.admissionportal.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
