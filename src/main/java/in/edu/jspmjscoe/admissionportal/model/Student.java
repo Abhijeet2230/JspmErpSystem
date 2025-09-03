@@ -22,8 +22,8 @@ public class Student {
     @Column(name = "student_id")
     private Long studentId;   // same as user_id
 
-    @OneToOne
-    @MapsId   // tells Hibernate to use the same PK as User
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @MapsId
     @JoinColumn(name = "student_id")
     private User user;
 
@@ -108,5 +108,8 @@ public class Student {
     @JsonManagedReference
     private List<Admission> admissions = new ArrayList<>();
 
-
+    public void addAdmission(Admission admission) {
+        admissions.add(admission);
+        admission.setStudent(this); // important
+    }
 }

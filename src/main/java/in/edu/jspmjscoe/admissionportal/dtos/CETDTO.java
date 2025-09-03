@@ -13,7 +13,6 @@ public class CETDTO {
 
     private Long cetId;
     private Long studentId;   // FK reference only
-
     private String rollNo;
     private Double percentile;
 }

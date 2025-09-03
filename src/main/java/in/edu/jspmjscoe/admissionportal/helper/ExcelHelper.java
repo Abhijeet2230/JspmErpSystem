@@ -1,5 +1,8 @@
 package in.edu.jspmjscoe.admissionportal.helper;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import in.edu.jspmjscoe.admissionportal.dtos.*;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -96,27 +99,43 @@ public class ExcelHelper {
                 studentDTO.setCet(cetDTO);
 
                 // ------------------- JEE Info -------------------
-                JEEDTO jeeDTO = new JEEDTO();
-                jeeDTO.setApplicationNo(getCellString(row.getCell(48)));
-                jeeDTO.setPercentile(getCellDouble(row.getCell(49)));
-                studentDTO.setJee(jeeDTO);
+                String jeeAppNo = getCellString(row.getCell(48));
+                Double jeePercentile = getCellDouble(row.getCell(49));
+                if (jeeAppNo != null && !jeeAppNo.isBlank()) {
+                    JEEDTO jeeDTO = new JEEDTO();
+                    jeeDTO.setApplicationNo(jeeAppNo);
+                    jeeDTO.setPercentile(jeePercentile);
+                    studentDTO.setJee(jeeDTO);
+                } else {
+                    studentDTO.setJee(null); // no JEE data
+                }
 
                 // ------------------- Admission Info -------------------
-                AdmissionDTO admissionDTO = new AdmissionDTO();
-                admissionDTO.setMeritNo(getCellInteger(row.getCell(50)));
-                admissionDTO.setMeritMarks(getCellDouble(row.getCell(51)));
-                admissionDTO.setInstituteCode(getCellString(row.getCell(52)));
-                admissionDTO.setInstituteName(getCellString(row.getCell(53)));
-                admissionDTO.setCourseName(getCellString(row.getCell(54)));
-                admissionDTO.setChoiceCode(getCellString(row.getCell(55)));
-                admissionDTO.setSeatType(getCellString(row.getCell(56)));
-                // Parse dates directly here
-                admissionDTO.setAdmissionDate(parseDate(row.getCell(57)));  // returns LocalDate
-                admissionDTO.setReportedDate(parseDate(row.getCell(58)));
+                Integer meritNo = getCellInteger(row.getCell(50));
+                String instituteCode = getCellString(row.getCell(52));
+                String courseName = getCellString(row.getCell(54));
 
-                List<AdmissionDTO> admissions = new ArrayList<>();
-                admissions.add(admissionDTO);
-                studentDTO.setAdmissions(admissions);
+                if (meritNo != null || instituteCode != null || courseName != null) {
+                    AdmissionDTO admissionDTO = new AdmissionDTO();
+                    admissionDTO.setMeritNo(meritNo);
+                    admissionDTO.setMeritMarks(getCellDouble(row.getCell(51)));
+                    admissionDTO.setInstituteCode(instituteCode);
+                    admissionDTO.setInstituteName(getCellString(row.getCell(53)));
+                    admissionDTO.setCourseName(courseName);
+                    admissionDTO.setChoiceCode(getCellString(row.getCell(55)));
+                    admissionDTO.setSeatType(getCellString(row.getCell(56)));
+                    admissionDTO.setAdmissionDate(parseDate(row.getCell(57)));
+                    admissionDTO.setReportedDate(parseDate(row.getCell(58)));
+
+                    List<AdmissionDTO> admissions = new ArrayList<>();
+                    admissions.add(admissionDTO);
+                    studentDTO.setAdmissions(admissions);
+                    for (StudentDTO dto : students) {
+                        System.out.println(dto);
+                    }
+                } else {
+                    studentDTO.setAdmissions(new ArrayList<>()); // empty list if no admission data
+                }
 
                 students.add(studentDTO);
             }
@@ -161,11 +180,9 @@ public class ExcelHelper {
 
         try {
             if (cell.getCellType() == CellType.NUMERIC) {
-                // Excel stores dates as numeric
                 return cell.getLocalDateTimeCellValue().toLocalDate();
             } else {
-                // If string like "9/6/2024"
-                return LocalDate.parse(cell.toString(), DateTimeFormatter.ofPattern("M/d/yyyy"));
+                return LocalDate.parse(cell.toString(), DATE_FORMATTER);
             }
         } catch (Exception e) {
             return null;
@@ -178,7 +195,7 @@ public class ExcelHelper {
         try {
             return Enum.valueOf(enumClass, value);
         } catch (IllegalArgumentException e) {
-            return null; // or log warning
+            return null;
         }
     }
 }
