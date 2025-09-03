@@ -1,6 +1,6 @@
 package in.edu.jspmjscoe.admissionportal.services.impl;
 
-import in.edu.jspmjscoe.admissionportal.dtos.StudentDTO;
+import in.edu.jspmjscoe.admissionportal.dtos.*;
 import in.edu.jspmjscoe.admissionportal.helper.ExcelHelper;
 import in.edu.jspmjscoe.admissionportal.mappers.*;
 import in.edu.jspmjscoe.admissionportal.model.*;
@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -22,6 +23,7 @@ public class ExcelImportServiceImpl implements ExcelImportService {
 
     private final StudentRepository studentRepository;
     private final RoleRepository roleRepository;
+    private final AdmissionRepository admissionRepository; // ✅ Added to save admissions separately
     private final StudentMapper studentMapper;
     private final ParentMapper parentMapper;
     private final AddressMapper addressMapper;
@@ -37,18 +39,7 @@ public class ExcelImportServiceImpl implements ExcelImportService {
     public int importStudents(MultipartFile file) {
         try {
             List<StudentDTO> studentDTOs = ExcelHelper.excelToStudentDTOs(file.getInputStream());
-            System.out.println(studentDTOs);
-            // 🔍 Print all parsed StudentDTOs at start
             log.info(">>> Total students parsed from Excel = {}", studentDTOs.size());
-            for (StudentDTO dto : studentDTOs) {
-                log.debug("Parsed DTO: applicationId={}, candidate={}, dob={}, gender={}, admissionsCount={}",
-                        dto.getApplicationId(),
-                        dto.getCandidateName(),
-                        dto.getDob(),
-                        dto.getGender(),
-                        (dto.getAdmissions() != null ? dto.getAdmissions().size() : 0)
-                );
-            }
 
             Role studentRole = roleRepository.findByRoleName(AppRole.ROLE_STUDENT)
                     .orElseThrow(() -> new RuntimeException("ROLE_STUDENT not found"));
@@ -57,7 +48,6 @@ public class ExcelImportServiceImpl implements ExcelImportService {
 
             for (StudentDTO dto : studentDTOs) {
 
-                // 🔍 Skip if student with applicationId already exists
                 if (studentRepository.findByApplicationId(dto.getApplicationId()).isPresent()) {
                     log.warn("Skipping duplicate: applicationId={}", dto.getApplicationId());
                     continue;
@@ -73,12 +63,10 @@ public class ExcelImportServiceImpl implements ExcelImportService {
 
                 // ✅ Create Student
                 Student student = studentMapper.toEntity(dto);
-
-                // set bidirectional link
                 student.setUser(user);
                 user.setStudent(student);
 
-                // ✅ Handle gender safely
+                // ✅ Gender
                 if (dto.getGender() != null && !dto.getGender().isBlank()) {
                     try {
                         student.setGender(Gender.valueOf(dto.getGender().toUpperCase().replace(" ", "_")));
@@ -122,42 +110,39 @@ public class ExcelImportServiceImpl implements ExcelImportService {
                     student.setCet(cet);
                 }
 
-                if (dto.getJee() != null
-                        && dto.getJee().getApplicationNo() != null
-                        && !dto.getJee().getApplicationNo().trim().isEmpty()) {
-
+                // ✅ JEE
+                if (dto.getJee() != null && dto.getJee().getApplicationNo() != null && !dto.getJee().getApplicationNo().trim().isEmpty()) {
                     JEE jee = jeeMapper.toEntity(dto.getJee());
                     jee.setStudent(student);
                     student.setJee(jee);
                 }
 
-
-                // ✅ Admissions
-                if (dto.getAdmissions() != null && !dto.getAdmissions().isEmpty()) {
-                    dto.getAdmissions().forEach(admissionDTO -> {
-                        Admission admission = admissionMapper.toEntity(admissionDTO);
-                        admission.setStudent(student);
-
-                        // Dates already parsed inside ExcelHelper
-                        admission.setAdmissionDate(admissionDTO.getAdmissionDate());
-                        admission.setReportedDate(admissionDTO.getReportedDate());
-
-                        student.getAdmissions().add(admission);
-                    });
+                // ✅ STEP 1: Detach Admissions before saving Student
+                List<AdmissionDTO> admissionDTOs = new ArrayList<>();
+                if (dto.getAdmissions() != null) {
+                    admissionDTOs.addAll(dto.getAdmissions());
                 }
+                student.setAdmissions(new ArrayList<>()); // prevent cascade
 
-                // 🔍 Print entity status before save
-                log.info("Preparing to save Student: applicationId={}, hasJee={}, admissionsCount={}, hasUser={}, hasParent={}, hasAddress={}",
+                // 🔍 Log before save
+                log.info("Preparing to save Student: applicationId={}, hasJee={}, admissionsDetachedCount={}",
                         student.getApplicationId(),
-                        (student.getJee() != null ? "YES (student=" + (student.getJee().getStudent() != null) + ")" : "NO"),
-                        (student.getAdmissions() != null ? student.getAdmissions().size() : 0),
-                        (student.getUser() != null),
-                        (student.getParent() != null),
-                        (student.getAddress() != null)
+                        (student.getJee() != null ? "YES" : "NO"),
+                        admissionDTOs.size()
                 );
 
-                // 🚀 Save once (cascade takes care of user + children)
-                studentRepository.save(student);
+                // ✅ STEP 2: Save Student first (no admissions)
+                Student savedStudent = studentRepository.saveAndFlush(student);
+
+                // ✅ STEP 3: Now save Admissions separately
+                for (AdmissionDTO admissionDTO : admissionDTOs) {
+                    Admission admission = admissionMapper.toEntity(admissionDTO);
+                    admission.setStudent(savedStudent);
+                    admission.setAdmissionDate(admissionDTO.getAdmissionDate());
+                    admission.setReportedDate(admissionDTO.getReportedDate());
+                    admissionRepository.save(admission);
+                }
+
                 importedCount++;
             }
 
@@ -169,5 +154,4 @@ public class ExcelImportServiceImpl implements ExcelImportService {
             throw new RuntimeException("Failed to import Excel file: " + e.getMessage(), e);
         }
     }
-
 }

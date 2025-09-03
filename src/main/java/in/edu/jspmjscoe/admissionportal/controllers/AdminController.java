@@ -1,7 +1,10 @@
 package in.edu.jspmjscoe.admissionportal.controllers;
 
+import in.edu.jspmjscoe.admissionportal.dtos.StudentDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.UserDTO;
+import in.edu.jspmjscoe.admissionportal.model.Student;
 import in.edu.jspmjscoe.admissionportal.services.ExcelImportService;
+import in.edu.jspmjscoe.admissionportal.services.StudentService;
 import in.edu.jspmjscoe.admissionportal.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,6 +21,7 @@ public class AdminController {
 
     private final UserService userService;
     private final ExcelImportService excelImportService;
+    private final StudentService studentService;
 
     // ------------------- User Endpoints -------------------
 
@@ -26,6 +30,14 @@ public class AdminController {
         List<UserDTO> users = userService.getAllUsers();
         return ResponseEntity.ok(users);
     }
+
+
+    @GetMapping("/getstudents")
+    public ResponseEntity<List<StudentDTO>> getAllStudents() {
+         List<StudentDTO> student = studentService.getAllStudents();
+        return ResponseEntity.ok(student);
+    }
+
 
     @GetMapping("/user/{id}")
     public ResponseEntity<UserDTO> getUser(@PathVariable Long id) {

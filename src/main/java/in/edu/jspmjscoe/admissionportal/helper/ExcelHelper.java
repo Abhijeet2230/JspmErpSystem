@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import in.edu.jspmjscoe.admissionportal.dtos.*;
+import in.edu.jspmjscoe.admissionportal.model.Admission;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
@@ -116,6 +117,7 @@ public class ExcelHelper {
                 String courseName = getCellString(row.getCell(54));
 
                 if (meritNo != null || instituteCode != null || courseName != null) {
+
                     AdmissionDTO admissionDTO = new AdmissionDTO();
                     admissionDTO.setMeritNo(meritNo);
                     admissionDTO.setMeritMarks(getCellDouble(row.getCell(51)));

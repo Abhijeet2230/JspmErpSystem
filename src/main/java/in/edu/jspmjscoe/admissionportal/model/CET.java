@@ -22,7 +22,7 @@ public class CET {
     @JsonBackReference
     private Student student;   // FK → students.student_id (strict 1:1)
 
-    @Column(name = "roll_no", nullable = false, unique = true)
+    @Column(name = "roll_no", unique = true)
     private String rollNo;
 
     @Column(name = "percentile")
