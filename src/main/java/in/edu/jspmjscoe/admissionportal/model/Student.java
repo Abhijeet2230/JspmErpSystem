@@ -25,6 +25,7 @@ public class Student {
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @MapsId
     @JoinColumn(name = "student_id")
+    @JsonManagedReference
     private User user;
 
     @Column(name = "application_id", unique = true)

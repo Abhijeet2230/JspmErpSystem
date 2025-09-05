@@ -20,7 +20,7 @@ public class ExcelHelper {
 
     public static List<StudentDTO> excelToStudentDTOs(InputStream is) {
         try (Workbook workbook = new XSSFWorkbook(is)) {
-            Sheet sheet = workbook.getSheetAt(0);
+            Sheet sheet = workbook.getSheetAt(1);
             List<StudentDTO> students = new ArrayList<>();
 
             int firstDataRow = 3; // skip headers

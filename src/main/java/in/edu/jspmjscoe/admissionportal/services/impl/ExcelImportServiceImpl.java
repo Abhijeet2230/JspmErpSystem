@@ -140,6 +140,9 @@ public class ExcelImportServiceImpl implements ExcelImportService {
                     admission.setStudent(savedStudent);
                     admission.setAdmissionDate(admissionDTO.getAdmissionDate());
                     admission.setReportedDate(admissionDTO.getReportedDate());
+                    admission.setIsCurrent(true);
+                    admission.setAdmissionStatus(AdmissionStatus.PENDING);
+                    admission.setCurrentYear(CurrentYear.FINAL_YEAR);
                     admissionRepository.save(admission);
                 }
 

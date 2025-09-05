@@ -1,12 +1,16 @@
 package in.edu.jspmjscoe.admissionportal.services.impl;
 
+import in.edu.jspmjscoe.admissionportal.dtos.ChangePasswordRequest;
 import in.edu.jspmjscoe.admissionportal.dtos.StudentDTO;
 import in.edu.jspmjscoe.admissionportal.mappers.StudentMapper;
 import in.edu.jspmjscoe.admissionportal.model.Gender;
 import in.edu.jspmjscoe.admissionportal.model.Student;
+import in.edu.jspmjscoe.admissionportal.model.User;
 import in.edu.jspmjscoe.admissionportal.repositories.StudentRepository;
+import in.edu.jspmjscoe.admissionportal.repositories.UserRepository;
 import in.edu.jspmjscoe.admissionportal.services.StudentService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,6 +23,8 @@ public class StudentServiceImpl implements StudentService {
 
     private final StudentRepository studentRepository;
     private final StudentMapper studentMapper;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public StudentDTO createStudent(StudentDTO studentDTO) {
@@ -69,5 +75,29 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public void deleteStudent(Long id) {
         studentRepository.deleteById(id);
+    }
+
+
+
+    public void changePassword(String username, ChangePasswordRequest request) {
+        // Load user
+        User user = userRepository.findByUserName(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Check old password
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("Old password is incorrect");
+        }
+
+        // Set new password
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+
+
+        // Flip first login flag
+        if (user.isFirstLogin()) {       // only if true
+            user.setFirstLogin(false);   // mark as changed
+        }
+
+        userRepository.save(user);
     }
 }

@@ -9,7 +9,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
-import in.edu.jspmjscoe.admissionportal.model.Student;
 
 import java.time.LocalDateTime;
 
@@ -62,6 +61,7 @@ public class User {
 
     // One-to-One with Student (shared PK)
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonBackReference
     private Student student;
 
 }

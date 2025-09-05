@@ -27,6 +27,19 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthTokenFilter.class);
 
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String path = request.getRequestURI();
+        return path.startsWith("/api/auth/public")
+                || path.startsWith("/swagger")
+                || path.startsWith("/webjars")
+                || path.startsWith("/swagger-resources")
+                || path.equals("/swagger-ui.html")
+                || path.startsWith("/api-docs")   // 👈 skip your new api-docs path
+                || path.equals("/error");
+    }
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
