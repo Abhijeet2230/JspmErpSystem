@@ -1,14 +1,12 @@
 package in.edu.jspmjscoe.admissionportal.helper;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
 import in.edu.jspmjscoe.admissionportal.dtos.*;
-import in.edu.jspmjscoe.admissionportal.model.Admission;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -20,7 +18,7 @@ public class ExcelHelper {
 
     public static List<StudentDTO> excelToStudentDTOs(InputStream is) {
         try (Workbook workbook = new XSSFWorkbook(is)) {
-            Sheet sheet = workbook.getSheetAt(1);
+            Sheet sheet = workbook.getSheetAt(4);
             List<StudentDTO> students = new ArrayList<>();
 
             int firstDataRow = 3; // skip headers
@@ -73,7 +71,7 @@ public class ExcelHelper {
                 SSCDTO sscDTO = new SSCDTO();
                 sscDTO.setBoard(getCellString(row.getCell(29)));
                 sscDTO.setPassingYear(getCellString(row.getCell(30)));
-                sscDTO.setSeatNo(getCellString(row.getCell(31)));
+                sscDTO.setSeatNo(normaliseSeatNo(row.getCell(31)));
                 sscDTO.setMathPercentage(getCellDouble(row.getCell(32)));
                 sscDTO.setTotalPercentage(getCellDouble(row.getCell(33)));
                 studentDTO.setSsc(sscDTO);
@@ -181,23 +179,28 @@ public class ExcelHelper {
         if (cell == null) return null;
 
         try {
-            if (cell.getCellType() == CellType.NUMERIC) {
+            if (cell.getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(cell)) {
                 return cell.getLocalDateTimeCellValue().toLocalDate();
-            } else {
-                return LocalDate.parse(cell.toString(), DATE_FORMATTER);
             }
+            String text = cell.toString().trim();
+            if (text.isEmpty()) return null;
+            return LocalDate.parse(text, DATE_FORMATTER);
         } catch (Exception e) {
+            System.out.println("Could not parse date for cell: " + cell.toString());
             return null;
         }
     }
 
-    private static <E extends Enum<E>> E getEnum(Cell cell, Class<E> enumClass) {
-        if (cell == null || cell.toString().trim().isEmpty()) return null;
-        String value = cell.toString().trim().toUpperCase().replace(" ", "_");
-        try {
-            return Enum.valueOf(enumClass, value);
-        } catch (IllegalArgumentException e) {
-            return null;
+
+    private static String normaliseSeatNo(Cell cell) {
+        if (cell == null) return null;
+        // this removes scientific notation and trailing .0
+        if (cell.getCellType() == CellType.NUMERIC) {
+            BigDecimal bd = new BigDecimal(cell.getNumericCellValue());
+            return bd.stripTrailingZeros().toPlainString();
         }
+        String value = cell.toString().trim();
+        return value.isEmpty() ? null : value;
     }
+
 }
