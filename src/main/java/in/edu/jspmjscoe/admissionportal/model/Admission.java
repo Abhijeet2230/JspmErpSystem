@@ -22,6 +22,7 @@ public class Admission {
     @JoinColumn(name = "student_id", nullable = false)
     @JsonBackReference
     private Student student;
+
     @Column(name = "merit_no")
     private Integer meritNo;
 

@@ -40,11 +40,12 @@ public class SecurityConfig {
 
 
     private final AuthEntryPointJwt unauthorizedHandler;
+    private final AuthTokenFilter authTokenFilter;  // <-- inject existing component
 
-    @Bean
-    public AuthTokenFilter authenticationJwtTokenFilter() {
-        return new AuthTokenFilter();
-    }
+//    @Bean
+//    public AuthTokenFilter authenticationJwtTokenFilter() {
+//        return new AuthTokenFilter();
+//    }
 
     @Bean
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
@@ -65,11 +66,20 @@ public class SecurityConfig {
                         "/api-docs",                 // 👈 new path for your JSON docs
                         "/api-docs/**"               // 👈 in case of nested
                 ).permitAll()
+                .requestMatchers(
+                        "/",
+                        "/index.html",
+                        "/assets/**",          // <—— add this for Vite build assets
+                        "/*.js",               // main JS bundles
+                        "/*.css",              // if your build outputs root CSS
+                        "/favicon.ico",
+                        "/manifest.json",
+                        "/vite.svg"
+                        ).permitAll()
                 .anyRequest().authenticated());
         http.exceptionHandling(exception
                 -> exception.authenticationEntryPoint(unauthorizedHandler));
-        http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
-//        http.formLogin(withDefaults());
+        http.addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class);
         http.csrf(AbstractHttpConfigurer::disable);
         http.httpBasic(withDefaults());
         return http.build();

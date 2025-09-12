@@ -1,6 +1,5 @@
 package in.edu.jspmjscoe.admissionportal.helper;
 
-
 import in.edu.jspmjscoe.admissionportal.dtos.*;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -9,8 +8,7 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class ExcelHelper {
 
@@ -18,123 +16,125 @@ public class ExcelHelper {
 
     public static List<StudentDTO> excelToStudentDTOs(InputStream is) {
         try (Workbook workbook = new XSSFWorkbook(is)) {
-            Sheet sheet = workbook.getSheetAt(4);
+            Sheet sheet = workbook.getSheetAt(1); // first sheet; adjust if needed
+
+            // ---- Build header map from row 3 (index 2) ----
+            Row headerRow = sheet.getRow(2); // 0-based index: third row
+            Map<String,Integer> headerMap = new HashMap<>();
+            for (Cell cell : headerRow) {
+                String header = cell.toString().trim();
+                if (!header.isEmpty()) {
+                    headerMap.put(header, cell.getColumnIndex());
+                }
+            }
+
             List<StudentDTO> students = new ArrayList<>();
 
-            int firstDataRow = 3; // skip headers
-            for (int i = firstDataRow; i <= sheet.getLastRowNum(); i++) {
+            // ---- Data starts from row 4 (index 3) ----
+            for (int i = 3; i <= sheet.getLastRowNum(); i++) {
                 Row row = sheet.getRow(i);
                 if (row == null) continue;
 
                 StudentDTO studentDTO = new StudentDTO();
 
-                // ------------------- Basic Info -------------------
-                studentDTO.setApplicationId(getCellString(row.getCell(1)));
-                studentDTO.setCandidateName(getCellString(row.getCell(2)));
-                studentDTO.setMobileNo(getCellString(row.getCell(19)));
-                studentDTO.setEmail(getCellString(row.getCell(20)));
-                studentDTO.setGender(getCellString(row.getCell(5)));
-                studentDTO.setDob(getCellString(row.getCell(6)));
-                studentDTO.setReligion(getCellString(row.getCell(7)));
-                studentDTO.setRegion(getCellString(row.getCell(8)));
-                studentDTO.setMotherTongue(getCellString(row.getCell(9)));
-                studentDTO.setAnnualFamilyIncome(getCellString(row.getCell(10)));
-                studentDTO.setCandidatureType(getCellString(row.getCell(22)));
-                studentDTO.setHomeUniversity(getCellString(row.getCell(23)));
-                studentDTO.setCategory(getCellString(row.getCell(24)));
-                studentDTO.setPhType(getCellString(row.getCell(25)));
-                studentDTO.setDefenceType(getCellString(row.getCell(26)));
-                studentDTO.setLinguisticMinority(getCellString(row.getCell(27)));
-                studentDTO.setReligiousMinority(getCellString(row.getCell(28)));
+                // Basic Info
+                studentDTO.setApplicationId(getCellString(row, headerMap, "Application ID"));
+                studentDTO.setCandidateName(getCellString(row, headerMap, "Candidate Name"));
+                studentDTO.setMobileNo(getCellString(row, headerMap, "Mobile No"));
+                studentDTO.setEmail(getCellString(row, headerMap, "E-Mail ID"));
+                studentDTO.setGender(getCellString(row, headerMap, "Gender"));
+                studentDTO.setDob(getDobFormatted(row, headerMap, "DOB"));
+                studentDTO.setReligion(getCellString(row, headerMap, "Religion"));
+                studentDTO.setRegion(getCellString(row, headerMap, "Region"));
+                studentDTO.setMotherTongue(getCellString(row, headerMap, "Mother Tongue"));
+                studentDTO.setAnnualFamilyIncome(getCellString(row, headerMap, "Annual Family Income"));
+                studentDTO.setCandidatureType(getCellString(row, headerMap, "Candidature Type"));
+                studentDTO.setHomeUniversity(getCellString(row, headerMap, "Home University"));
+                studentDTO.setCategory(getCellString(row, headerMap, "Category"));
+                studentDTO.setPhType(getCellString(row, headerMap, "PH Type"));
+                studentDTO.setDefenceType(getCellString(row, headerMap, "Defence Type"));
+                studentDTO.setLinguisticMinority(getCellString(row, headerMap, "Linguistic Minority"));
+                studentDTO.setReligiousMinority(getCellString(row, headerMap, "Religious Minority"));
 
-                // ------------------- Parent Info -------------------
+                // Parent Info
                 ParentDTO parentDTO = new ParentDTO();
-                parentDTO.setFatherName(getCellString(row.getCell(3)));
-                parentDTO.setMotherName(getCellString(row.getCell(4)));
-                parentDTO.setFatherMobileNo(getCellString(row.getCell(21)));
-                parentDTO.setMotherMobileNo(getCellString(row.getCell(21)));
+                parentDTO.setFatherName(getCellString(row, headerMap, "Father Name"));
+                parentDTO.setMotherName(getCellString(row, headerMap, "Mother Name"));
+                parentDTO.setFatherMobileNo(getCellString(row, headerMap, "Phone No"));
+                parentDTO.setMotherMobileNo(getCellString(row, headerMap, "Phone No"));
                 studentDTO.setParent(parentDTO);
 
-                // ------------------- Address Info -------------------
+                // Address Info
                 AddressDTO addressDTO = new AddressDTO();
-                addressDTO.setAddressLine1(getCellString(row.getCell(11)));
-                addressDTO.setAddressLine2(getCellString(row.getCell(12)));
-                addressDTO.setAddressLine3(getCellString(row.getCell(13)));
-                addressDTO.setState(getCellString(row.getCell(14)));
-                addressDTO.setDistrict(getCellString(row.getCell(15)));
-                addressDTO.setTaluka(getCellString(row.getCell(16)));
-                addressDTO.setVillage(getCellString(row.getCell(17)));
-                addressDTO.setPincode(getCellString(row.getCell(18)));
+                addressDTO.setAddressLine1(getCellString(row, headerMap, "Address Line 1"));
+                addressDTO.setAddressLine2(getCellString(row, headerMap, "Address Line 2"));
+                addressDTO.setAddressLine3(getCellString(row, headerMap, "Address Line 3"));
+                addressDTO.setState(getCellString(row, headerMap, "State"));
+                addressDTO.setDistrict(getCellString(row, headerMap, "District"));
+                addressDTO.setTaluka(getCellString(row, headerMap, "Taluka"));
+                addressDTO.setVillage(getCellString(row, headerMap, "Village"));
+                addressDTO.setPincode(getCellString(row, headerMap, "Pincode"));
                 studentDTO.setAddress(addressDTO);
 
-                // ------------------- SSC Info -------------------
+                // SSC Info
                 SSCDTO sscDTO = new SSCDTO();
-                sscDTO.setBoard(getCellString(row.getCell(29)));
-                sscDTO.setPassingYear(getCellString(row.getCell(30)));
-                sscDTO.setSeatNo(normaliseSeatNo(row.getCell(31)));
-                sscDTO.setMathPercentage(getCellDouble(row.getCell(32)));
-                sscDTO.setTotalPercentage(getCellDouble(row.getCell(33)));
+                sscDTO.setBoard(getCellString(row, headerMap, "SSC Board"));
+                sscDTO.setPassingYear(getCellString(row, headerMap, "SSC Passing Year"));
+                sscDTO.setSeatNo(normaliseSeatNo(row, headerMap, "SSC Seat No"));
+                sscDTO.setMathPercentage(getCellDouble(row, headerMap, "SSC Math Percentage"));
+                sscDTO.setTotalPercentage(getCellDouble(row, headerMap, "SSC Total Percentage"));
                 studentDTO.setSsc(sscDTO);
 
-                // ------------------- HSC Info -------------------
+                // HSC Info
                 HSCDTO hscDTO = new HSCDTO();
-                hscDTO.setBoard(getCellString(row.getCell(35)));
-                hscDTO.setPassingYear(getCellInteger(row.getCell(36)));
-                hscDTO.setSeatNo(getCellString(row.getCell(37)));
-                hscDTO.setPhysicsPercentage(getCellDouble(row.getCell(38)));
-                hscDTO.setChemistryPercentage(getCellDouble(row.getCell(39)));
-                hscDTO.setMathPercentage(getCellDouble(row.getCell(40)));
-                hscDTO.setAdditionalSubjectName(getCellString(row.getCell(41)));
-                hscDTO.setAdditionalSubjectPercentage(getCellDouble(row.getCell(42)));
-                hscDTO.setEnglishPercentage(getCellDouble(row.getCell(43)));
-                hscDTO.setTotalPercentage(getCellDouble(row.getCell(44)));
-                hscDTO.setEligibilityPercentage(getCellDouble(row.getCell(45)));
+                hscDTO.setBoard(getCellString(row, headerMap, "HSC Board"));
+                hscDTO.setPassingYear(getCellInteger(row, headerMap, "HSC Passing Year"));
+                hscDTO.setSeatNo(getCellString(row, headerMap, "HSC Seat No"));
+                hscDTO.setPhysicsPercentage(getCellDouble(row, headerMap, "HSC Physics Percentage"));
+                hscDTO.setChemistryPercentage(getCellDouble(row, headerMap, "HSC Chemistry Percentage"));
+                hscDTO.setMathPercentage(getCellDouble(row, headerMap, "HSC Math Percentage"));
+                hscDTO.setAdditionalSubjectName(getCellString(row, headerMap, "HSC Additional Subject for Eligiblity"));
+                hscDTO.setAdditionalSubjectPercentage(getCellDouble(row, headerMap, "HSC Subject Percentage"));
+                hscDTO.setEnglishPercentage(getCellDouble(row, headerMap, "HSC English Percentage"));
+                hscDTO.setTotalPercentage(getCellDouble(row, headerMap, "HSC Total Percentage"));
+                hscDTO.setEligibilityPercentage(getCellDouble(row, headerMap, "Eligibility Percentage"));
                 studentDTO.setHsc(hscDTO);
 
-                // ------------------- CET Info -------------------
+                // CET Info
                 CETDTO cetDTO = new CETDTO();
-                cetDTO.setRollNo(getCellString(row.getCell(46)));
-                cetDTO.setPercentile(getCellDouble(row.getCell(47)));
+                cetDTO.setRollNo(getCellString(row, headerMap, "CET Roll No"));
+                cetDTO.setPercentile(getCellDouble(row, headerMap, "CET Percentile"));
                 studentDTO.setCet(cetDTO);
 
-                // ------------------- JEE Info -------------------
-                String jeeAppNo = getCellString(row.getCell(48));
-                Double jeePercentile = getCellDouble(row.getCell(49));
+                // JEE Info
+                String jeeAppNo = getCellString(row, headerMap, "JEE Application No");
+                Double jeePercentile = getCellDouble(row, headerMap, "JEE Percentile");
                 if (jeeAppNo != null && !jeeAppNo.isBlank()) {
                     JEEDTO jeeDTO = new JEEDTO();
                     jeeDTO.setApplicationNo(jeeAppNo);
                     jeeDTO.setPercentile(jeePercentile);
                     studentDTO.setJee(jeeDTO);
                 } else {
-                    studentDTO.setJee(null); // no JEE data
+                    studentDTO.setJee(null);
                 }
 
-                // ------------------- Admission Info -------------------
-                Integer meritNo = getCellInteger(row.getCell(50));
-                String instituteCode = getCellString(row.getCell(52));
-                String courseName = getCellString(row.getCell(54));
-
-                if (meritNo != null || instituteCode != null || courseName != null) {
-
+                // Admission Info
+                Integer meritNo = getCellInteger(row, headerMap, "Merit No");
+                if (meritNo != null) {
                     AdmissionDTO admissionDTO = new AdmissionDTO();
                     admissionDTO.setMeritNo(meritNo);
-                    admissionDTO.setMeritMarks(getCellDouble(row.getCell(51)));
-                    admissionDTO.setInstituteCode(instituteCode);
-                    admissionDTO.setInstituteName(getCellString(row.getCell(53)));
-                    admissionDTO.setCourseName(courseName);
-                    admissionDTO.setChoiceCode(getCellString(row.getCell(55)));
-                    admissionDTO.setSeatType(getCellString(row.getCell(56)));
-                    admissionDTO.setAdmissionDate(parseDate(row.getCell(57)));
-                    admissionDTO.setReportedDate(parseDate(row.getCell(58)));
+                    admissionDTO.setMeritMarks(getCellDouble(row, headerMap, "Merit Marks"));
+                    admissionDTO.setInstituteCode(getCellString(row, headerMap, "Institute Code"));
+                    admissionDTO.setInstituteName(getCellString(row, headerMap, "Institute Name"));
+                    admissionDTO.setCourseName(getCellString(row, headerMap, "Course Name"));
+                    admissionDTO.setChoiceCode(getCellString(row, headerMap, "Choice Code"));
+                    admissionDTO.setSeatType(getCellString(row, headerMap, "Seat Type"));
+                    admissionDTO.setAdmissionDate(parseDate(row, headerMap, "Admission Date"));
+                    admissionDTO.setReportedDate(parseDate(row, headerMap, "Reported Date"));
 
-                    List<AdmissionDTO> admissions = new ArrayList<>();
-                    admissions.add(admissionDTO);
-                    studentDTO.setAdmissions(admissions);
-                    for (StudentDTO dto : students) {
-                        System.out.println(dto);
-                    }
+                    studentDTO.setAdmissions(Collections.singletonList(admissionDTO));
                 } else {
-                    studentDTO.setAdmissions(new ArrayList<>()); // empty list if no admission data
+                    studentDTO.setAdmissions(new ArrayList<>());
                 }
 
                 students.add(studentDTO);
@@ -147,15 +147,74 @@ public class ExcelHelper {
         }
     }
 
-    // ------------------- Helper Methods -------------------
+    // ---------------- Helper methods for name-based access ----------------
 
-    private static String getCellString(Cell cell) {
-        if (cell == null) return null;
-        String value = cell.toString().trim();
-        return value.isEmpty() ? null : value;
+    private static Cell getCell(Row row, Map<String,Integer> headerMap, String colName) {
+        Integer idx = headerMap.get(colName);
+        if (idx == null) return null;
+        return row.getCell(idx);
     }
 
-    private static Integer getCellInteger(Cell cell) {
+    private static String getCellString(Row row, Map<String,Integer> headerMap, String colName) {
+        Cell cell = getCell(row, headerMap, colName);
+        if (cell == null) return null;
+
+        switch (cell.getCellType()) {
+            case STRING:
+                return cell.getStringCellValue().trim();
+            case NUMERIC:
+                if (DateUtil.isCellDateFormatted(cell)) {
+                    // Return as Excel's original text
+                    DataFormatter formatter = new DataFormatter();
+                    return formatter.formatCellValue(cell).trim();
+                } else {
+                    // For numeric cells like 20041021 (no scientific notation)
+                    BigDecimal bd = new BigDecimal(cell.getNumericCellValue());
+                    return bd.stripTrailingZeros().toPlainString();
+                }
+            case BOOLEAN:
+                return String.valueOf(cell.getBooleanCellValue());
+            case FORMULA:
+                DataFormatter formatter = new DataFormatter();
+                return formatter.formatCellValue(cell).trim();
+            case BLANK:
+            case _NONE:
+            case ERROR:
+            default:
+                return null;
+        }
+    }
+
+    private static String getDobFormatted(Row row, Map<String, Integer> headerMap, String colName) {
+        Cell cell = getCell(row, headerMap, colName);
+        if (cell == null) return null;
+
+        if (cell.getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(cell)) {
+            LocalDate date = cell.getLocalDateTimeCellValue().toLocalDate();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            return date.format(formatter);
+        } else {
+            // If someone enters it as text in Excel
+            String text = cell.toString().trim();
+            if (text.isEmpty()) return null;
+
+            try {
+                // Try parsing 2/1/05 as date
+                DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("M/d/yy");
+                LocalDate date = LocalDate.parse(text, inputFormatter);
+                DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                return date.format(outputFormatter);
+            } catch (Exception e) {
+                return text; // fallback: keep original text
+            }
+        }
+    }
+
+
+
+
+    private static Integer getCellInteger(Row row, Map<String,Integer> headerMap, String colName) {
+        Cell cell = getCell(row, headerMap, colName);
         if (cell == null) return null;
         if (cell.getCellType() == CellType.NUMERIC) return (int) cell.getNumericCellValue();
         try {
@@ -165,7 +224,8 @@ public class ExcelHelper {
         }
     }
 
-    private static Double getCellDouble(Cell cell) {
+    private static Double getCellDouble(Row row, Map<String,Integer> headerMap, String colName) {
+        Cell cell = getCell(row, headerMap, colName);
         if (cell == null) return null;
         if (cell.getCellType() == CellType.NUMERIC) return cell.getNumericCellValue();
         try {
@@ -175,9 +235,9 @@ public class ExcelHelper {
         }
     }
 
-    public static LocalDate parseDate(Cell cell) {
+    private static LocalDate parseDate(Row row, Map<String,Integer> headerMap, String colName) {
+        Cell cell = getCell(row, headerMap, colName);
         if (cell == null) return null;
-
         try {
             if (cell.getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(cell)) {
                 return cell.getLocalDateTimeCellValue().toLocalDate();
@@ -186,15 +246,13 @@ public class ExcelHelper {
             if (text.isEmpty()) return null;
             return LocalDate.parse(text, DATE_FORMATTER);
         } catch (Exception e) {
-            System.out.println("Could not parse date for cell: " + cell.toString());
             return null;
         }
     }
 
-
-    private static String normaliseSeatNo(Cell cell) {
+    private static String normaliseSeatNo(Row row, Map<String,Integer> headerMap, String colName) {
+        Cell cell = getCell(row, headerMap, colName);
         if (cell == null) return null;
-        // this removes scientific notation and trailing .0
         if (cell.getCellType() == CellType.NUMERIC) {
             BigDecimal bd = new BigDecimal(cell.getNumericCellValue());
             return bd.stripTrailingZeros().toPlainString();

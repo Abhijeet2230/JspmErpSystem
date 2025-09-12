@@ -24,6 +24,5 @@ public class JEE {
     @Column(name = "application_no", unique = true)
     private String applicationNo;
 
-
     private Double percentile;
 }
