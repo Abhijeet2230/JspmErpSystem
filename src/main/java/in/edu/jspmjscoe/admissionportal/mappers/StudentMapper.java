@@ -14,8 +14,7 @@ import org.mapstruct.Named;
         AddressMapper.class,
         SSCMapper.class,
         HSCMapper.class,
-        CETMapper.class,
-        JEEMapper.class,
+        EntranceExamMapper.class,
         AdmissionMapper.class
     }
 )

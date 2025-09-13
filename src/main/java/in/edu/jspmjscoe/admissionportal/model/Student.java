@@ -2,23 +2,23 @@ package in.edu.jspmjscoe.admissionportal.model;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @Table(name = "students")
 public class Student {
 
     @Id
+    @EqualsAndHashCode.Include
     @Column(name = "student_id")
     private Long studentId;   // same as user_id
 
@@ -96,13 +96,9 @@ public class Student {
     @JsonManagedReference
     private HSC hsc;
 
-    @OneToOne(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
-    private CET cet;
-
-    @OneToOne(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
-    private JEE jee;
+    private List<EntranceExam> entranceExams = new ArrayList<>();
 
     // One student can have multiple admission records
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)

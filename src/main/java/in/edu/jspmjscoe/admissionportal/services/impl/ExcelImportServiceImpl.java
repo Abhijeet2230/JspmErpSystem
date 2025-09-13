@@ -29,8 +29,7 @@ public class ExcelImportServiceImpl implements ExcelImportService {
     private final AddressMapper addressMapper;
     private final SSCMapper sscMapper;
     private final HSCMapper hscMapper;
-    private final CETMapper cetMapper;
-    private final JEEMapper jeeMapper;
+    private final EntranceExamMapper entranceExamMapper;
     private final AdmissionMapper admissionMapper;
     private final PasswordEncoder passwordEncoder;
 
@@ -103,19 +102,16 @@ public class ExcelImportServiceImpl implements ExcelImportService {
                     student.setHsc(hsc);
                 }
 
-                // ✅ CET
-                if (dto.getCet() != null) {
-                    CET cet = cetMapper.toEntity(dto.getCet());
-                    cet.setStudent(student);
-                    student.setCet(cet);
+                // ✅ Entrance Exams (CET + JEE now combined)
+                List<EntranceExam> exams = new ArrayList<>();
+                if (dto.getEntranceExams() != null && !dto.getEntranceExams().isEmpty()) {
+                    for (EntranceExamDTO examDTO : dto.getEntranceExams()) {
+                        EntranceExam exam = entranceExamMapper.toEntity(examDTO);
+                        exam.setStudent(student); // attach student reference
+                        exams.add(exam);
+                    }
                 }
-
-                // ✅ JEE
-                if (dto.getJee() != null && dto.getJee().getApplicationNo() != null && !dto.getJee().getApplicationNo().trim().isEmpty()) {
-                    JEE jee = jeeMapper.toEntity(dto.getJee());
-                    jee.setStudent(student);
-                    student.setJee(jee);
-                }
+                student.setEntranceExams(exams);
 
                 // ✅ STEP 1: Detach Admissions before saving Student
                 List<AdmissionDTO> admissionDTOs = new ArrayList<>();
@@ -123,13 +119,6 @@ public class ExcelImportServiceImpl implements ExcelImportService {
                     admissionDTOs.addAll(dto.getAdmissions());
                 }
                 student.setAdmissions(new ArrayList<>()); // prevent cascade
-
-                // 🔍 Log before save
-                log.info("Preparing to save Student: applicationId={}, hasJee={}, admissionsDetachedCount={}",
-                        student.getApplicationId(),
-                        (student.getJee() != null ? "YES" : "NO"),
-                        admissionDTOs.size()
-                );
 
                 // ✅ STEP 2: Save Student first (no admissions)
                 Student savedStudent = studentRepository.saveAndFlush(student);

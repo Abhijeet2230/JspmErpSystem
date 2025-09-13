@@ -100,23 +100,33 @@ public class ExcelHelper {
                 hscDTO.setEligibilityPercentage(getCellDouble(row, headerMap, "Eligibility Percentage"));
                 studentDTO.setHsc(hscDTO);
 
-                // CET Info
-                CETDTO cetDTO = new CETDTO();
-                cetDTO.setRollNo(getCellString(row, headerMap, "CET Roll No"));
-                cetDTO.setPercentile(getCellDouble(row, headerMap, "CET Percentile"));
-                studentDTO.setCet(cetDTO);
+                // Build entrance exams list
+                List<EntranceExamDTO> exams = new ArrayList<>();
 
-                // JEE Info
+                // CET info
+                String cetRollNo = getCellString(row, headerMap, "CET Roll No");
+                Double cetPercentile = getCellDouble(row, headerMap, "CET Percentile");
+                if (cetRollNo != null && !cetRollNo.isBlank()) {
+                    EntranceExamDTO cetExam = new EntranceExamDTO();
+                    cetExam.setExamType("CET");
+                    cetExam.setExamNo(cetRollNo);
+                    cetExam.setPercentile(cetPercentile);
+                    // studentId will be set later by service/controller
+                    exams.add(cetExam);
+                }
+
+                // JEE info
                 String jeeAppNo = getCellString(row, headerMap, "JEE Application No");
                 Double jeePercentile = getCellDouble(row, headerMap, "JEE Percentile");
                 if (jeeAppNo != null && !jeeAppNo.isBlank()) {
-                    JEEDTO jeeDTO = new JEEDTO();
-                    jeeDTO.setApplicationNo(jeeAppNo);
-                    jeeDTO.setPercentile(jeePercentile);
-                    studentDTO.setJee(jeeDTO);
-                } else {
-                    studentDTO.setJee(null);
+                    EntranceExamDTO jeeExam = new EntranceExamDTO();
+                    jeeExam.setExamType("JEE");
+                    jeeExam.setExamNo(jeeAppNo);
+                    jeeExam.setPercentile(jeePercentile);
+                    exams.add(jeeExam);
                 }
+
+                studentDTO.setEntranceExams(exams);
 
                 // Admission Info
                 Integer meritNo = getCellInteger(row, headerMap, "Merit No");

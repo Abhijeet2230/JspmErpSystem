@@ -37,8 +37,7 @@ public class StudentDTO {
     private AddressDTO address;
     private SSCDTO ssc;
     private HSCDTO hsc;
-    private CETDTO cet;
-    private JEEDTO jee;
+    private List<EntranceExamDTO> entranceExams;
 
     // Admission history
     private List<AdmissionDTO> admissions;
