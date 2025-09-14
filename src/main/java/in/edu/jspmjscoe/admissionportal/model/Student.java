@@ -1,5 +1,6 @@
 package in.edu.jspmjscoe.admissionportal.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
@@ -104,6 +105,12 @@ public class Student {
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonManagedReference
     private List<Admission> admissions = new ArrayList<>();
+
+    // link to Course
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "course_id")
+    @JsonBackReference // opposite side of Course.students
+    private Course course;
 
     public void addAdmission(Admission admission) {
         admissions.add(admission);
