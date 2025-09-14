@@ -1,11 +1,11 @@
 package in.edu.jspmjscoe.admissionportal.controllers;
 
 import in.edu.jspmjscoe.admissionportal.dtos.StudentDTO;
+import in.edu.jspmjscoe.admissionportal.dtos.TeacherDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.UserDTO;
+import in.edu.jspmjscoe.admissionportal.model.Department;
 import in.edu.jspmjscoe.admissionportal.model.Student;
-import in.edu.jspmjscoe.admissionportal.services.ExcelImportService;
-import in.edu.jspmjscoe.admissionportal.services.StudentService;
-import in.edu.jspmjscoe.admissionportal.services.UserService;
+import in.edu.jspmjscoe.admissionportal.services.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +23,14 @@ public class AdminController {
     private final UserService userService;
     private final ExcelImportService excelImportService;
     private final StudentService studentService;
+    private final TeacherService teacherService;
+    private final DepartmentService departmentService;
 
+    @GetMapping("/departments/{id}")
+    public ResponseEntity<Department> getDepartmentById(@PathVariable Long id) {
+        Department department = departmentService.getDepartmentById(id);
+        return ResponseEntity.ok(department);
+    }
     // ------------------- User Endpoints -------------------
 
     @GetMapping("/getusers")
@@ -46,6 +53,30 @@ public class AdminController {
         return ResponseEntity.ok(userDTO);
     }
 
+    // ------------------- Teacher Endpoints -------------------
+
+    @PostMapping("/add-department")
+    public ResponseEntity<Department> addDepartment(@RequestBody Department department) {
+        Department savedDepartment = departmentService.saveDepartment(department);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedDepartment);
+    }
+    @GetMapping("/getteachers")
+    public ResponseEntity<List<TeacherDTO>> getAllTeachers() {
+        List<TeacherDTO> teachers = teacherService.getAllTeachers();
+        return ResponseEntity.ok(teachers);
+    }
+
+    @GetMapping("/teacher/{id}")
+    public ResponseEntity<TeacherDTO> getTeacher(@PathVariable Long id) {
+        TeacherDTO teacher = teacherService.getTeacherById(id);
+        return ResponseEntity.ok(teacher);
+    }
+
+    @PostMapping("/saveteacher")
+    public ResponseEntity<TeacherDTO> saveTeacher(@RequestBody TeacherDTO teacherDTO) {
+        TeacherDTO savedTeacher = teacherService.saveTeacher(teacherDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedTeacher);
+    }
     // ------------------- Excel Import Endpoint -------------------
 
     @PostMapping("/import-students")

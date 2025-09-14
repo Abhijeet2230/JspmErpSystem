@@ -13,20 +13,20 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Table(name = "students")
 public class Student {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
     @Column(name = "student_id")
-    private Long studentId;   // same as user_id
+    private Long studentId;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @MapsId
-    @JoinColumn(name = "student_id")
-    @JsonManagedReference
+    @OneToOne
+    @JoinColumn(name = "user_id", referencedColumnName = "user_id")
+    @JsonBackReference
     private User user;
 
     @Column(name = "application_id", unique = true)
@@ -101,19 +101,17 @@ public class Student {
     @JsonManagedReference
     private List<EntranceExam> entranceExams = new ArrayList<>();
 
-    // One student can have multiple admission records
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonManagedReference
     private List<Admission> admissions = new ArrayList<>();
 
-    // link to Course
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "course_id")
-    @JsonBackReference // opposite side of Course.students
+    @JsonBackReference
     private Course course;
 
     public void addAdmission(Admission admission) {
         admissions.add(admission);
-        admission.setStudent(this); // important
+        admission.setStudent(this);
     }
 }

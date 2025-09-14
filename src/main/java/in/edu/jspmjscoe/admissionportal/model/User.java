@@ -1,6 +1,5 @@
 package in.edu.jspmjscoe.admissionportal.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -13,24 +12,25 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @Setter
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Table(name = "users")
 public class User {
 
     @Id
-    @EqualsAndHashCode.Include
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     @Column(name = "user_id")
     private Long userId;
 
     @NotBlank
     @Size(max = 20)
-    @Column(unique = true, name = "username")
+    @Column(unique = true, name = "username", nullable = false)
     private String userName;
 
     @Size(max = 120)
-    @Column(name = "password")
+    @Column(nullable = false)
     @JsonIgnore
     private String password;
 
@@ -39,30 +39,30 @@ public class User {
     private boolean credentialsNonExpired = true;
     private boolean enabled = true;
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE})
-    @JoinColumn(name = "role_id", referencedColumnName = "role_id")
-    @JsonBackReference
-    @ToString.Exclude
-    private Role role;
-
     @Column(name = "first_login")
     private boolean firstLogin = true;
 
     @CreationTimestamp
     @Column(updatable = false)
-    private LocalDateTime createdDate;   // time of import
+    private LocalDateTime createdDate;
 
-    private LocalDateTime firstLoginDate;  // when student logs in first time
+    private LocalDateTime firstLoginDate;
     private LocalDateTime lastLoginDate;
 
-    public User(String userName, String password) {
-        this.userName=userName;
-        this.password=password;
-    }
-
-    // One-to-One with Student (shared PK)
+    // ✅ Relations
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonBackReference
     private Student student;
 
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Teacher teacher;
+
+    // ✅ Proper Role mapping
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "role_id", nullable = false)
+    private Role role;
+
+    public User(String userName, String password) {
+        this.userName = userName;
+        this.password = password;
+    }
 }
