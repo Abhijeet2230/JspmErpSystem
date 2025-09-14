@@ -1,10 +1,10 @@
 package in.edu.jspmjscoe.admissionportal.security;
 
-import in.edu.jspmjscoe.admissionportal.model.AppRole;
-import in.edu.jspmjscoe.admissionportal.model.Role;
-import in.edu.jspmjscoe.admissionportal.model.User;
-import in.edu.jspmjscoe.admissionportal.repositories.RoleRepository;
-import in.edu.jspmjscoe.admissionportal.repositories.UserRepository;
+import in.edu.jspmjscoe.admissionportal.model.security.AppRole;
+import in.edu.jspmjscoe.admissionportal.model.security.Role;
+import in.edu.jspmjscoe.admissionportal.model.security.User;
+import in.edu.jspmjscoe.admissionportal.repositories.security.RoleRepository;
+import in.edu.jspmjscoe.admissionportal.repositories.security.UserRepository;
 import in.edu.jspmjscoe.admissionportal.security.jwt.AuthEntryPointJwt;
 import in.edu.jspmjscoe.admissionportal.security.jwt.AuthTokenFilter;
 import lombok.RequiredArgsConstructor;

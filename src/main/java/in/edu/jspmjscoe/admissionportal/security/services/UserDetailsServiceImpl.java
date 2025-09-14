@@ -1,7 +1,7 @@
 package in.edu.jspmjscoe.admissionportal.security.services;
 
-import in.edu.jspmjscoe.admissionportal.model.User;
-import in.edu.jspmjscoe.admissionportal.repositories.UserRepository;
+import in.edu.jspmjscoe.admissionportal.model.security.User;
+import in.edu.jspmjscoe.admissionportal.repositories.security.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
