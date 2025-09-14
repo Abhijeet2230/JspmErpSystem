@@ -10,7 +10,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class TeacherDto {
+public class TeacherDTO {
     private Long teacherId;
     private String name;
     private String email;

@@ -1,6 +1,6 @@
 package in.edu.jspmjscoe.admissionportal.mappers.teacher;
 
-import in.edu.jspmjscoe.admissionportal.dtos.teacher.TeacherDto;
+import in.edu.jspmjscoe.admissionportal.dtos.teacher.TeacherDTO;
 import in.edu.jspmjscoe.admissionportal.model.subject.Department;
 import in.edu.jspmjscoe.admissionportal.model.teacher.Teacher;
 import in.edu.jspmjscoe.admissionportal.model.teacher.TeacherSubject;
@@ -15,13 +15,13 @@ public interface TeacherMapper {
     // ===== Entity -> DTO =====
     @Mapping(source = "department.departmentId", target = "departmentId")
     @Mapping(source = "teacherSubjects", target = "teacherSubjectIds")
-    TeacherDto toDto(Teacher teacher);
+    TeacherDTO toDto(Teacher teacher);
 
     // ===== DTO -> Entity =====
     @InheritInverseConfiguration
     @Mapping(target = "department", expression = "java(mapDepartment(dto.getDepartmentId()))")
     @Mapping(target = "teacherSubjects", expression = "java(mapTeacherSubjectsFromIds(dto.getTeacherSubjectIds()))")
-    Teacher toEntity(TeacherDto dto);
+    Teacher toEntity(TeacherDTO dto);
 
     // ---------- Helper methods ----------
     default Department mapDepartment(Long departmentId) {
