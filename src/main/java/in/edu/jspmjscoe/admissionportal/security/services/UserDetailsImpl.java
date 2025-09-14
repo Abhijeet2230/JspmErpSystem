@@ -1,7 +1,7 @@
 package in.edu.jspmjscoe.admissionportal.security.services;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import in.edu.jspmjscoe.admissionportal.model.User;
+import in.edu.jspmjscoe.admissionportal.model.security.User;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;

@@ -1,17 +1,16 @@
 package in.edu.jspmjscoe.admissionportal.controllers;
 
 
-import in.edu.jspmjscoe.admissionportal.dtos.ChangePasswordRequest;
-import in.edu.jspmjscoe.admissionportal.model.Student;
-import in.edu.jspmjscoe.admissionportal.model.User;
-import in.edu.jspmjscoe.admissionportal.repositories.StudentRepository;
-import in.edu.jspmjscoe.admissionportal.repositories.UserRepository;
-import in.edu.jspmjscoe.admissionportal.services.StudentService;
+import in.edu.jspmjscoe.admissionportal.dtos.security.ChangePasswordRequest;
+import in.edu.jspmjscoe.admissionportal.model.student.Student;
+import in.edu.jspmjscoe.admissionportal.model.security.User;
+import in.edu.jspmjscoe.admissionportal.repositories.student.StudentRepository;
+import in.edu.jspmjscoe.admissionportal.repositories.security.UserRepository;
+import in.edu.jspmjscoe.admissionportal.services.student.StudentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController

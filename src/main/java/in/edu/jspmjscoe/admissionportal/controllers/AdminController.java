@@ -1,11 +1,10 @@
 package in.edu.jspmjscoe.admissionportal.controllers;
 
-import in.edu.jspmjscoe.admissionportal.dtos.StudentDTO;
-import in.edu.jspmjscoe.admissionportal.dtos.UserDTO;
-import in.edu.jspmjscoe.admissionportal.model.Student;
-import in.edu.jspmjscoe.admissionportal.services.ExcelImportService;
-import in.edu.jspmjscoe.admissionportal.services.StudentService;
-import in.edu.jspmjscoe.admissionportal.services.UserService;
+import in.edu.jspmjscoe.admissionportal.dtos.student.StudentDTO;
+import in.edu.jspmjscoe.admissionportal.dtos.security.UserDTO;
+import in.edu.jspmjscoe.admissionportal.services.excel.ExcelImportService;
+import in.edu.jspmjscoe.admissionportal.services.student.StudentService;
+import in.edu.jspmjscoe.admissionportal.services.security.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -70,4 +69,7 @@ public class AdminController {
                     .body("Failed to import students: " + e.getMessage());
         }
     }
+
+
+
 }

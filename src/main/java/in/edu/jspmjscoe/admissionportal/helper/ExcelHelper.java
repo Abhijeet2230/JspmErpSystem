@@ -1,6 +1,6 @@
 package in.edu.jspmjscoe.admissionportal.helper;
 
-import in.edu.jspmjscoe.admissionportal.dtos.*;
+import in.edu.jspmjscoe.admissionportal.dtos.student.*;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import java.io.InputStream;

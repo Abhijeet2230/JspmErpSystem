@@ -1,12 +1,12 @@
 package in.edu.jspmjscoe.admissionportal.controllers;
 
-import in.edu.jspmjscoe.admissionportal.model.User;
-import in.edu.jspmjscoe.admissionportal.repositories.RoleRepository;
-import in.edu.jspmjscoe.admissionportal.repositories.UserRepository;
+import in.edu.jspmjscoe.admissionportal.model.security.User;
+import in.edu.jspmjscoe.admissionportal.repositories.security.RoleRepository;
+import in.edu.jspmjscoe.admissionportal.repositories.security.UserRepository;
 import in.edu.jspmjscoe.admissionportal.security.jwt.JwtUtils;
 import in.edu.jspmjscoe.admissionportal.security.response.LoginResponse;
 import in.edu.jspmjscoe.admissionportal.security.request.LoginRequest;
-import in.edu.jspmjscoe.admissionportal.services.UserService;
+import in.edu.jspmjscoe.admissionportal.services.security.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
