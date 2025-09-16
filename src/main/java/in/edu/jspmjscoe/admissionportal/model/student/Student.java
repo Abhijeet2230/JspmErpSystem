@@ -40,6 +40,12 @@ public class Student {
     @Column(name = "mobile_no")
     private String mobileNo;
 
+    @Column(name = "roll_no")
+    private Integer rollNo;
+
+    @Column(name = "division")
+    private String division;
+
     @Column(name = "email")
     private String email;
 

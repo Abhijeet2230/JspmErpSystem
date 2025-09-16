@@ -120,6 +120,10 @@ public class SecurityConfig {
             Role adminRole = roleRepository.findByRoleName(AppRole.ROLE_ADMIN).orElseGet(()
                     -> roleRepository.save(new Role(AppRole.ROLE_ADMIN)));
 
+            Role teacherRole = roleRepository.findByRoleName(AppRole.ROLE_TEACHER).orElseGet(()
+                    -> roleRepository.save(new Role(AppRole.ROLE_TEACHER)));
+
+
             if (!userRepository.existsByUserName("user1")) {
                 User user1 = new User();
                 user1.setUserName("user1");  // ✅ required
@@ -134,6 +138,15 @@ public class SecurityConfig {
                 admin.setPassword(passwordEncoder.encode("adminPass"));
                 admin.setRole(adminRole);
                 userRepository.save(admin);
+            }
+
+            // Create default teacher
+            if (!userRepository.existsByUserName("teacher")) {
+                User teacher = new User();
+                teacher.setUserName("teacher");
+                teacher.setPassword(passwordEncoder.encode("teacherPass"));
+                teacher.setRole(teacherRole);
+                userRepository.save(teacher);
             }
         };
     }
