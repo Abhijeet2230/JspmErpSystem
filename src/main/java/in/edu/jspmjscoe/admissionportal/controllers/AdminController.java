@@ -3,6 +3,7 @@ package in.edu.jspmjscoe.admissionportal.controllers;
 import in.edu.jspmjscoe.admissionportal.dtos.student.StudentDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.security.UserDTO;
 import in.edu.jspmjscoe.admissionportal.services.excel.ExcelImportService;
+import in.edu.jspmjscoe.admissionportal.services.impl.assessment.CceInitializationService;
 import in.edu.jspmjscoe.admissionportal.services.student.StudentService;
 import in.edu.jspmjscoe.admissionportal.services.security.UserService;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ public class AdminController {
     private final UserService userService;
     private final ExcelImportService excelImportService;
     private final StudentService studentService;
+    private final CceInitializationService cceInitializationService;
 
     // ------------------- User Endpoints -------------------
 
@@ -68,6 +70,30 @@ public class AdminController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Failed to import students: " + e.getMessage());
         }
+    }
+
+
+    // ✅ Upload Excel and Import Students
+    @PostMapping("/import")
+    public ResponseEntity<String> importDemoStudents(@RequestParam("file") MultipartFile file) {
+        if (file.isEmpty()) {
+            return ResponseEntity.badRequest().body("Please upload a valid Excel file.");
+        }
+
+        int importedCount = excelImportService.importStudentsBasic(file);
+        return ResponseEntity.ok(importedCount + " students imported successfully.");
+    }
+
+
+
+    @PostMapping("/initialize")
+    public ResponseEntity<CceInitializationService.CceInitResult> initializeCceData(
+            @RequestParam(defaultValue = "true") boolean units,
+            @RequestParam(defaultValue = "true") boolean exams,
+            @RequestParam(defaultValue = "true") boolean attendance) {
+
+        CceInitializationService.CceInitResult result = cceInitializationService.initializeAll(units, exams, attendance);
+        return ResponseEntity.ok(result);
     }
 
 

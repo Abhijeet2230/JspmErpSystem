@@ -18,6 +18,7 @@ public class SubjectDTO {
     private Integer theoryCredits;
     private Integer practicalCredits;
     private Integer yearOfStudy;
+    private String subjectGroup;
     private Integer semester;
     private String subjectType;     // Theory, Lab, Project
     private String subjectCategory; // Core or Elective

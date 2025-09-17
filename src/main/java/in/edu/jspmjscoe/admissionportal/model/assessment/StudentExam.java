@@ -41,7 +41,4 @@ public class StudentExam {
     @Column(name = "marks_obtained")
     private Double marksObtained;
 
-    public enum ExamType {
-        MID_TERM, END_TERM
-    }
 }

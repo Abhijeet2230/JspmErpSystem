@@ -10,10 +10,10 @@ import lombok.*;
 public class StudentUnitAssessmentDTO {
 
     private Long id;
-
-    private Long studentId;   // only ID, not full Student entity
     private Long subjectId;   // only ID, not full Subject entity
-
+    private Long studentId;
+    private Integer rollNo;
+    private String candidateName;
     private Integer unitNumber;
     private Double quizMarks;
     private Double activityMarks;

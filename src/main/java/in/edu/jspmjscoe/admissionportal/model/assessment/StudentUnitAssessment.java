@@ -39,9 +39,10 @@ public class StudentUnitAssessment {
     @Column(name = "unit_number", nullable = false)
     private Integer unitNumber; // 1–5
 
-    @Column(name = "quiz_marks")
+    @Column(name = "quiz_marks", columnDefinition = "DOUBLE DEFAULT 0.0")
     private Double quizMarks;
 
-    @Column(name = "activity_marks")
+    @Column(name = "activity_marks", columnDefinition = "DOUBLE DEFAULT 0.0")
     private Double activityMarks;
+
 }

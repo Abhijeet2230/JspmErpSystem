@@ -156,6 +156,56 @@ public class ExcelHelper {
         }
     }
 
+
+    public static List<StudentDTO> excelToBasicStudentDTOs(InputStream is) {
+        try (Workbook workbook = new XSSFWorkbook(is)) {
+            Sheet sheet = workbook.getSheetAt(0); // First sheet
+
+            // ---- Build header map from first row ----
+            Row headerRow = sheet.getRow(0);
+            Map<String, Integer> headerMap = new HashMap<>();
+            for (Cell cell : headerRow) {
+                String header = cell.toString().trim();
+                if (!header.isEmpty()) {
+                    headerMap.put(header, cell.getColumnIndex());
+                }
+            }
+
+            List<StudentDTO> students = new ArrayList<>();
+
+            // ---- Data starts from 2nd row ----
+            for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+                Row row = sheet.getRow(i);
+                if (row == null) continue;
+
+                StudentDTO studentDTO = new StudentDTO();
+
+                // ✅ Only four fields
+                String rollNoStr = getCellString(row, headerMap, "Roll No");
+                if (rollNoStr != null) {
+                    try {
+                        studentDTO.setRollNo(Integer.parseInt(rollNoStr));
+                    } catch (NumberFormatException e) {
+                        studentDTO.setRollNo(null); // fallback
+                    }
+                }
+
+                studentDTO.setCandidateName(getCellString(row, headerMap, "Name"));
+                studentDTO.setDob(getDobFormatted(row, headerMap, "DOB"));
+                studentDTO.setDivision(getCellString(row, headerMap, "Division"));
+
+                students.add(studentDTO);
+            }
+
+            return students;
+
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to parse Excel file (basic): " + e.getMessage(), e);
+        }
+    }
+
+
+
     // ---------------- Helper methods for name-based access ----------------
 
     private static Cell getCell(Row row, Map<String,Integer> headerMap, String colName) {

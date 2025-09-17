@@ -8,10 +8,12 @@ import in.edu.jspmjscoe.admissionportal.mappers.student.*;
 import in.edu.jspmjscoe.admissionportal.model.security.AppRole;
 import in.edu.jspmjscoe.admissionportal.model.security.Role;
 import in.edu.jspmjscoe.admissionportal.model.security.User;
+import in.edu.jspmjscoe.admissionportal.model.subject.Course;
 import in.edu.jspmjscoe.admissionportal.model.student.*;
 import in.edu.jspmjscoe.admissionportal.repositories.student.AdmissionRepository;
 import in.edu.jspmjscoe.admissionportal.repositories.security.RoleRepository;
 import in.edu.jspmjscoe.admissionportal.repositories.student.StudentRepository;
+import in.edu.jspmjscoe.admissionportal.repositories.subject.CourseRepository;
 import in.edu.jspmjscoe.admissionportal.services.excel.ExcelImportService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,6 +41,7 @@ public class ExcelImportServiceImpl implements ExcelImportService {
     private final EntranceExamMapper entranceExamMapper;
     private final AdmissionMapper admissionMapper;
     private final PasswordEncoder passwordEncoder;
+    private final CourseRepository courseRepository;
 
     @Override
     @Transactional
@@ -153,4 +156,67 @@ public class ExcelImportServiceImpl implements ExcelImportService {
             throw new RuntimeException("Failed to import Excel file: " + e.getMessage(), e);
         }
     }
+
+    @Override
+    @Transactional
+    public int importStudentsBasic(MultipartFile file) {
+        try {
+            List<StudentDTO> studentDTOs = ExcelHelper.excelToBasicStudentDTOs(file.getInputStream());
+            log.info(">>> Total students parsed from Excel (basic) = {}", studentDTOs.size());
+
+            Role studentRole = roleRepository.findByRoleName(AppRole.ROLE_STUDENT)
+                    .orElseThrow(() -> new RuntimeException("ROLE_STUDENT not found"));
+
+            // ✅ Fetch the course with ID = 1 only once
+            Course defaultCourse = courseRepository.findById(1L)
+                    .orElseThrow(() -> new RuntimeException("Course with ID=1 not found"));
+
+            int importedCount = 0;
+
+            for (StudentDTO dto : studentDTOs) {
+
+                // ✅ Check duplicates by rollNo
+                if (studentRepository.findByRollNo(dto.getRollNo()).isPresent()) {
+                    log.warn("Skipping duplicate: rollNo={}", dto.getRollNo());
+                    continue;
+                }
+
+                // ✅ Create User (username = rollNo, password = dob)
+                User user = new User();
+                user.setUserName(String.valueOf(dto.getRollNo()));
+                user.setPassword(passwordEncoder.encode(dto.getDob())); // password = dob
+                user.setFirstLogin(true);
+                user.setEnabled(true);
+                user.setRole(studentRole);
+
+                // ✅ Create Student entity
+                Student student = new Student();
+                student.setRollNo(dto.getRollNo());
+                student.setCandidateName(dto.getCandidateName());
+                student.setDob(dto.getDob());
+                student.setDivision(dto.getDivision());
+
+                // ✅ Assign course with ID = 1
+                student.setCourse(defaultCourse);
+
+                // Link user <-> student
+                student.setUser(user);
+                user.setStudent(student);
+
+                // ✅ Save Student (cascades User as needed)
+                studentRepository.save(student);
+
+                importedCount++;
+            }
+
+            log.info(">>> Import (basic) completed successfully: {} students saved", importedCount);
+            return importedCount;
+
+        } catch (Exception e) {
+            log.error(">>> Failed to import Excel file (basic): {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to import Excel file (basic): " + e.getMessage(), e);
+        }
+    }
+
+
 }

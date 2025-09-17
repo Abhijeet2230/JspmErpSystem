@@ -11,4 +11,6 @@ public interface ExcelImportService {
      * @return number of students successfully imported
      */
     int importStudents(MultipartFile file);
+
+    int importStudentsBasic(MultipartFile file);
 }

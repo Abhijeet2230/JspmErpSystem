@@ -17,6 +17,7 @@ public interface SubjectMapper {
     @Mapping(source = "course.courseId", target = "courseId")
     @Mapping(source = "electiveGroup.groupId", target = "electiveGroupId")
     @Mapping(source = "teacherSubjects", target = "teacherSubjectIds")
+    @Mapping(source = "subjectGroup", target = "subjectGroup") // 👈 add this
     SubjectDTO toDto(Subject subject);
 
     // ===== DTO -> Entity =====
@@ -24,6 +25,7 @@ public interface SubjectMapper {
     @Mapping(target = "course", expression = "java(mapCourse(dto.getCourseId()))")
     @Mapping(target = "electiveGroup", expression = "java(mapElectiveGroup(dto.getElectiveGroupId()))")
     @Mapping(target = "teacherSubjects", expression = "java(mapTeacherSubjectsFromIds(dto.getTeacherSubjectIds()))")
+    @Mapping(source = "subjectGroup", target = "subjectGroup") // 👈 add this
     Subject toEntity(SubjectDTO dto);
 
     // ---------- Helper methods ----------

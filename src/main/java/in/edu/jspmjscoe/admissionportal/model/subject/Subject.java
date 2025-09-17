@@ -34,6 +34,8 @@ public class Subject {
     @Column(name = "name", nullable = false, length = 100)
     private String name;
 
+    @Column(name = "subject_group")
+    private String subjectGroup;
 
     @Column(name = "code", nullable = false, unique = true, length = 20)
     private String code;
