@@ -2,6 +2,7 @@ package in.edu.jspmjscoe.admissionportal.model.teacher;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import in.edu.jspmjscoe.admissionportal.model.security.User;
 import in.edu.jspmjscoe.admissionportal.model.subject.Department;
 import jakarta.persistence.*;
 import lombok.*;
@@ -17,7 +18,7 @@ import java.util.List;
 @Builder
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Entity
-@Table(name = "teacher")
+@Table(name = "teachers")
 public class Teacher {
 
     @Id
@@ -25,6 +26,11 @@ public class Teacher {
     @EqualsAndHashCode.Include
     @Column(name = "teacher_id")
     private Long teacherId;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", unique = true, nullable = false)
+    @JsonManagedReference
+    private User user;
 
     // belongs to which department
     @ManyToOne(fetch = FetchType.LAZY)

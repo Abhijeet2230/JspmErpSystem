@@ -9,7 +9,6 @@ import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
-
 @Entity
 @Getter
 @Setter
@@ -21,13 +20,14 @@ import java.util.List;
 public class Student {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
     @Column(name = "student_id")
-    private Long studentId;   // same as user_id
+    private Long studentId;   // independent PK
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @MapsId
-    @JoinColumn(name = "student_id")
+    // Unique foreign key to User
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", unique = true, nullable = false)
     @JsonManagedReference
     private User user;
 
@@ -42,6 +42,9 @@ public class Student {
 
     @Column(name = "roll_no")
     private Integer rollNo;
+
+    @Column(name = "prn_number", unique = true, length = 20)
+    private String prnNumber;   // PRN field
 
     @Column(name = "division")
     private String division;

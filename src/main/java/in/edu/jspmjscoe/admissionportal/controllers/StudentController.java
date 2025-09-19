@@ -2,12 +2,14 @@ package in.edu.jspmjscoe.admissionportal.controllers;
 
 import in.edu.jspmjscoe.admissionportal.dtos.assessment.studentside.StudentCCEProfileResponseDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.security.ChangePasswordRequest;
+import in.edu.jspmjscoe.admissionportal.dtos.trainingplacement.StudentPlacementDTO;
 import in.edu.jspmjscoe.admissionportal.model.student.Student;
 import in.edu.jspmjscoe.admissionportal.model.security.User;
 import in.edu.jspmjscoe.admissionportal.repositories.student.StudentRepository;
 import in.edu.jspmjscoe.admissionportal.repositories.security.UserRepository;
 import in.edu.jspmjscoe.admissionportal.services.assessment.StudentCCEProfileService;
 import in.edu.jspmjscoe.admissionportal.services.student.StudentService;
+import in.edu.jspmjscoe.admissionportal.services.trainingplacement.TrainingPlacementService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -23,6 +25,8 @@ public class StudentController {
     private final UserRepository userRepository;
     private final StudentService studentService;
     private final StudentCCEProfileService studentCCEProfileService; // ✅ Inject service
+    private final TrainingPlacementService trainingPlacementService;
+
 
     // ✅ Get the currently logged-in student's details
     @GetMapping("/me")
@@ -77,5 +81,10 @@ public class StudentController {
         StudentCCEProfileResponseDTO profile = studentCCEProfileService.getStudentCCEProfile(student.getStudentId());
 
         return ResponseEntity.ok(profile);
+    }
+
+    @GetMapping("/training-placement")
+    public StudentPlacementDTO getMyTrainingPlacement(@AuthenticationPrincipal(expression = "id") Long studentId) {
+        return trainingPlacementService.getMyTrainingPlacement(studentId);
     }
 }

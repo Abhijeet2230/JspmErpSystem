@@ -132,4 +132,21 @@ public class TrainingPlacementServiceImpl implements TrainingPlacementService {
     }
 
 
+    @Override
+    @Transactional(readOnly = true)
+    public StudentPlacementDTO getMyTrainingPlacement(Long studentId) {
+        TrainingPlacementRecord record = trainingPlacementRecordRepository
+                .findByStudent_StudentId(studentId)
+                .orElseThrow(() -> new RuntimeException("No TrainingPlacementRecord found for studentId=" + studentId));
+
+        return StudentPlacementDTO.builder()
+                .rollNo(record.getStudent().getRollNo())
+                .name(record.getStudent().getCandidateName())
+                .division(record.getStudent().getDivision())
+                .trainingPlacement(trainingPlacementMapper.toDTO(record))
+                .build();
+    }
+
+
+
 }

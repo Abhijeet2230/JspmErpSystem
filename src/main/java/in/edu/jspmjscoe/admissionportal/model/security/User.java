@@ -6,6 +6,7 @@ import in.edu.jspmjscoe.admissionportal.model.student.Student;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import in.edu.jspmjscoe.admissionportal.model.teacher.Teacher;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -65,5 +66,10 @@ public class User {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonBackReference
     private Student student;
+
+    // One-to-One with Teacher (shared PK)
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonBackReference
+    private Teacher teacher;
 
 }

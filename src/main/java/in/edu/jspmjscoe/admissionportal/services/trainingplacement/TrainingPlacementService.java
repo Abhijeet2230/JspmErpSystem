@@ -12,4 +12,6 @@ public interface TrainingPlacementService {
     List<StudentPlacementDTO> getStudentsByDivision(String division);
 
     void bulkPatch(BulkTrainingPlacementPatchRequest request);
+
+    StudentPlacementDTO getMyTrainingPlacement(Long studentId);
 }

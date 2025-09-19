@@ -7,6 +7,7 @@ import in.edu.jspmjscoe.admissionportal.services.trainingplacement.TrainingPlace
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -64,4 +65,6 @@ public class TrainingPlacementController {
         );
         return ResponseEntity.ok(response);
     }
+
+
 }
