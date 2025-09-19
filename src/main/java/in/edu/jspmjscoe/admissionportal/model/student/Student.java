@@ -2,13 +2,14 @@ package in.edu.jspmjscoe.admissionportal.model.student;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import in.edu.jspmjscoe.admissionportal.model.subject.Course;
 import in.edu.jspmjscoe.admissionportal.model.security.User;
+import in.edu.jspmjscoe.admissionportal.model.subject.Course;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
+
 @Entity
 @Getter
 @Setter

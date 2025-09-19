@@ -20,5 +20,7 @@ public class UserDTO {
     private LocalDateTime createdDate;
     private LocalDateTime firstLoginDate;
     private LocalDateTime lastLoginDate;
-    private Long studentId;
+
+    private Long studentId;   // ✅ from Student
+    private Long teacherId;   // ✅ from Teacher
 }

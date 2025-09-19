@@ -2,6 +2,7 @@ package in.edu.jspmjscoe.admissionportal.model.teacher;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import in.edu.jspmjscoe.admissionportal.model.security.Status;
 import in.edu.jspmjscoe.admissionportal.model.security.User;
 import in.edu.jspmjscoe.admissionportal.model.subject.Department;
 import jakarta.persistence.*;
@@ -38,20 +39,88 @@ public class Teacher {
     @JsonBackReference // opposite of Department.teachers
     private Department department;
 
-    @Column(name = "name", nullable = false, length = 100)
-    private String name;
+    // ========== 1. Personal Details ==========
+    @Column(name = "prefix", length = 20)
+    private String prefix;  // Mr., Dr., Prof.
 
-    @Column(name = "email", nullable = false, unique = true, length = 100)
-    private String email;
+    @Column(name = "first_name", length = 50)
+    private String firstName;
+
+    @Column(name = "middle_name", length = 50)
+    private String middleName;
+
+    @Column(name = "last_name", length = 50)
+    private String lastName;
+
+    @Column(name = "gender", length = 10)
+    private String gender;
+
+    @Column(name = "dob")
+    private String dateOfBirth;
 
     @Column(name = "phone", length = 20)
     private String phone;
 
-    @Column(name = "designation", length = 50)
-    private String designation = "Faculty";
+    @Column(name = "personal_email", length = 100)
+    private String personalEmail;
 
+    @Column(name = "aadhaar", length = 12, unique = true)
+    private String aadhaarNumber;
+
+    // ========== 2. Professional Details ==========
+    @Column(name = "official_email", length = 100)
+    private String officialEmail;
+
+    @Column(name = "designation", length = 50)
+    private String designation;
+
+    @Column(name = "employee_id", length = 50, unique = true)
+    private String employeeId;
+
+    @Column(name = "bcud_id", length = 50)
+    private String bcudId;
+
+    @Column(name = "vidwaan_id", length = 50)
+    private String vidwaanId;
+
+    @Column(name = "orchid_id", length = 50)
+    private String orchidId;
+
+    @Column(name = "google_scholar_id", length = 100)
+    private String googleScholarId;
+
+    // ========== 3. Academic Details ==========
+    @Column(name = "highest_degree", length = 50)
+    private String highestDegree;
+
+    @Column(name = "phd_year")
+    private Integer phdYear;
+
+    @Column(name = "specialization", length = 100)
+    private String specialization;
+
+    @Column(name = "degree_university", length = 100)
+    private String degreeUniversity;
+
+    // ========== 4. Address ==========
+    @OneToOne(mappedBy = "teacher", cascade = CascadeType.ALL, orphanRemoval = true)
+    private TeacherAddress address;
+
+    // ========== 5. Work Experience ==========
+    @Column(name = "previous_institutions", columnDefinition = "TEXT")
+    private String previousInstitutions;
+
+    @Column(name = "years_experience")
+    private Integer yearsExperience;
+
+    @Column(name = "subjects_taught", columnDefinition = "TEXT")
+    private String subjectsTaught;
+
+    // ========== 6. System fields ==========
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 20)
-    private String status = "Active";
+    private Status status = Status.PENDING; // default
+
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
@@ -59,10 +128,7 @@ public class Teacher {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // link to TeacherSubject bridge
-    @OneToMany(mappedBy = "teacher",
-               cascade = CascadeType.ALL,
-               orphanRemoval = true)
+    @OneToMany(mappedBy = "teacher", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<TeacherSubject> teacherSubjects = new ArrayList<>();
 

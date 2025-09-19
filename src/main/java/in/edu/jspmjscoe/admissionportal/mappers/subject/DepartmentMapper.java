@@ -8,8 +8,6 @@ import in.edu.jspmjscoe.admissionportal.model.subject.Department;
 
 import org.mapstruct.*;
 
-import java.util.List;
-
 
 @Mapper(componentModel = "spring", uses = {CourseMapper.class , TeacherMapper.class})
 public interface DepartmentMapper {

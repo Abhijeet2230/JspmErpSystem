@@ -10,5 +10,9 @@ import lombok.*;
 public class TeacherSubjectDTO {
     private Long teacherSubjectId;
     private Long teacherId;
+    private String teacherName;
     private Long subjectId;
+    private String subjectName;
 }
+
+

@@ -3,10 +3,10 @@ package in.edu.jspmjscoe.admissionportal.model.security;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import in.edu.jspmjscoe.admissionportal.model.student.Student;
+import in.edu.jspmjscoe.admissionportal.model.teacher.Teacher;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import in.edu.jspmjscoe.admissionportal.model.teacher.Teacher;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -15,20 +15,21 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @Setter
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Table(name = "users")
 public class User {
 
     @Id
-    @EqualsAndHashCode.Include
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     @Column(name = "user_id")
     private Long userId;
 
     @NotBlank
-    @Size(max = 20)
-    @Column(unique = true, name = "username")
+    @Size(max = 100)
+    @Column(unique = true, name = "username",length = 100, nullable = false)
     private String userName;
 
     @Size(max = 120)
