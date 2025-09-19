@@ -14,6 +14,8 @@ import java.util.List;
 public class StudentDTO {
 
     private Long studentId;
+    private Long userId;   // ✅ Added for mapping with User
+
     private String applicationId;
     private String candidateName;
     private String mobileNo;

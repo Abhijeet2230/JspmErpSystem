@@ -2,8 +2,8 @@ package in.edu.jspmjscoe.admissionportal.model.student;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import in.edu.jspmjscoe.admissionportal.model.subject.Course;
 import in.edu.jspmjscoe.admissionportal.model.security.User;
+import in.edu.jspmjscoe.admissionportal.model.subject.Course;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -26,8 +26,9 @@ public class Student {
     @Column(name = "student_id")
     private Long studentId;
 
+    // ✅ FK reference to User
     @OneToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "user_id")
+    @JoinColumn(name = "user_id", referencedColumnName = "user_id", unique = true)
     @JsonBackReference
     private User user;
 
@@ -83,6 +84,7 @@ public class Student {
     @Column(name = "religious_minority")
     private String religiousMinority;
 
+    // ✅ Relations
     @OneToOne(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private Parent parent;

@@ -10,9 +10,9 @@ import org.mapstruct.Mapping;
 public interface UserMapper {
 
         @Mapping(source = "student.studentId", target = "studentId")
+        @Mapping(source = "teacher.teacherId", target = "teacherId")
         UserDTO toDTO(User user);
 
         @InheritInverseConfiguration
         User toEntity(UserDTO dto);
-
 }

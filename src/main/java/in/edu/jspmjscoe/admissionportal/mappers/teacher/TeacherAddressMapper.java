@@ -1,11 +1,11 @@
-package in.edu.jspmjscoe.admissionportal.mappers;
+package in.edu.jspmjscoe.admissionportal.mappers.teacher;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
-import in.edu.jspmjscoe.admissionportal.model.TeacherAddress;
-import in.edu.jspmjscoe.admissionportal.model.Teacher;
-import in.edu.jspmjscoe.admissionportal.dtos.TeacherAddressDTO;
+import in.edu.jspmjscoe.admissionportal.model.teacher.TeacherAddress;
+import in.edu.jspmjscoe.admissionportal.model.teacher.Teacher;
+import in.edu.jspmjscoe.admissionportal.dtos.teacher.TeacherAddressDTO;
 
 @Mapper(componentModel = "spring")
 public interface TeacherAddressMapper {

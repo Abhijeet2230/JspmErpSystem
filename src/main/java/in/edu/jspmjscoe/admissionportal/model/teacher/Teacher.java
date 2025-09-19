@@ -2,6 +2,8 @@ package in.edu.jspmjscoe.admissionportal.model.teacher;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import in.edu.jspmjscoe.admissionportal.model.security.Status;
+import in.edu.jspmjscoe.admissionportal.model.security.User;
 import in.edu.jspmjscoe.admissionportal.model.subject.Department;
 import jakarta.persistence.*;
 import lombok.*;
@@ -26,8 +28,9 @@ public class Teacher {
     @Column(name = "teacher_id")
     private Long teacherId;
 
+    // ✅ FK reference to User
     @OneToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "user_id")
+    @JoinColumn(name = "user_id", referencedColumnName = "user_id", unique = true)
     @JsonBackReference
     private User user;
 
@@ -37,8 +40,8 @@ public class Teacher {
     private Department department;
 
     // ========== 1. Personal Details ==========
-    @Column(name = "prefix", length = 20)       // Mr., Dr., Prof.
-    private String prefix;
+    @Column(name = "prefix", length = 20)
+    private String prefix;  // Mr., Dr., Prof.
 
     @Column(name = "first_name", length = 50)
     private String firstName;
@@ -53,7 +56,7 @@ public class Teacher {
     private String gender;
 
     @Column(name = "dob")
-    private String dateOfBirth;   // use String or LocalDate
+    private String dateOfBirth;
 
     @Column(name = "phone", length = 20)
     private String phone;
@@ -66,7 +69,7 @@ public class Teacher {
 
     // ========== 2. Professional Details ==========
     @Column(name = "official_email", length = 100)
-    private String officialEmail;   // JSPM email
+    private String officialEmail;
 
     @Column(name = "designation", length = 50)
     private String designation;
@@ -99,7 +102,7 @@ public class Teacher {
     @Column(name = "degree_university", length = 100)
     private String degreeUniversity;
 
-    // ========== 4. Address (separate entity) ==========
+    // ========== 4. Address ==========
     @OneToOne(mappedBy = "teacher", cascade = CascadeType.ALL, orphanRemoval = true)
     private TeacherAddress address;
 
@@ -114,8 +117,10 @@ public class Teacher {
     private String subjectsTaught;
 
     // ========== 6. System fields ==========
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 20)
-    private String status = "Active";
+    private Status status = Status.PENDING; // default
+
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

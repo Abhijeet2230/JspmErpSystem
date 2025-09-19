@@ -1,7 +1,7 @@
 package in.edu.jspmjscoe.admissionportal.services.impl.student;
 
 import in.edu.jspmjscoe.admissionportal.dtos.student.AddressDTO;
-import in.edu.jspmjscoe.admissionportal.mappers.student.AddressMapper;
+import in.edu.jspmjscoe.admissionportal.mappers.student.StudentAddressMapper;
 import in.edu.jspmjscoe.admissionportal.model.student.Address;
 import in.edu.jspmjscoe.admissionportal.model.student.Student;
 import in.edu.jspmjscoe.admissionportal.repositories.student.AddressRepository;
@@ -22,23 +22,23 @@ public class AddressServiceImpl implements AddressService {
 
     private final AddressRepository addressRepository;
     private final StudentRepository studentRepository;
-    private final AddressMapper addressMapper;
+    private final StudentAddressMapper studentAddressMapper;
 
     @Override
     public AddressDTO createAddress(AddressDTO addressDTO, Long studentId) {
         Student student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new EntityNotFoundException("Student not found"));
 
-        Address address = addressMapper.toEntity(addressDTO);
+        Address address = studentAddressMapper.toEntity(addressDTO);
         address.setStudent(student);
 
-        return addressMapper.toDTO(addressRepository.save(address));
+        return studentAddressMapper.toDTO(addressRepository.save(address));
     }
 
     @Override
     public AddressDTO getAddressById(Long id) {
         return addressRepository.findById(id)
-                .map(addressMapper::toDTO)
+                .map(studentAddressMapper::toDTO)
                 .orElseThrow(() -> new EntityNotFoundException("Address not found"));
     }
 
@@ -46,7 +46,7 @@ public class AddressServiceImpl implements AddressService {
     public List<AddressDTO> getAllAddresses() {
         return addressRepository.findAll()
                 .stream()
-                .map(addressMapper::toDTO)
+                .map(studentAddressMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
@@ -55,9 +55,9 @@ public class AddressServiceImpl implements AddressService {
         Address address = addressRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Address not found"));
 
-        addressMapper.updateAddressFromDTO(addressDTO, address);
+        studentAddressMapper.updateAddressFromDTO(addressDTO, address);
 
-        return addressMapper.toDTO(addressRepository.save(address));
+        return studentAddressMapper.toDTO(addressRepository.save(address));
     }
 
     @Override

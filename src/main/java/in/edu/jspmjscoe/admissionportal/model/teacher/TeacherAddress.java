@@ -1,4 +1,4 @@
-package in.edu.jspmjscoe.admissionportal.model;
+package in.edu.jspmjscoe.admissionportal.model.teacher;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;

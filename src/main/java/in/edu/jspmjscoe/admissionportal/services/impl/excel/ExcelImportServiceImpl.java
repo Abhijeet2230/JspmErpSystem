@@ -33,7 +33,7 @@ public class ExcelImportServiceImpl implements ExcelImportService {
     private final AdmissionRepository admissionRepository; // ✅ Added to save admissions separately
     private final StudentMapper studentMapper;
     private final ParentMapper parentMapper;
-    private final AddressMapper addressMapper;
+    private final StudentAddressMapper studentAddressMapper;
     private final SSCMapper sscMapper;
     private final HSCMapper hscMapper;
     private final EntranceExamMapper entranceExamMapper;
@@ -90,7 +90,7 @@ public class ExcelImportServiceImpl implements ExcelImportService {
 
                 // ✅ Address
                 if (dto.getAddress() != null) {
-                    Address address = addressMapper.toEntity(dto.getAddress());
+                    Address address = studentAddressMapper.toEntity(dto.getAddress());
                     address.setStudent(student);
                     student.setAddress(address);
                 }

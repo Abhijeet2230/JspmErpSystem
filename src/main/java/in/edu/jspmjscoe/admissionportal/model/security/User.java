@@ -2,6 +2,7 @@ package in.edu.jspmjscoe.admissionportal.model.security;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import in.edu.jspmjscoe.admissionportal.model.student.Student;
+import in.edu.jspmjscoe.admissionportal.model.teacher.Teacher;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -26,8 +27,8 @@ public class User {
     private Long userId;
 
     @NotBlank
-    @Size(max = 20)
-    @Column(unique = true, name = "username", nullable = false)
+    @Size(max = 100)
+    @Column(unique = true, name = "username",length = 100, nullable = false)
     private String userName;
 
     @Size(max = 120)

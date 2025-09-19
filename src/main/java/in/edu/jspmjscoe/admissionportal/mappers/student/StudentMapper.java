@@ -8,20 +8,24 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
 @Mapper(
-    componentModel = "spring",
-    uses = {
-        ParentMapper.class,
-        AddressMapper.class,
-        SSCMapper.class,
-        HSCMapper.class,
-        EntranceExamMapper.class,
-        AdmissionMapper.class
-    }
+        componentModel = "spring",
+        uses = {
+                ParentMapper.class,
+                StudentAddressMapper.class,
+                SSCMapper.class,
+                HSCMapper.class,
+                EntranceExamMapper.class,
+                AdmissionMapper.class
+        }
 )
-public interface StudentMapper {  // Entity → DTO
+public interface StudentMapper {
+
+    // Entity → DTO
+    @Mapping(source = "user.userId", target = "userId")  // ✅ link to User
     StudentDTO toDTO(Student student);
 
     // DTO → Entity
+    @Mapping(target = "user.userId", source = "userId")  // ✅ reconstruct User reference
     @Mapping(target = "gender", source = "gender", qualifiedByName = "stringToGender")
     Student toEntity(StudentDTO dto);
 
