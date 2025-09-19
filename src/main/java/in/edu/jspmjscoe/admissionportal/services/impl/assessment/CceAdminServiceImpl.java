@@ -27,7 +27,7 @@ public class CceAdminServiceImpl implements CceAdminService {
 
     private final StudentRepository studentRepository;
     private final SubjectRepository subjectRepository;
-    private final StudentUnitAssessmentRepository suaRepository;
+    private final StudentUnitAssessmentRepository studentUnitAssessmentRepository;
     private final StudentExamRepository examRepository;
     private final AttendanceRepository attendanceRepository;
 
@@ -83,17 +83,17 @@ public class CceAdminServiceImpl implements CceAdminService {
         String group = getDivisionGroup(division);
         List<Student> students = studentRepository.findByDivision(division);
         List<Long> studentIds = students.stream().map(Student::getStudentId).collect(Collectors.toList());
-        List<StudentUnitAssessment> units = suaRepository.findByStudentStudentIdInAndSubjectSubjectIdIn(studentIds, Collections.singletonList(subjectId));
+        List<StudentUnitAssessment> units = studentUnitAssessmentRepository.findByStudentStudentIdInAndSubjectSubjectIdIn(studentIds, Collections.singletonList(subjectId));
 
-        return units.stream().map(u -> StudentUnitAssessmentDTO.builder()
-                        .id(u.getId())
-                        .studentId(u.getStudent().getStudentId())
-                        .rollNo(u.getStudent().getRollNo())
-                        .candidateName(u.getStudent().getCandidateName())
-                        .subjectId(u.getSubject().getSubjectId())
-                        .unitNumber(u.getUnitNumber())
-                        .quizMarks(u.getQuizMarks())
-                        .activityMarks(u.getActivityMarks())
+        return units.stream().map(studentUnitAssessment -> StudentUnitAssessmentDTO.builder()
+                        .id(studentUnitAssessment.getId())
+                        .studentId(studentUnitAssessment.getStudent().getStudentId())
+                        .rollNo(studentUnitAssessment.getStudent().getRollNo())
+                        .candidateName(studentUnitAssessment.getStudent().getCandidateName())
+                        .subjectId(studentUnitAssessment.getSubject().getSubjectId())
+                        .unitNumber(studentUnitAssessment.getUnitNumber())
+                        .quizMarks(studentUnitAssessment.getQuizMarks())
+                        .activityMarks(studentUnitAssessment.getActivityMarks())
                         .build())
                 .collect(Collectors.toList());
     }
@@ -101,20 +101,20 @@ public class CceAdminServiceImpl implements CceAdminService {
     @Override
     @Transactional
     public StudentUnitAssessmentDTO updateUnitAssessmentMarks(Long unitId, Double quizMarks, Double activityMarks) {
-        StudentUnitAssessment sua = suaRepository.findById(unitId)
+        StudentUnitAssessment studentUnitAssessment = studentUnitAssessmentRepository.findById(unitId)
                 .orElseThrow(() -> new RuntimeException("Unit assessment not found: " + unitId));
-        if (quizMarks != null) sua.setQuizMarks(quizMarks);
-        if (activityMarks != null) sua.setActivityMarks(activityMarks);
-        suaRepository.save(sua);
+        if (quizMarks != null) studentUnitAssessment.setQuizMarks(quizMarks);
+        if (activityMarks != null) studentUnitAssessment.setActivityMarks(activityMarks);
+        studentUnitAssessmentRepository.save(studentUnitAssessment);
         return StudentUnitAssessmentDTO.builder()
-                .id(sua.getId())
-                .studentId(sua.getStudent().getStudentId())
-                .rollNo(sua.getStudent().getRollNo())
-                .candidateName(sua.getStudent().getCandidateName())
-                .subjectId(sua.getSubject().getSubjectId())
-                .unitNumber(sua.getUnitNumber())
-                .quizMarks(sua.getQuizMarks())
-                .activityMarks(sua.getActivityMarks())
+                .id(studentUnitAssessment.getId())
+                .studentId(studentUnitAssessment.getStudent().getStudentId())
+                .rollNo(studentUnitAssessment.getStudent().getRollNo())
+                .candidateName(studentUnitAssessment.getStudent().getCandidateName())
+                .subjectId(studentUnitAssessment.getSubject().getSubjectId())
+                .unitNumber(studentUnitAssessment.getUnitNumber())
+                .quizMarks(studentUnitAssessment.getQuizMarks())
+                .activityMarks(studentUnitAssessment.getActivityMarks())
                 .build();
     }
 
@@ -192,18 +192,18 @@ public class CceAdminServiceImpl implements CceAdminService {
                 .map(StudentCCEDTO::getStudentId)
                 .collect(Collectors.toList());
 
-        List<StudentUnitAssessment> units = suaRepository.findByStudentStudentIdInAndSubjectSubjectIdIn(
+        List<StudentUnitAssessment> units = studentUnitAssessmentRepository.findByStudentStudentIdInAndSubjectSubjectIdIn(
                 studentIds, Collections.singletonList(subjectId));
 
-        return units.stream().map(u -> StudentUnitAssessmentDTO.builder()
-                .id(u.getId())
-                .studentId(u.getStudent().getStudentId())
-                .rollNo(u.getStudent().getRollNo())
-                .candidateName(u.getStudent().getCandidateName())
-                .subjectId(u.getSubject().getSubjectId())
-                .unitNumber(u.getUnitNumber())
-                .quizMarks(u.getQuizMarks())
-                .activityMarks(u.getActivityMarks())
+        return units.stream().map(studentUnitAssessment -> StudentUnitAssessmentDTO.builder()
+                .id(studentUnitAssessment.getId())
+                .studentId(studentUnitAssessment.getStudent().getStudentId())
+                .rollNo(studentUnitAssessment.getStudent().getRollNo())
+                .candidateName(studentUnitAssessment.getStudent().getCandidateName())
+                .subjectId(studentUnitAssessment.getSubject().getSubjectId())
+                .unitNumber(studentUnitAssessment.getUnitNumber())
+                .quizMarks(studentUnitAssessment.getQuizMarks())
+                .activityMarks(studentUnitAssessment.getActivityMarks())
                 .build()
         ).collect(Collectors.toList());
     }
@@ -219,7 +219,7 @@ public class CceAdminServiceImpl implements CceAdminService {
                 .collect(Collectors.toList());
 
         // 2. Fetch all units for these students and the subject
-        List<StudentUnitAssessment> units = suaRepository.findByStudentStudentIdInAndSubjectSubjectIdIn(
+        List<StudentUnitAssessment> units = studentUnitAssessmentRepository.findByStudentStudentIdInAndSubjectSubjectIdIn(
                 studentIds, Collections.singletonList(subjectId));
 
         // 3. Group units by studentId
@@ -237,7 +237,7 @@ public class CceAdminServiceImpl implements CceAdminService {
                 ));
 
         // 4. Map students to StudentWithUnitsDTO
-        List<StudentWithUnitsDTO> result = students.stream().map(s -> {
+        return students.stream().map(s -> {
             List<UnitMarksDTO> unitList = studentUnitsMap.getOrDefault(s.getStudentId(), new ArrayList<>());
             return StudentWithUnitsDTO.builder()
                     .studentId(s.getStudentId())
@@ -246,44 +246,73 @@ public class CceAdminServiceImpl implements CceAdminService {
                     .units(unitList)
                     .build();
         }).collect(Collectors.toList());
-
-        return result;
     }
 
+    @Override
+    @Transactional
     public List<StudentUnitAssessmentDTO> updateMultipleUnitAssessments(List<UnitUpdateRequestDTO> updates) {
-        List<StudentUnitAssessmentDTO> result = new ArrayList<>();
-        for (UnitUpdateRequestDTO req : updates) {
-            StudentUnitAssessmentDTO updated = updateUnitAssessmentMarks(req.getUnitId(), req.getQuizMarks(), req.getActivityMarks());
-            result.add(updated);
-        }
-        return result;
-    }
+        if (updates == null || updates.isEmpty()) return Collections.emptyList();
 
+        // Fetch all entities in one go
+        List<Long> unitIds = updates.stream().map(UnitUpdateRequestDTO::getUnitId).toList();
+        Map<Long, StudentUnitAssessment> existingMap = studentUnitAssessmentRepository.findAllById(unitIds)
+                .stream()
+                .collect(Collectors.toMap(StudentUnitAssessment::getId, u -> u));
+
+        // Apply updates
+        for (UnitUpdateRequestDTO req : updates) {
+            StudentUnitAssessment studentUnitAssessment = existingMap.get(req.getUnitId());
+            if (studentUnitAssessment == null) {
+                throw new RuntimeException("Unit assessment not found: " + req.getUnitId());
+            }
+            if (req.getQuizMarks() != null) studentUnitAssessment.setQuizMarks(req.getQuizMarks());
+            if (req.getActivityMarks() != null) studentUnitAssessment.setActivityMarks(req.getActivityMarks());
+        }
+
+        // Save all in batch
+        List<StudentUnitAssessment> saved = studentUnitAssessmentRepository.saveAll(existingMap.values());
+
+        return saved.stream().map(studentUnitAssessment -> StudentUnitAssessmentDTO.builder()
+                .id(studentUnitAssessment.getId())
+                .studentId(studentUnitAssessment.getStudent().getStudentId())
+                .rollNo(studentUnitAssessment.getStudent().getRollNo())
+                .candidateName(studentUnitAssessment.getStudent().getCandidateName())
+                .subjectId(studentUnitAssessment.getSubject().getSubjectId())
+                .unitNumber(studentUnitAssessment.getUnitNumber())
+                .quizMarks(studentUnitAssessment.getQuizMarks())
+                .activityMarks(studentUnitAssessment.getActivityMarks())
+                .build()).toList();
+    }
 
     @Override
     @Transactional
     public List<StudentExamDTO> updateExamMarksBulk(List<ExamUpdateRequestDTO> requests) {
-        List<StudentExamDTO> updatedList = new ArrayList<>();
+        if (requests == null || requests.isEmpty()) return Collections.emptyList();
 
+        // Fetch all entities in one go
+        List<Long> examIds = requests.stream().map(ExamUpdateRequestDTO::getExamId).toList();
+        Map<Long, StudentExam> existingMap = examRepository.findAllById(examIds)
+                .stream()
+                .collect(Collectors.toMap(StudentExam::getId, e -> e));
+
+        // Apply updates
         for (ExamUpdateRequestDTO req : requests) {
-            StudentExam exam = examRepository.findById(req.getExamId())
-                    .orElseThrow(() -> new RuntimeException("Exam not found: " + req.getExamId()));
-
+            StudentExam exam = existingMap.get(req.getExamId());
+            if (exam == null) {
+                throw new RuntimeException("Exam not found: " + req.getExamId());
+            }
             exam.setMarksObtained(req.getMarksObtained());
-            StudentExam saved = examRepository.save(exam);
-
-            updatedList.add(
-                    StudentExamDTO.builder()
-                            .id(saved.getId())
-                            .studentId(saved.getStudent().getStudentId())
-                            .subjectId(saved.getSubject().getSubjectId())
-                            .examType(saved.getExamType().name())
-                            .marksObtained(saved.getMarksObtained())
-                            .build()
-            );
         }
 
-        return updatedList;
-    }
+        // Save all in batch
+        List<StudentExam> saved = examRepository.saveAll(existingMap.values());
 
+        return saved.stream().map(e -> StudentExamDTO.builder()
+                .id(e.getId())
+                .studentId(e.getStudent().getStudentId())
+                .subjectId(e.getSubject().getSubjectId())
+                .examType(e.getExamType().name())
+                .marksObtained(e.getMarksObtained())
+                .build()).toList();
+    }
 }

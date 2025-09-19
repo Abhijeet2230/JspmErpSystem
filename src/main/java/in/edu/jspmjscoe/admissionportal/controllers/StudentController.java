@@ -67,6 +67,7 @@ public class StudentController {
             return ResponseEntity.status(401).body("Unauthorized");
         }
 
+
         User user = userRepository.findByUserName(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
