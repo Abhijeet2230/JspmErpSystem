@@ -1,8 +1,7 @@
-package in.edu.jspmjscoe.admissionportal.controllers;
+package in.edu.jspmjscoe.admissionportal.controllers.admin;
 
 import in.edu.jspmjscoe.admissionportal.dtos.student.StudentDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.security.UserDTO;
-import in.edu.jspmjscoe.admissionportal.dtos.student.StudentDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.HeadLeaveDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.LeaveDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.TeacherDTO;
@@ -16,7 +15,6 @@ import in.edu.jspmjscoe.admissionportal.services.excel.ExcelImportService;
 import in.edu.jspmjscoe.admissionportal.services.impl.assessment.CceInitializationService;
 import in.edu.jspmjscoe.admissionportal.services.student.StudentService;
 import in.edu.jspmjscoe.admissionportal.services.security.UserService;
-import in.edu.jspmjscoe.admissionportal.services.student.StudentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

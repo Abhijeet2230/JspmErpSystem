@@ -1,14 +1,10 @@
 package in.edu.jspmjscoe.admissionportal.services.impl.trainingplacement;
 
-import in.edu.jspmjscoe.admissionportal.dtos.trainingplacement.BulkTrainingPlacementPatchRequest;
-import in.edu.jspmjscoe.admissionportal.dtos.trainingplacement.StudentPlacementDTO;
-import in.edu.jspmjscoe.admissionportal.dtos.trainingplacement.TrainingPlacementPatchDTO;
-import in.edu.jspmjscoe.admissionportal.dtos.trainingplacement.TrainingPlacementTestDTO;
+import in.edu.jspmjscoe.admissionportal.dtos.trainingplacement.*;
+import in.edu.jspmjscoe.admissionportal.exception.TrainingPlacementNotFoundException;
 import in.edu.jspmjscoe.admissionportal.mappers.trainingplacement.TrainingPlacementMapper;
 import in.edu.jspmjscoe.admissionportal.model.student.Student;
-import in.edu.jspmjscoe.admissionportal.model.trainingplacement.TrainingPlacementRecord;
-import in.edu.jspmjscoe.admissionportal.model.trainingplacement.TrainingPlacementTest;
-import in.edu.jspmjscoe.admissionportal.model.trainingplacement.TestCategory;
+import in.edu.jspmjscoe.admissionportal.model.trainingplacement.*;
 import in.edu.jspmjscoe.admissionportal.repositories.student.StudentRepository;
 import in.edu.jspmjscoe.admissionportal.repositories.trainingplacement.TrainingPlacementRecordRepository;
 import in.edu.jspmjscoe.admissionportal.services.trainingplacement.TrainingPlacementService;
@@ -25,14 +21,12 @@ public class TrainingPlacementServiceImpl implements TrainingPlacementService {
 
     private final StudentRepository studentRepository;
     private final TrainingPlacementRecordRepository trainingPlacementRecordRepository;
-
     private final TrainingPlacementMapper trainingPlacementMapper;
 
     @Override
     @Transactional
     public void initializeTrainingPlacementRecords() {
         List<Student> students = studentRepository.findAll();
-
         List<TrainingPlacementRecord> records = new ArrayList<>();
 
         for (Student student : students) {
@@ -50,7 +44,6 @@ public class TrainingPlacementServiceImpl implements TrainingPlacementService {
 
             List<TrainingPlacementTest> tests = new ArrayList<>();
 
-            // Add 3 Softskill Tests
             for (int i = 1; i <= 3; i++) {
                 tests.add(TrainingPlacementTest.builder()
                         .trainingPlacementRecord(record)
@@ -60,7 +53,6 @@ public class TrainingPlacementServiceImpl implements TrainingPlacementService {
                         .build());
             }
 
-            // Add 5 Aptitude Tests
             for (int i = 1; i <= 5; i++) {
                 tests.add(TrainingPlacementTest.builder()
                         .trainingPlacementRecord(record)
@@ -77,7 +69,6 @@ public class TrainingPlacementServiceImpl implements TrainingPlacementService {
         trainingPlacementRecordRepository.saveAll(records);
     }
 
-
     @Override
     public List<StudentPlacementDTO> getStudentsByDivision(String division) {
         List<TrainingPlacementRecord> records = trainingPlacementRecordRepository.findByDivision(division);
@@ -92,16 +83,13 @@ public class TrainingPlacementServiceImpl implements TrainingPlacementService {
                 .toList();
     }
 
-
     @Override
     @Transactional
     public void bulkPatch(BulkTrainingPlacementPatchRequest request) {
         for (TrainingPlacementPatchDTO dto : request.getUpdates()) {
-            TrainingPlacementRecord record =
-                    trainingPlacementRecordRepository.findByStudent_StudentId(dto.getStudentId())
-                            .orElseThrow(() -> new RuntimeException("Record not found for studentId=" + dto.getStudentId()));
+            TrainingPlacementRecord record = trainingPlacementRecordRepository.findByStudent_StudentId(dto.getStudentId())
+                    .orElseThrow(() -> new TrainingPlacementNotFoundException(dto.getStudentId(),null));
 
-            // update scalar fields
             if (dto.getSgpaScore() != null) record.setSgpaScore(dto.getSgpaScore());
             if (dto.getSoftskillAttendance() != null) record.setSoftskillAttendance(dto.getSoftskillAttendance());
             if (dto.getCertificationCourses() != null) record.setCertificationCourses(dto.getCertificationCourses());
@@ -111,33 +99,27 @@ public class TrainingPlacementServiceImpl implements TrainingPlacementService {
             if (dto.getNationalEvent() != null) record.setNationalEvent(dto.getNationalEvent());
             if (dto.getTotalScore() != null) record.setTotalScore(dto.getTotalScore());
 
-            // update test scores
             if (dto.getTests() != null) {
                 for (TrainingPlacementTestDTO testDto : dto.getTests()) {
-                    TrainingPlacementTest test =
-                            record.getTests().stream()
-                                    .filter(t -> t.getTestName().equalsIgnoreCase(testDto.getTestName())
-                                            && t.getCategory() == testDto.getCategory())
-                                    .findFirst()
-                                    .orElseThrow(() -> new RuntimeException("Test not found: " + testDto.getTestName()));
+                    TrainingPlacementTest test = record.getTests().stream()
+                            .filter(t -> t.getTestName().equalsIgnoreCase(testDto.getTestName())
+                                    && t.getCategory() == testDto.getCategory())
+                            .findFirst()
+                            .orElseThrow(() -> new TrainingPlacementNotFoundException(dto.getStudentId(), testDto.getTestName()));
 
-                    if (testDto.getScore() != null) {
-                        test.setScore(testDto.getScore());
-                    }
+                    if (testDto.getScore() != null) test.setScore(testDto.getScore());
                 }
             }
 
-            trainingPlacementRecordRepository.save(record); // cascade will save tests too
+            trainingPlacementRecordRepository.save(record);
         }
     }
-
 
     @Override
     @Transactional(readOnly = true)
     public StudentPlacementDTO getMyTrainingPlacement(Long studentId) {
-        TrainingPlacementRecord record = trainingPlacementRecordRepository
-                .findByStudent_StudentId(studentId)
-                .orElseThrow(() -> new RuntimeException("No TrainingPlacementRecord found for studentId=" + studentId));
+        TrainingPlacementRecord record = trainingPlacementRecordRepository.findByStudent_StudentId(studentId)
+                .orElseThrow(() -> new TrainingPlacementNotFoundException(studentId,null));
 
         return StudentPlacementDTO.builder()
                 .rollNo(record.getStudent().getRollNo())
@@ -146,7 +128,4 @@ public class TrainingPlacementServiceImpl implements TrainingPlacementService {
                 .trainingPlacement(trainingPlacementMapper.toDTO(record))
                 .build();
     }
-
-
-
 }

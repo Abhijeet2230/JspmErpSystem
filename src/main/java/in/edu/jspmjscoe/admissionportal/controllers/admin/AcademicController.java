@@ -1,4 +1,4 @@
-package in.edu.jspmjscoe.admissionportal.controllers;
+package in.edu.jspmjscoe.admissionportal.controllers.admin;
 
 import in.edu.jspmjscoe.admissionportal.dtos.subject.CourseDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.subject.DepartmentDTO;

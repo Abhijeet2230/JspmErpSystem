@@ -1,4 +1,4 @@
-package in.edu.jspmjscoe.admissionportal.controllers;
+package in.edu.jspmjscoe.admissionportal.controllers.auth;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.web.csrf.CsrfToken;

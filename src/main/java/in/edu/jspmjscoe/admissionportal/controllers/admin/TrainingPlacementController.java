@@ -1,4 +1,4 @@
-package in.edu.jspmjscoe.admissionportal.controllers;
+package in.edu.jspmjscoe.admissionportal.controllers.admin;
 
 import in.edu.jspmjscoe.admissionportal.dtos.apiresponse.ApiResponse;
 import in.edu.jspmjscoe.admissionportal.dtos.trainingplacement.BulkTrainingPlacementPatchRequest;
@@ -7,7 +7,6 @@ import in.edu.jspmjscoe.admissionportal.services.trainingplacement.TrainingPlace
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

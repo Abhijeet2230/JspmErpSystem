@@ -11,8 +11,8 @@ public class StudentExamDTO {
 
     private Long id;
 
-    private Long studentId;   // only ID, not full Student entity
-    private Long subjectId;   // only ID, not full Subject entity
+    private Long studentId;
+    private Long subjectId;
 
     private String examType;  // "MID_TERM" or "END_TERM"
 

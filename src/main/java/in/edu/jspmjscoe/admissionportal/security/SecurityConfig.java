@@ -42,10 +42,6 @@ public class SecurityConfig {
     private final AuthEntryPointJwt unauthorizedHandler;
     private final AuthTokenFilter authTokenFilter;  // <-- inject existing component
 
-//    @Bean
-//    public AuthTokenFilter authenticationJwtTokenFilter() {
-//        return new AuthTokenFilter();
-//    }
 
     @Bean
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
@@ -56,6 +52,7 @@ public class SecurityConfig {
         http.cors(Customizer.withDefaults());
         http.authorizeHttpRequests((requests) -> requests
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/student/**").hasRole("STUDENT")
                 .requestMatchers("/api/teacher/**").hasRole("TEACHER")
                 .requestMatchers(
                         "/api/auth/public/**",
@@ -140,6 +137,16 @@ public class SecurityConfig {
                 admin.setRole(adminRole);
                 userRepository.save(admin);
             }
+
+            if (!userRepository.existsByUserName("admin1")) {
+                User admin = new User();
+                admin.setUserName("admin1");  // ✅ required
+                admin.setPassword(passwordEncoder.encode("adminPass"));
+                admin.setRole(adminRole);
+                admin.setFirstLogin(false);
+                userRepository.save(admin);
+            }
+
 
             // Create default teacher
             if (!userRepository.existsByUserName("teacher")) {
