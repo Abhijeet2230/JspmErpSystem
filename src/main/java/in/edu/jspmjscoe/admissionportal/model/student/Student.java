@@ -78,6 +78,9 @@ public class Student {
     @Column(name = "home_university")
     private String homeUniversity;
 
+    @Column(name = "course_name")
+    private String courseName;
+
     @Column(name = "category")
     private String category;
 

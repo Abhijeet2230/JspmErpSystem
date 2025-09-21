@@ -51,7 +51,7 @@ public class SecurityConfig {
 
         http.cors(Customizer.withDefaults());
         http.authorizeHttpRequests((requests) -> requests
-                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/admin/**","/actuator/**").hasRole("ADMIN")
                 .requestMatchers("/api/student/**").hasRole("STUDENT")
                 .requestMatchers("/api/teacher/**").hasRole("TEACHER")
                 .requestMatchers(
