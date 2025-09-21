@@ -4,6 +4,7 @@ import in.edu.jspmjscoe.admissionportal.dtos.teacher.HeadLeaveDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.LeaveDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.TeacherDTO;
 import in.edu.jspmjscoe.admissionportal.model.security.Status;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.List;
 

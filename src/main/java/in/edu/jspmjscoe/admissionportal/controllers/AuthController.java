@@ -96,7 +96,16 @@ public class AuthController {
 
         String jwtToken = jwtUtils.generateTokenFromUsername(userDetails);
 
-        LoginResponse response = new LoginResponse(userDetails.getUsername(), roles, jwtToken, user.isFirstLogin());
+        // ✅ Fetch designation only if teacher
+        String designation = null;
+        if (roles.contains("ROLE_TEACHER")) {
+            Teacher teacher = teacherRepository.findByUser(user).orElse(null);
+            if (teacher != null) {
+                designation = teacher.getDesignation(); // assuming field exists in Teacher entity
+            }
+        }
+
+        LoginResponse response = new LoginResponse(userDetails.getUsername(), roles, jwtToken, user.isFirstLogin(),designation);
 
         return ResponseEntity.ok(response);
     }

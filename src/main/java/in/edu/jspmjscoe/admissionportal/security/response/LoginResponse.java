@@ -13,12 +13,14 @@ public class LoginResponse {
     private String username;
     private List<String> roles;
     private boolean firstLogin;
+    private String designation;
 
-    public LoginResponse(String username, List<String> roles, String jwtToken, boolean firstLogin) {
+    public LoginResponse(String username, List<String> roles, String jwtToken, boolean firstLogin,String designation) {
         this.username = username;
         this.roles = roles;
         this.jwtToken = jwtToken;
         this.firstLogin = firstLogin;
+        this.designation = designation;
     }
 
 }

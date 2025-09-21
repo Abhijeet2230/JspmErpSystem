@@ -27,7 +27,7 @@ public class TeacherController {
     private final TeacherRepository teacherRepository;
     private final UserRepository userRepository;
 
-    // ✅ Get the currently logged-in student's details
+    // ✅ Get the currently logged-in teacher's details
     @GetMapping("/profile")
     public ResponseEntity<?> getCurrentTeacher(@AuthenticationPrincipal UserDetails userDetails) {
         if (userDetails == null) {
@@ -38,7 +38,7 @@ public class TeacherController {
         User user = userRepository.findByUserName(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // 2. Find Student linked with that User
+        // 2. Find teacher linked with that User
         Teacher teacher = teacherRepository.findByUser(user)
                 .orElseThrow(() -> new RuntimeException("Teacher profile not found"));
 

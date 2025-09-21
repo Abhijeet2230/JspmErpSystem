@@ -20,6 +20,7 @@ import in.edu.jspmjscoe.admissionportal.repositories.subject.DepartmentRepositor
 import in.edu.jspmjscoe.admissionportal.repositories.teacher.HeadLeaveRepository;
 import in.edu.jspmjscoe.admissionportal.repositories.teacher.LeaveRepository;
 import in.edu.jspmjscoe.admissionportal.repositories.teacher.TeacherRepository;
+import in.edu.jspmjscoe.admissionportal.security.services.CurrentUserService;
 import in.edu.jspmjscoe.admissionportal.services.teacher.TeacherService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -44,7 +45,7 @@ public class TeacherServiceImpl implements TeacherService {
     private final LeaveMapper leaveMapper;
     private final HeadLeaveRepository headLeaveRepository;
     private final HeadLeaveMapper headLeaveMapper;
-
+    private final CurrentUserService currentUserService;
 
     @Override
     public List<TeacherDTO> getAllTeachers() {
@@ -172,20 +173,7 @@ public class TeacherServiceImpl implements TeacherService {
     // --------------- Teacher Leave -------------//
     @Override
     public LeaveDTO applyLeave(LeaveDTO leaveDTO) {
-        // 🔹 Fetch currently logged-in user
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (!(principal instanceof UserDetails)) {
-            throw new RuntimeException("Unauthorized");
-        }
-        UserDetails userDetails = (UserDetails) principal;
-
-        // 🔹 Get User entity
-        User user = userRepository.findByUserName(userDetails.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        // 🔹 Get Teacher linked to the logged-in user
-        Teacher teacher = teacherRepository.findByUser(user)
-                .orElseThrow(() -> new RuntimeException("Teacher not found"));
+        Teacher teacher = currentUserService.getCurrentTeacher();
 
         // ❌ Check if teacher already has a pending leave
         boolean hasPendingLeave = leaveRepository
@@ -240,19 +228,7 @@ public class TeacherServiceImpl implements TeacherService {
     @Override
     public HeadLeaveDTO applyHeadLeave(HeadLeaveDTO headLeaveDTO) {
         // 🔹 Get logged-in user
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (!(principal instanceof UserDetails)) {
-            throw new RuntimeException("Unauthorized");
-        }
-        UserDetails userDetails = (UserDetails) principal;
-
-        // 🔹 Find User entity
-        User user = userRepository.findByUserName(userDetails.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        // 🔹 Find Teacher entity
-        Teacher teacher = teacherRepository.findByUser(user)
-                .orElseThrow(() -> new RuntimeException("Teacher not found"));
+        Teacher teacher = currentUserService.getCurrentTeacher();
 
         // ❌ Check if already pending
         boolean hasPendingLeave = headLeaveRepository
