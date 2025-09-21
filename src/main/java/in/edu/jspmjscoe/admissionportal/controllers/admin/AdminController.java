@@ -1,8 +1,8 @@
-package in.edu.jspmjscoe.admissionportal.controllers;
+package in.edu.jspmjscoe.admissionportal.controllers.admin;
 
+import in.edu.jspmjscoe.admissionportal.dtos.assessment.CceInitResult;
 import in.edu.jspmjscoe.admissionportal.dtos.student.StudentDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.security.UserDTO;
-import in.edu.jspmjscoe.admissionportal.dtos.student.StudentDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.HeadLeaveDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.LeaveDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.TeacherDTO;
@@ -16,7 +16,6 @@ import in.edu.jspmjscoe.admissionportal.services.excel.ExcelImportService;
 import in.edu.jspmjscoe.admissionportal.services.impl.assessment.CceInitializationService;
 import in.edu.jspmjscoe.admissionportal.services.student.StudentService;
 import in.edu.jspmjscoe.admissionportal.services.security.UserService;
-import in.edu.jspmjscoe.admissionportal.services.student.StudentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -185,29 +184,33 @@ public class AdminController {
     }
 
 
-    // ✅ Upload Excel and Import Students
+    // ✅ Upload Excel and Import Students with header row number
     @PostMapping("/import")
-    public ResponseEntity<String> importDemoStudents(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<String> importDemoStudents(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(name = "headerRowNumber", defaultValue = "1") int headerRowNumber) {
+
         if (file.isEmpty()) {
             return ResponseEntity.badRequest().body("Please upload a valid Excel file.");
         }
 
-        int importedCount = excelImportService.importStudentsBasic(file);
+        // Pass the headerRowNumber to your service
+        int importedCount = excelImportService.importStudentsBasic(file, headerRowNumber);
+
         return ResponseEntity.ok(importedCount + " students imported successfully.");
     }
 
 
 
     @PostMapping("/initialize")
-    public ResponseEntity<CceInitializationService.CceInitResult> initializeCceData(
+    public ResponseEntity<CceInitResult> initializeCceData(
             @RequestParam(defaultValue = "true") boolean units,
             @RequestParam(defaultValue = "true") boolean exams,
             @RequestParam(defaultValue = "true") boolean attendance) {
 
-        CceInitializationService.CceInitResult result = cceInitializationService.initializeAll(units, exams, attendance);
+        CceInitResult result = cceInitializationService.initializeAll(units, exams, attendance);
         return ResponseEntity.ok(result);
     }
-
 
 
 }

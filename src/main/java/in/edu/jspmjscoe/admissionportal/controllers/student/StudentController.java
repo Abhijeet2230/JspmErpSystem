@@ -1,8 +1,10 @@
-package in.edu.jspmjscoe.admissionportal.controllers;
+package in.edu.jspmjscoe.admissionportal.controllers.student;
 
 import in.edu.jspmjscoe.admissionportal.dtos.assessment.studentside.StudentCCEProfileResponseDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.security.ChangePasswordRequest;
 import in.edu.jspmjscoe.admissionportal.dtos.trainingplacement.StudentPlacementDTO;
+import in.edu.jspmjscoe.admissionportal.exception.ResourceNotFoundException;
+import in.edu.jspmjscoe.admissionportal.exception.UnauthorizedException;
 import in.edu.jspmjscoe.admissionportal.model.student.Student;
 import in.edu.jspmjscoe.admissionportal.model.security.User;
 import in.edu.jspmjscoe.admissionportal.repositories.student.StudentRepository;
@@ -28,18 +30,17 @@ public class StudentController {
     private final TrainingPlacementService trainingPlacementService;
 
 
-    // ✅ Get the currently logged-in student's details
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentStudent(@AuthenticationPrincipal UserDetails userDetails) {
         if (userDetails == null) {
-            return ResponseEntity.status(401).body("Unauthorized");
+            throw new UnauthorizedException("Unauthorized: Login required");
         }
 
         User user = userRepository.findByUserName(userDetails.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         Student student = studentRepository.findByUser(user)
-                .orElseThrow(() -> new RuntimeException("Student profile not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Student profile not found"));
 
         return ResponseEntity.ok(student);
     }
@@ -64,22 +65,19 @@ public class StudentController {
         }
     }
 
-    // ✅ Get logged-in student's CCE profile
     @GetMapping("/cce")
     public ResponseEntity<?> getCCEProfile(@AuthenticationPrincipal UserDetails userDetails) {
         if (userDetails == null) {
-            return ResponseEntity.status(401).body("Unauthorized");
+            throw new UnauthorizedException("Unauthorized: Login required");
         }
 
-
         User user = userRepository.findByUserName(userDetails.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         Student student = studentRepository.findByUser(user)
-                .orElseThrow(() -> new RuntimeException("Student profile not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Student profile not found"));
 
         StudentCCEProfileResponseDTO profile = studentCCEProfileService.getStudentCCEProfile(student.getStudentId());
-
         return ResponseEntity.ok(profile);
     }
 

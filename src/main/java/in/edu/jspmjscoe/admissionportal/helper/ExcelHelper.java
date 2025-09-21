@@ -157,12 +157,17 @@ public class ExcelHelper {
     }
 
 
-    public static List<StudentDTO> excelToBasicStudentDTOs(InputStream is) {
+    public static List<StudentDTO> excelToBasicStudentDTOs(InputStream is, int headerRowNumber) {
         try (Workbook workbook = new XSSFWorkbook(is)) {
             Sheet sheet = workbook.getSheetAt(0); // First sheet
 
-            // ---- Build header map from first row ----
-            Row headerRow = sheet.getRow(0);
+            // ---- Convert Excel 1-based row to 0-based index ----
+            int headerRowIndex = headerRowNumber - 1;
+
+            // ---- Build header map from the provided header row ----
+            Row headerRow = sheet.getRow(headerRowIndex);
+            if (headerRow == null) throw new RuntimeException("Header row not found at row " + headerRowNumber);
+
             Map<String, Integer> headerMap = new HashMap<>();
             for (Cell cell : headerRow) {
                 String header = cell.toString().trim();
@@ -173,26 +178,34 @@ public class ExcelHelper {
 
             List<StudentDTO> students = new ArrayList<>();
 
-            // ---- Data starts from 2nd row ----
-            for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+            // ---- Data starts from next row ----
+            for (int i = headerRowIndex + 1; i <= sheet.getLastRowNum(); i++) {
                 Row row = sheet.getRow(i);
                 if (row == null) continue;
 
                 StudentDTO studentDTO = new StudentDTO();
 
-                // ✅ Only four fields
+                // Roll No
                 String rollNoStr = getCellString(row, headerMap, "Roll No");
                 if (rollNoStr != null) {
                     try {
                         studentDTO.setRollNo(Integer.parseInt(rollNoStr));
                     } catch (NumberFormatException e) {
-                        studentDTO.setRollNo(null); // fallback
+                        studentDTO.setRollNo(null);
                     }
                 }
 
-                studentDTO.setCandidateName(getCellString(row, headerMap, "Name"));
+                // Candidate Name
+                studentDTO.setCandidateName(getCellString(row, headerMap, "Candidate Name"));
+
+                // DOB
                 studentDTO.setDob(getDobFormatted(row, headerMap, "DOB"));
-                studentDTO.setDivision(getCellString(row, headerMap, "Division"));
+
+                // Division
+                studentDTO.setDivision(getCellString(row, headerMap, "DIV"));
+
+                // Course Name
+                studentDTO.setCourseName(getCellString(row, headerMap, "Course Name"));
 
                 students.add(studentDTO);
             }
@@ -200,9 +213,10 @@ public class ExcelHelper {
             return students;
 
         } catch (Exception e) {
-            throw new RuntimeException("Failed to parse Excel file (basic): " + e.getMessage(), e);
+            throw new RuntimeException("Failed to parse Excel file: " + e.getMessage(), e);
         }
     }
+
 
 
 

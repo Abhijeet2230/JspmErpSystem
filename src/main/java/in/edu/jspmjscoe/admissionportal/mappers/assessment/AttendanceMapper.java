@@ -7,12 +7,17 @@ import org.mapstruct.*;
 @Mapper(componentModel = "spring")
 public interface AttendanceMapper {
 
+    // ---------- Entity -> DTO ----------
     @Mapping(source = "student.studentId", target = "studentId")
     @Mapping(source = "subject.subjectId", target = "subjectId")
-    AttendanceDTO toDTO(Attendance entity);
+    AttendanceDTO toDto(Attendance entity);
 
-    @InheritInverseConfiguration
-    @Mapping(target = "student", ignore = true)
-    @Mapping(target = "subject", ignore = true)
+    // ---------- DTO -> Entity ----------
+    @Mapping(source = "studentId", target = "student.studentId")
+    @Mapping(source = "subjectId", target = "subject.subjectId")
     Attendance toEntity(AttendanceDTO dto);
+
+    // ---------- Update from DTO (null-safe) ----------
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    void updateFromDto(AttendanceDTO dto, @MappingTarget Attendance entity);
 }

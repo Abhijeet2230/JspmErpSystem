@@ -2,18 +2,37 @@ package in.edu.jspmjscoe.admissionportal.mappers.assessment;
 
 import in.edu.jspmjscoe.admissionportal.dtos.assessment.StudentExamDTO;
 import in.edu.jspmjscoe.admissionportal.model.assessment.StudentExam;
+import in.edu.jspmjscoe.admissionportal.model.assessment.ExamType;
 import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")
 public interface StudentExamMapper {
 
+    // ---------- Entity -> DTO ----------
     @Mapping(source = "student.studentId", target = "studentId")
     @Mapping(source = "subject.subjectId", target = "subjectId")
-    @Mapping(source = "examType", target = "examType")
-    StudentExamDTO toDTO(StudentExam entity);
+    @Mapping(source = "examType", target = "examType", qualifiedByName = "enumToString")
+    StudentExamDTO toDto(StudentExam entity);
 
-    @InheritInverseConfiguration
-    @Mapping(target = "student", ignore = true) // set in service layer
-    @Mapping(target = "subject", ignore = true) // set in service layer
+    // ---------- DTO -> Entity ----------
+    @Mapping(source = "studentId", target = "student.studentId")
+    @Mapping(source = "subjectId", target = "subject.subjectId")
+    @Mapping(source = "examType", target = "examType", qualifiedByName = "stringToEnum")
     StudentExam toEntity(StudentExamDTO dto);
+
+    // ---------- Update from DTO (null-safe) ----------
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(source = "examType", target = "examType", qualifiedByName = "stringToEnum")
+    void updateFromDto(StudentExamDTO dto, @MappingTarget StudentExam entity);
+
+    // ---------- Helpers for enum <-> string ----------
+    @Named("enumToString")
+    static String enumToString(ExamType examType) {
+        return examType != null ? examType.name() : null;
+    }
+
+    @Named("stringToEnum")
+    static ExamType stringToEnum(String examType) {
+        return examType != null ? ExamType.valueOf(examType) : null;
+    }
 }

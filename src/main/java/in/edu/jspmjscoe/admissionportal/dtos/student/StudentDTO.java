@@ -30,6 +30,7 @@ public class StudentDTO {
     private String annualFamilyIncome;
     private String candidatureType;
     private String homeUniversity;
+    private String courseName;
     private String category;
     private String phType;
     private String defenceType;

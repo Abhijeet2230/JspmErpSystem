@@ -1,5 +1,6 @@
 package in.edu.jspmjscoe.admissionportal.services.impl.assessment;
 
+import in.edu.jspmjscoe.admissionportal.dtos.assessment.CceInitResult;
 import in.edu.jspmjscoe.admissionportal.model.assessment.Attendance;
 import in.edu.jspmjscoe.admissionportal.model.assessment.ExamType;
 import in.edu.jspmjscoe.admissionportal.model.assessment.StudentExam;
@@ -11,8 +12,6 @@ import in.edu.jspmjscoe.admissionportal.repositories.assessment.StudentExamRepos
 import in.edu.jspmjscoe.admissionportal.repositories.student.StudentRepository;
 import in.edu.jspmjscoe.admissionportal.repositories.assessment.StudentUnitAssessmentRepository;
 import in.edu.jspmjscoe.admissionportal.repositories.subject.SubjectRepository;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -185,14 +184,6 @@ public class CceInitializationService {
         return "A"; // fallback
     }
 
-    // DTO for result
-    @Data
-    @AllArgsConstructor
-    public static class CceInitResult {
-        private int unitRowsCreated;
-        private int examRowsCreated;
-        private int attendanceRowsCreated;
-    }
 
     // Internal pair holder
     private static class Pair {
