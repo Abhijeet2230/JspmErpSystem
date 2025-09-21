@@ -90,12 +90,6 @@ public class AuthController {
 
         String jwtToken = jwtUtils.generateTokenFromUsername(userDetails);
 
-        LoginResponse response = new LoginResponse(
-                userDetails.getUsername(),
-                roles,
-                jwtToken,
-                user.isFirstLogin()
-        );
         // ✅ Fetch designation only if teacher
         String designation = null;
         if (roles.contains("ROLE_TEACHER")) {

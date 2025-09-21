@@ -31,4 +31,7 @@ public class TeacherSubject {
     @JsonBackReference // opposite of Subject.teacherSubjects
     private Subject subject;
 
+    @Column(name = "division", nullable = false)
+    private String division;
+
 }

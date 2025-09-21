@@ -2,125 +2,129 @@ package in.edu.jspmjscoe.admissionportal.controllers.exception;
 
 import in.edu.jspmjscoe.admissionportal.dtos.response.ErrorResponse;
 import in.edu.jspmjscoe.admissionportal.exception.*;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import jakarta.servlet.http.HttpServletRequest;
 
 import java.time.LocalDateTime;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    // ---------------- Common Exceptions ----------------
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleResourceNotFound(ResourceNotFoundException ex, HttpServletRequest request) {
-        ErrorResponse response = ErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
-                .status(HttpStatus.NOT_FOUND.value())
-                .error("Resource Not Found")
-                .message(ex.getMessage())
-                .path(request.getRequestURI())
-                .build();
-        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        return buildResponse(HttpStatus.NOT_FOUND, "Resource Not Found", ex, request);
     }
 
     @ExceptionHandler(DuplicateResourceException.class)
     public ResponseEntity<ErrorResponse> handleDuplicateResource(DuplicateResourceException ex, HttpServletRequest request) {
-        ErrorResponse response = ErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
-                .status(HttpStatus.CONFLICT.value())
-                .error("Duplicate Resource")
-                .message(ex.getMessage())
-                .path(request.getRequestURI())
-                .build();
-        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+        return buildResponse(HttpStatus.CONFLICT, "Duplicate Resource", ex, request);
     }
 
     @ExceptionHandler(InvalidCredentialsException.class)
     public ResponseEntity<ErrorResponse> handleInvalidCredentials(InvalidCredentialsException ex, HttpServletRequest request) {
-        ErrorResponse response = ErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
-                .status(HttpStatus.BAD_REQUEST.value())
-                .error("Invalid Credentials")
-                .message(ex.getMessage())
-                .path(request.getRequestURI())
-                .build();
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(ExamNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleExamNotFound(ExamNotFoundException ex, HttpServletRequest request) {
-        ErrorResponse response = ErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
-                .status(HttpStatus.NOT_FOUND.value())
-                .error("Exam Not Found")
-                .message(ex.getMessage())
-                .path(request.getRequestURI())
-                .build();
-        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler(UnitAssessmentNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleUnitAssessmentNotFound(UnitAssessmentNotFoundException ex, HttpServletRequest request) {
-        ErrorResponse response = ErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
-                .status(HttpStatus.NOT_FOUND.value())
-                .error("Unit Assessment Not Found")
-                .message(ex.getMessage())
-                .path(request.getRequestURI())
-                .build();
-        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        return buildResponse(HttpStatus.BAD_REQUEST, "Invalid Credentials", ex, request);
     }
 
     @ExceptionHandler(InsufficientAuthenticationException.class)
     public ResponseEntity<ErrorResponse> handleInsufficientAuth(InsufficientAuthenticationException ex, HttpServletRequest request) {
-        ErrorResponse response = ErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
-                .status(HttpStatus.UNAUTHORIZED.value())
-                .error("Unauthorized")
-                .message("Authentication is required to access this resource")
-                .path(request.getRequestURI())
-                .build();
-        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        return buildResponse(HttpStatus.UNAUTHORIZED, "Unauthorized", ex, request, "Authentication is required to access this resource");
     }
 
-
+    // ---------------- Training & Placement ----------------
     @ExceptionHandler(TrainingPlacementNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleTPNotFound(TrainingPlacementNotFoundException ex, HttpServletRequest request) {
-        ErrorResponse response = ErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
-                .status(HttpStatus.NOT_FOUND.value())
-                .error("Training & Placement Not Found")
-                .message(ex.getMessage())
-                .path(request.getRequestURI())
-                .build();
-        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        return buildResponse(HttpStatus.NOT_FOUND, "Training & Placement Not Found", ex, request);
     }
 
     @ExceptionHandler(InvalidTrainingPlacementRequestException.class)
     public ResponseEntity<ErrorResponse> handleInvalidTPRequest(InvalidTrainingPlacementRequestException ex, HttpServletRequest request) {
-        ErrorResponse response = ErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
-                .status(HttpStatus.BAD_REQUEST.value())
-                .error("Invalid Training & Placement Request")
-                .message(ex.getMessage())
-                .path(request.getRequestURI())
-                .build();
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        return buildResponse(HttpStatus.BAD_REQUEST, "Invalid Training & Placement Request", ex, request);
     }
 
+    //----------------- Subject ----------------------
+    @ExceptionHandler(SubjectNotFoundException.class)
+    public ResponseEntity<String> handleSubjectNotFound(SubjectNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ex.getMessage());
+    }
 
-    @ExceptionHandler(Exception.class) // fallback
+    @ExceptionHandler(SubjectNotAvailableForTeacherException.class)
+    public ResponseEntity<ErrorResponse> handleSubjectNotAvailable(SubjectNotAvailableForTeacherException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.BAD_REQUEST, "Subject Not Available", ex, request);
+    }
+
+    // ---------------- Teacher / User / Department ----------------
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleUserNotFound(UserNotFoundException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.NOT_FOUND, "User Not Found", ex, request);
+    }
+
+    @ExceptionHandler(TeacherNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleTeacherNotFound(TeacherNotFoundException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.NOT_FOUND, "Teacher Not Found", ex, request);
+    }
+
+    @ExceptionHandler(TeacherAccountNotApprovedException.class)
+    public ResponseEntity<ErrorResponse> handleTeacherNotApproved(TeacherAccountNotApprovedException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.FORBIDDEN, "Teacher Account Not Approved", ex, request);
+    }
+
+    @ExceptionHandler(DepartmentNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleDepartmentNotFound(DepartmentNotFoundException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.NOT_FOUND, "Department Not Found", ex, request);
+    }
+
+    // ---------------- Teacher Leaves ----------------
+    @ExceptionHandler(LeaveNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleLeaveNotFound(LeaveNotFoundException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.NOT_FOUND, "Leave Not Found", ex, request);
+    }
+
+    @ExceptionHandler(PendingLeaveExistsException.class)
+    public ResponseEntity<ErrorResponse> handlePendingLeaveExists(PendingLeaveExistsException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.CONFLICT, "Pending Leave Exists", ex, request);
+    }
+
+    @ExceptionHandler(NoPendingLeavesException.class)
+    public ResponseEntity<ErrorResponse> handleNoPendingLeaves(NoPendingLeavesException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.NOT_FOUND, "No Pending Leaves", ex, request);
+    }
+
+    // ---------------- Head Leaves ----------------
+    @ExceptionHandler(HeadLeaveNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleHeadLeaveNotFound(HeadLeaveNotFoundException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.NOT_FOUND, "Head Leave Not Found", ex, request);
+    }
+
+    @ExceptionHandler(PendingHeadLeaveExistsException.class)
+    public ResponseEntity<ErrorResponse> handlePendingHeadLeaveExists(PendingHeadLeaveExistsException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.CONFLICT, "Pending Head Leave Exists", ex, request);
+    }
+
+    // ---------------- Fallback ----------------
+    @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneric(Exception ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error", ex, request);
+    }
+
+    // ---------------- Utility Method ----------------
+    private ResponseEntity<ErrorResponse> buildResponse(HttpStatus status, String error, Exception ex, HttpServletRequest request) {
+        return buildResponse(status, error, ex, request, ex.getMessage());
+    }
+
+    private ResponseEntity<ErrorResponse> buildResponse(HttpStatus status, String error, Exception ex, HttpServletRequest request, String message) {
         ErrorResponse response = ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
-                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                .error("Internal Server Error")
-                .message(ex.getMessage())
+                .status(status.value())
+                .error(error)
+                .message(message)
                 .path(request.getRequestURI())
                 .build();
-        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(response, status);
     }
 }

@@ -3,6 +3,7 @@ package in.edu.jspmjscoe.admissionportal.services.teacher;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.HeadLeaveDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.LeaveDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.TeacherDTO;
+import in.edu.jspmjscoe.admissionportal.dtos.teacher.TeacherSubjectDTO;
 import in.edu.jspmjscoe.admissionportal.model.security.Status;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -38,4 +39,5 @@ public interface TeacherService {
     List<HeadLeaveDTO> getAcceptedHeadLeaves();
 
     HeadLeaveDTO updateHeadLeaveStatus(Long id, Status status);
+    TeacherSubjectDTO assignSubjectToTeacher(Long teacherId, Long subjectId);
 }

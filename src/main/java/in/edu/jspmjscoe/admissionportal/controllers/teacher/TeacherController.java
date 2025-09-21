@@ -3,6 +3,8 @@ package in.edu.jspmjscoe.admissionportal.controllers.teacher;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.HeadLeaveDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.LeaveDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.TeacherDTO;
+import in.edu.jspmjscoe.admissionportal.exception.TeacherNotFoundException;
+import in.edu.jspmjscoe.admissionportal.exception.UserNotFoundException;
 import in.edu.jspmjscoe.admissionportal.model.security.User;
 import in.edu.jspmjscoe.admissionportal.model.teacher.Teacher;
 import in.edu.jspmjscoe.admissionportal.repositories.security.UserRepository;
@@ -32,11 +34,11 @@ public class TeacherController {
 
         // 1. Find User from username/email
         User user = userRepository.findByUserName(userDetails.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException(userDetails.getUsername()));
 
         // 2. Find teacher linked with that User
         Teacher teacher = teacherRepository.findByUser(user)
-                .orElseThrow(() -> new RuntimeException("Teacher profile not found"));
+                .orElseThrow(() -> new TeacherNotFoundException("User ID: " + user.getUserId()));
 
         return ResponseEntity.ok(teacher);
     }
