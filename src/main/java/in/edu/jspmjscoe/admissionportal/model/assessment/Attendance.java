@@ -1,12 +1,10 @@
-package in.edu.jspmjscoe.admissionportal.model.attendance;
+package in.edu.jspmjscoe.admissionportal.model.assessment;
 
-import in.edu.jspmjscoe.admissionportal.model.teacher.TeacherSubject;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import in.edu.jspmjscoe.admissionportal.model.student.Student;
+import in.edu.jspmjscoe.admissionportal.model.subject.Subject;
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Getter
 @Setter
@@ -14,42 +12,31 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "attendance",
-        uniqueConstraints = @UniqueConstraint(
-                columnNames = {"teacher_subject_id", "attendance_date", "session"}
-        ))
+@Table(
+        name = "attendance",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"student_id", "subject_id"})
+)
 public class Attendance {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "attendance_id")
     private Long attendanceId;
 
+    // Link to Student
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "teacher_subject_id", nullable = false)
-    private TeacherSubject teacherSubject;
+    @JoinColumn(name = "student_id", nullable = false)
+    @JsonBackReference
+    private Student student;
 
-    @Column(name = "attendance_date", nullable = false)
-    private LocalDate attendanceDate;
+    // Link to Subject
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "subject_id", nullable = false)
+    @JsonBackReference
+    private Subject subject;
 
-    // optional: "Morning", "Afternoon", "Period-1" etc
-    @Column(name = "session", length = 50)
-    private String session;
+    @Column(name = "total_classes")
+    private Integer totalClasses;
 
-    @OneToMany(mappedBy = "attendance", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<AttendanceEntry> entries = new ArrayList<>();
-
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-    }
-
-    // helper
-    public void addEntry(AttendanceEntry entry) {
-        entries.add(entry);
-        entry.setAttendance(this);
-    }
+    @Column(name = "attended_classes")
+    private Integer attendedClasses;
 }

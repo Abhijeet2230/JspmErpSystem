@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -40,7 +41,6 @@ public class CceAdminServiceImpl implements CceAdminService {
     private final UnitMarksMapper unitMarksMapper;
     private final StudentWithUnitsMapper studentWithUnitsMapper;
     private final SubjectMapper subjectMapper;
-
 
     // ---------- Helper ----------
     private String getDivisionGroup(String division) {
@@ -66,7 +66,7 @@ public class CceAdminServiceImpl implements CceAdminService {
         String group = getDivisionGroup(division);
         return subjectRepository.findAll().stream()
                 .filter(sub -> "ALL".equalsIgnoreCase(sub.getSubjectGroup()) || group.equalsIgnoreCase(sub.getSubjectGroup()))
-                .map(subjectMapper::toDto)// Assuming SubjectMapper is a singleton via INSTANCE
+                .map(subjectMapper::toDto)
                 .toList();
     }
 
@@ -212,7 +212,6 @@ public class CceAdminServiceImpl implements CceAdminService {
                 .toList();
     }
 
-
     @Override
     public List<StudentUnitAssessmentDTO> getAllUnitsForSubject(List<StudentCCEDTO> students, Long subjectId) {
         if (students == null || students.isEmpty()) return Collections.emptyList();
@@ -227,5 +226,4 @@ public class CceAdminServiceImpl implements CceAdminService {
                 .map(studentUnitAssessmentMapper::toDto)
                 .toList();
     }
-
 }

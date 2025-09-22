@@ -36,9 +36,9 @@ public class CceInitializationService {
     public CceInitResult initializeAll(boolean createUnits, boolean createExams, boolean createAttendance) {
 
         List<Student> students = studentRepository.findAll();
-        List<Subject> subjects = subjectRepository.findAll();
+        List<Subject> subjects = subjectRepository.findByHasCCETrue();
 
-        if (students.isEmpty() || subjects.isEmpty()) {
+        if (subjects.isEmpty()) {
             return new CceInitResult(0, 0, 0);
         }
 
@@ -183,7 +183,6 @@ public class CceInitializationService {
         if (d >= 'F' && d <= 'J') return "B"; // Divisions F-J
         return "A"; // fallback
     }
-
 
     // Internal pair holder
     private static class Pair {
