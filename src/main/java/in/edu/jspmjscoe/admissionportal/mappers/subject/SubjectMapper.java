@@ -13,19 +13,21 @@ import java.util.stream.Collectors;
 @Mapper(componentModel = "spring")
 public interface SubjectMapper {
 
-    // ===== Entity -> DTO =====
+    // Entity → DTO
     @Mapping(source = "course.courseId", target = "courseId")
     @Mapping(source = "electiveGroup.groupId", target = "electiveGroupId")
     @Mapping(source = "teacherSubjects", target = "teacherSubjectIds")
-    @Mapping(source = "subjectGroup", target = "subjectGroup") // 👈 add this
+    @Mapping(source = "subjectGroup", target = "subjectGroup")
+    @Mapping(source = "hasCCE", target = "hasCCE") // 👈 add this
     SubjectDTO toDto(Subject subject);
 
-    // ===== DTO -> Entity =====
+    // DTO → Entity
     @InheritInverseConfiguration
     @Mapping(target = "course", expression = "java(mapCourse(dto.getCourseId()))")
     @Mapping(target = "electiveGroup", expression = "java(mapElectiveGroup(dto.getElectiveGroupId()))")
     @Mapping(target = "teacherSubjects", expression = "java(mapTeacherSubjectsFromIds(dto.getTeacherSubjectIds()))")
-    @Mapping(source = "subjectGroup", target = "subjectGroup") // 👈 add this
+    @Mapping(source = "subjectGroup", target = "subjectGroup")
+    @Mapping(source = "hasCCE", target = "hasCCE") // 👈 add this
     Subject toEntity(SubjectDTO dto);
 
     // ---------- Helper methods ----------

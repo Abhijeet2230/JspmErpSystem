@@ -37,6 +37,9 @@ public class Subject {
     @Column(name = "subject_group")
     private String subjectGroup;
 
+    @Column(name="has_CCE")
+    private Boolean hasCCE;
+
     @Column(name = "code", nullable = false, unique = true, length = 20)
     private String code;
 

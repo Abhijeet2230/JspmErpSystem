@@ -9,8 +9,6 @@ import in.edu.jspmjscoe.admissionportal.dtos.teacher.TeacherDTO;
 import in.edu.jspmjscoe.admissionportal.model.security.Status;
 import in.edu.jspmjscoe.admissionportal.repositories.teacher.HeadLeaveRepository;
 import in.edu.jspmjscoe.admissionportal.repositories.teacher.LeaveRepository;
-import in.edu.jspmjscoe.admissionportal.repositories.teacher.TeacherRepository;
-import in.edu.jspmjscoe.admissionportal.services.subject.DepartmentService;
 import in.edu.jspmjscoe.admissionportal.services.teacher.TeacherService;
 import in.edu.jspmjscoe.admissionportal.services.excel.ExcelImportService;
 import in.edu.jspmjscoe.admissionportal.services.impl.assessment.CceInitializationService;
@@ -35,8 +33,6 @@ public class AdminController {
     private final StudentService studentService;
     private final CceInitializationService cceInitializationService;
     private final TeacherService teacherService;
-    private final DepartmentService departmentService;
-    private final TeacherRepository teacherRepository;
     private final LeaveRepository leaveRepository;
     private final HeadLeaveRepository headLeaveRepository;
 
@@ -205,10 +201,9 @@ public class AdminController {
     @PostMapping("/initialize")
     public ResponseEntity<CceInitResult> initializeCceData(
             @RequestParam(defaultValue = "true") boolean units,
-            @RequestParam(defaultValue = "true") boolean exams,
-            @RequestParam(defaultValue = "true") boolean attendance) {
+            @RequestParam(defaultValue = "true") boolean exams) {
 
-        CceInitResult result = cceInitializationService.initializeAll(units, exams, attendance);
+        CceInitResult result = cceInitializationService.initializeAll(units, exams);
         return ResponseEntity.ok(result);
     }
 

@@ -26,8 +26,7 @@ public class Student {
     @Column(name = "student_id")
     private Long studentId;   // independent PK
 
-    // Unique foreign key to User
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "user_id", unique = true, nullable = false)
     @JsonManagedReference
     private User user;

@@ -71,25 +71,6 @@ public class CceAdminController {
         return ResponseEntity.ok(updated);
     }
 
-    // ----------------- Attendance -----------------
-    @GetMapping("/divisions/{division}/subjects/{subjectId}/attendance")
-    public ResponseEntity<List<AttendanceDTO>> getAttendance(
-            @PathVariable String division,
-            @PathVariable Long subjectId) {
-
-        List<AttendanceDTO> attendance = cceAdminService.getAttendanceForDivisionAndSubject(division, subjectId);
-        return ResponseEntity.ok(attendance);
-    }
-
-    @PatchMapping("/attendance/{attendanceId}/update")
-    public ResponseEntity<AttendanceDTO> updateAttendance(
-            @PathVariable Long attendanceId,
-            @RequestParam(required = false) Integer totalClasses,
-            @RequestParam(required = false) Integer attendedClasses) {
-
-        AttendanceDTO updated = cceAdminService.updateAttendance(attendanceId, totalClasses, attendedClasses);
-        return ResponseEntity.ok(updated);
-    }
 
     // ----------------- Students with Units -----------------
     @GetMapping("/divisions/{division}/subjects/{subjectId}/students-with-units")

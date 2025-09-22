@@ -198,8 +198,13 @@ public class ExcelHelper {
                 // Candidate Name
                 studentDTO.setCandidateName(getCellString(row, headerMap, "Candidate Name"));
 
-                // DOB
-                studentDTO.setDob(getDobFormatted(row, headerMap, "DOB"));
+                // DOB with default
+                // DOB with default
+                if (headerMap.containsKey("DOB")) {
+                    studentDTO.setDob(getCellString(row, headerMap, "DOB")); // keep as String
+                } else {
+                    studentDTO.setDob("01/08/2003"); // default string
+                }
 
                 // Division
                 studentDTO.setDivision(getCellString(row, headerMap, "DIV"));

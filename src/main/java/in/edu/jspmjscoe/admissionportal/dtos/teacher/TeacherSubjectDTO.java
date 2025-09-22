@@ -13,6 +13,7 @@ public class TeacherSubjectDTO {
     private String teacherName;
     private Long subjectId;
     private String subjectName;
+    private String division;
 }
 
 

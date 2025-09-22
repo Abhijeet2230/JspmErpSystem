@@ -9,5 +9,4 @@ import lombok.Data;
 public  class CceInitResult {
         private int unitRowsCreated;
         private int examRowsCreated;
-        private int attendanceRowsCreated;
     }
