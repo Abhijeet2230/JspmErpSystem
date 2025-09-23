@@ -1,22 +1,25 @@
 package in.edu.jspmjscoe.admissionportal.controllers.admin;
 
 import in.edu.jspmjscoe.admissionportal.dtos.assessment.CceInitResult;
+import in.edu.jspmjscoe.admissionportal.dtos.teacher.staffrecord.StaffMonthlyReportDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.student.StudentDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.security.UserDTO;
-import in.edu.jspmjscoe.admissionportal.dtos.teacher.HeadLeaveDTO;
-import in.edu.jspmjscoe.admissionportal.dtos.teacher.LeaveDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.TeacherDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.TeacherSubjectDTO;
+import in.edu.jspmjscoe.admissionportal.mappers.teacher.staffrecord.StaffMonthlyReportMapper;
+import in.edu.jspmjscoe.admissionportal.model.teacher.staffrecord.StaffMonthlyReport;
 import in.edu.jspmjscoe.admissionportal.model.security.Status;
 import in.edu.jspmjscoe.admissionportal.repositories.teacher.HeadLeaveRepository;
 import in.edu.jspmjscoe.admissionportal.repositories.teacher.LeaveRepository;
 import in.edu.jspmjscoe.admissionportal.repositories.teacher.TeacherRepository;
+import in.edu.jspmjscoe.admissionportal.services.excel.TeacherExcelImportService;
 import in.edu.jspmjscoe.admissionportal.services.subject.DepartmentService;
 import in.edu.jspmjscoe.admissionportal.services.teacher.TeacherService;
 import in.edu.jspmjscoe.admissionportal.services.excel.ExcelImportService;
 import in.edu.jspmjscoe.admissionportal.services.impl.assessment.CceInitializationService;
 import in.edu.jspmjscoe.admissionportal.services.student.StudentService;
 import in.edu.jspmjscoe.admissionportal.services.security.UserService;
+import in.edu.jspmjscoe.admissionportal.services.teacher.staffrecord.StaffMonthlyReportService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,6 +43,9 @@ public class AdminController {
     private final TeacherRepository teacherRepository;
     private final LeaveRepository leaveRepository;
     private final HeadLeaveRepository headLeaveRepository;
+    private final TeacherExcelImportService teacherExcelImportService;
+    private final StaffMonthlyReportService staffMonthlyReportService;
+    private final StaffMonthlyReportMapper staffMonthlyReportMapper;
 
     // ------------------- User Endpoints -------------------
 
@@ -145,7 +151,7 @@ public class AdminController {
     }
 
 
-
+    //-----------------Student CC Initializer------------//
     @PostMapping("/initialize")
     public ResponseEntity<CceInitResult> initializeCceData(
             @RequestParam(defaultValue = "true") boolean units,
@@ -154,6 +160,42 @@ public class AdminController {
 
         CceInitResult result = cceInitializationService.initializeAll(units, exams, attendance);
         return ResponseEntity.ok(result);
+    }
+
+    // ---------- 1. Initialize report for teacher ----------
+    @PostMapping("/initialize/{teacherId}")
+    public ResponseEntity<StaffMonthlyReportDTO> initializeReport(
+            @PathVariable Long teacherId,
+            @RequestParam int year,
+            @RequestParam int month) {
+
+        StaffMonthlyReport report = staffMonthlyReportService.initializeForTeacher(teacherId, year, month);
+        StaffMonthlyReportDTO dto = staffMonthlyReportMapper.toDto(report);
+        return ResponseEntity.ok(dto);
+    }
+
+    // ------------------- Teacher Excel Import Endpoint -------------------
+    @PostMapping("/import-teachers")
+    public ResponseEntity<String> importTeachers(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(name = "headerRowNumber", defaultValue = "2") int headerRowNumber) {
+
+        // Basic validations
+        if (file.isEmpty()) {
+            return ResponseEntity.badRequest().body("Please upload a valid Excel file.");
+        }
+        String fname = file.getOriginalFilename() == null ? "" : file.getOriginalFilename().toLowerCase();
+        if (!fname.endsWith(".xlsx")) {
+            return ResponseEntity.badRequest().body("Only .xlsx files are supported.");
+        }
+
+        try {
+            int importedCount = teacherExcelImportService.importTeachers(file, headerRowNumber);
+            return ResponseEntity.ok(importedCount + " teachers imported successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to import teachers: " + e.getMessage());
+        }
     }
 
 

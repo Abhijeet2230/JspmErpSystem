@@ -6,7 +6,6 @@ import in.edu.jspmjscoe.admissionportal.exception.ExamNotFoundException;
 import in.edu.jspmjscoe.admissionportal.exception.UnitAssessmentNotFoundException;
 import in.edu.jspmjscoe.admissionportal.mappers.assessment.*;
 import in.edu.jspmjscoe.admissionportal.mappers.subject.SubjectMapper;
-import in.edu.jspmjscoe.admissionportal.model.assessment.Attendance;
 import in.edu.jspmjscoe.admissionportal.model.assessment.StudentExam;
 import in.edu.jspmjscoe.admissionportal.model.assessment.StudentUnitAssessment;
 import in.edu.jspmjscoe.admissionportal.model.student.Student;
@@ -37,7 +36,6 @@ public class CceAdminServiceImpl implements CceAdminService {
     private final StudentCCEMapper studentCCEMapper;
     private final StudentUnitAssessmentMapper studentUnitAssessmentMapper;
     private final StudentExamMapper studentExamMapper;
-    private final AttendanceMapper attendanceMapper;
     private final UnitMarksMapper unitMarksMapper;
     private final StudentWithUnitsMapper studentWithUnitsMapper;
     private final SubjectMapper subjectMapper;
@@ -145,29 +143,7 @@ public class CceAdminServiceImpl implements CceAdminService {
     }
 
     // ---------- Attendance ----------
-    @Override
-    public List<AttendanceDTO> getAttendanceForDivisionAndSubject(String division, Long subjectId) {
-        List<Long> studentIds = studentRepository.findByDivision(division)
-                .stream().map(Student::getStudentId).toList();
 
-        return attendanceRepository.findByStudentStudentIdInAndSubjectSubjectIdIn(studentIds, Collections.singletonList(subjectId))
-                .stream()
-                .map(attendanceMapper::toDto)
-                .toList();
-    }
-
-    @Override
-    @Transactional
-    public AttendanceDTO updateAttendance(Long attendanceId, Integer totalClasses, Integer attendedClasses) {
-        Attendance att = attendanceRepository.findById(attendanceId)
-                .orElseThrow(() -> new RuntimeException("Attendance not found: " + attendanceId));
-
-        if (totalClasses != null) att.setTotalClasses(totalClasses);
-        if (attendedClasses != null) att.setAttendedClasses(attendedClasses);
-
-        attendanceRepository.save(att);
-        return attendanceMapper.toDto(att);
-    }
 
     // ---------- Bulk Updates ----------
     @Override

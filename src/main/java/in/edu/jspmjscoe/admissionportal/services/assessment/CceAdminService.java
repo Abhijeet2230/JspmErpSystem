@@ -21,10 +21,6 @@ public interface CceAdminService {
     List<StudentExamDTO> getExamsForDivisionAndSubject(String division, Long subjectId);
     StudentExamDTO updateExamMarks(Long examId, Double marksObtained);
 
-    // Attendance
-    List<AttendanceDTO> getAttendanceForDivisionAndSubject(String division, Long subjectId);
-    AttendanceDTO updateAttendance(Long attendanceId, Integer totalClasses, Integer attendedClasses);
-
     List<StudentUnitAssessmentDTO> getAllUnitsForSubject(List<StudentCCEDTO> students, Long subjectId);
 
     List<StudentWithUnitsDTO> getStudentsWithUnits(String division, Long subjectId);
