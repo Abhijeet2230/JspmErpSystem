@@ -1,6 +1,7 @@
 package in.edu.jspmjscoe.admissionportal.model.trainingplacement;
 
 import in.edu.jspmjscoe.admissionportal.model.student.Student;
+import in.edu.jspmjscoe.admissionportal.model.student.StudentAcademicYear;
 import jakarta.persistence.*;
 import lombok.*;
 import java.util.List;
@@ -19,10 +20,10 @@ public class TrainingPlacementRecord {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Student link
+    // StudentAcademicYear link
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "student_id", nullable = false)
-    private Student student;
+    @JoinColumn(name = "student_academic_year_id", nullable = false)
+    private StudentAcademicYear studentAcademicYear;
 
     // Merit (20%)
     private Double sgpaScore; // 0–20

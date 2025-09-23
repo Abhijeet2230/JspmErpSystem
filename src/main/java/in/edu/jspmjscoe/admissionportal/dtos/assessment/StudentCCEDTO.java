@@ -10,8 +10,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class StudentCCEDTO {
-    private Long studentId;
-    private String candidateName;
-    private Integer rollNo;
-    private String division;
+
+    private Long studentAcademicYearId;  // replaces studentId
+    private String candidateName;        // optional: from StudentAcademicYear.student
+    private Integer rollNo;              // optional: from StudentAcademicYear
+    private String division;             // optional: from StudentAcademicYear
 }

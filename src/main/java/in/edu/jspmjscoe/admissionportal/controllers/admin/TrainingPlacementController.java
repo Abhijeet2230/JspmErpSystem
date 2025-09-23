@@ -66,4 +66,21 @@ public class TrainingPlacementController {
     }
 
 
+    @GetMapping("/rollno/{rollNo}")
+    public ResponseEntity<ApiResponse<List<StudentPlacementDTO>>> getStudentsByRollNo(
+            @PathVariable Integer rollNo) {
+
+        List<StudentPlacementDTO> students = trainingPlacementService.getStudentsByRollNo(rollNo);
+
+        ApiResponse<List<StudentPlacementDTO>> response = new ApiResponse<>(
+                HttpStatus.OK.value(),
+                "Students fetched successfully for rollNo: " + rollNo,
+                students
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
+
+
 }

@@ -21,8 +21,6 @@ public class StudentDTO {
     private String mobileNo;
     private String email;
     private String gender;
-    private Integer rollNo;
-    private String division;
     private String dob;
     private String religion;
     private String region;

@@ -1,5 +1,6 @@
 package in.edu.jspmjscoe.admissionportal.helper;
 
+import in.edu.jspmjscoe.admissionportal.dtos.excel.ExcelStudentDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.student.*;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -156,63 +157,51 @@ public class ExcelHelper {
         }
     }
 
-
-    public static List<StudentDTO> excelToBasicStudentDTOs(InputStream is, int headerRowNumber) {
+    public static List<ExcelStudentDTO> excelToBasicStudentDTOs(InputStream is, int headerRowNumber) {
         try (Workbook workbook = new XSSFWorkbook(is)) {
             Sheet sheet = workbook.getSheetAt(0); // First sheet
 
-            // ---- Convert Excel 1-based row to 0-based index ----
             int headerRowIndex = headerRowNumber - 1;
-
-            // ---- Build header map from the provided header row ----
             Row headerRow = sheet.getRow(headerRowIndex);
             if (headerRow == null) throw new RuntimeException("Header row not found at row " + headerRowNumber);
 
             Map<String, Integer> headerMap = new HashMap<>();
             for (Cell cell : headerRow) {
                 String header = cell.toString().trim();
-                if (!header.isEmpty()) {
-                    headerMap.put(header, cell.getColumnIndex());
-                }
+                if (!header.isEmpty()) headerMap.put(header, cell.getColumnIndex());
             }
 
-            List<StudentDTO> students = new ArrayList<>();
+            List<ExcelStudentDTO> students = new ArrayList<>();
 
-            // ---- Data starts from next row ----
             for (int i = headerRowIndex + 1; i <= sheet.getLastRowNum(); i++) {
                 Row row = sheet.getRow(i);
                 if (row == null) continue;
 
-                StudentDTO studentDTO = new StudentDTO();
+                ExcelStudentDTO dto = new ExcelStudentDTO();
+
+                // Candidate Name
+                dto.setCandidateName(getCellString(row, headerMap, "Candidate Name"));
+
+                // DOB (default if missing)
+                dto.setDob(getCellString(row, headerMap, "DOB") != null ? getCellString(row, headerMap, "DOB") : "01/08/2003");
+
+                // Course Name
+                dto.setCourseName(getCellString(row, headerMap, "Course Name"));
 
                 // Roll No
                 String rollNoStr = getCellString(row, headerMap, "Roll No");
                 if (rollNoStr != null) {
                     try {
-                        studentDTO.setRollNo(Integer.parseInt(rollNoStr));
+                        dto.setRollNo(Integer.parseInt(rollNoStr));
                     } catch (NumberFormatException e) {
-                        studentDTO.setRollNo(null);
+                        dto.setRollNo(null);
                     }
                 }
 
-                // Candidate Name
-                studentDTO.setCandidateName(getCellString(row, headerMap, "Candidate Name"));
-
-                // DOB with default
-                // DOB with default
-                if (headerMap.containsKey("DOB")) {
-                    studentDTO.setDob(getCellString(row, headerMap, "DOB")); // keep as String
-                } else {
-                    studentDTO.setDob("01/08/2003"); // default string
-                }
-
                 // Division
-                studentDTO.setDivision(getCellString(row, headerMap, "DIV"));
+                dto.setDivision(getCellString(row, headerMap, "DIV"));
 
-                // Course Name
-                studentDTO.setCourseName(getCellString(row, headerMap, "Course Name"));
-
-                students.add(studentDTO);
+                students.add(dto);
             }
 
             return students;

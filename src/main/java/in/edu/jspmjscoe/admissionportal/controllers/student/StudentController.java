@@ -82,7 +82,23 @@ public class StudentController {
     }
 
     @GetMapping("/training-placement")
-    public StudentPlacementDTO getMyTrainingPlacement(@AuthenticationPrincipal(expression = "id") Long studentId) {
-        return trainingPlacementService.getMyTrainingPlacement(studentId);
+    public ResponseEntity<?> getMyTrainingPlacement(@AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) {
+            throw new UnauthorizedException("Unauthorized: Login required");
+        }
+
+        // Find the logged-in user
+        User user = userRepository.findByUserName(userDetails.getUsername())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        // Find the student profile linked to the user
+        Student student = studentRepository.findByUser(user)
+                .orElseThrow(() -> new ResourceNotFoundException("Student profile not found"));
+
+        // Call service with studentId
+        StudentPlacementDTO placement = trainingPlacementService.getMyTrainingPlacement(student.getStudentId());
+
+        return ResponseEntity.ok(placement);
     }
+
 }

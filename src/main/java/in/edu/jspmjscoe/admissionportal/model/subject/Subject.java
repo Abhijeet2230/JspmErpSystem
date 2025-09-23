@@ -102,4 +102,9 @@ public class Subject {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
+
+    public boolean isHasCCE() {
+        return hasCCE;
+    }
+
 }

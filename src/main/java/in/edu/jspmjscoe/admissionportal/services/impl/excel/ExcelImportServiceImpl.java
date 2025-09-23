@@ -1,5 +1,6 @@
 package in.edu.jspmjscoe.admissionportal.services.impl.excel;
 
+import in.edu.jspmjscoe.admissionportal.dtos.excel.ExcelStudentDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.student.AdmissionDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.student.EntranceExamDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.student.StudentDTO;
@@ -12,6 +13,7 @@ import in.edu.jspmjscoe.admissionportal.model.subject.Course;
 import in.edu.jspmjscoe.admissionportal.model.student.*;
 import in.edu.jspmjscoe.admissionportal.repositories.student.AdmissionRepository;
 import in.edu.jspmjscoe.admissionportal.repositories.security.RoleRepository;
+import in.edu.jspmjscoe.admissionportal.repositories.student.StudentAcademicYearRepository;
 import in.edu.jspmjscoe.admissionportal.repositories.student.StudentRepository;
 import in.edu.jspmjscoe.admissionportal.repositories.subject.CourseRepository;
 import in.edu.jspmjscoe.admissionportal.services.excel.ExcelImportService;
@@ -42,6 +44,7 @@ public class ExcelImportServiceImpl implements ExcelImportService {
     private final AdmissionMapper admissionMapper;
     private final PasswordEncoder passwordEncoder;
     private final CourseRepository courseRepository;
+    private final StudentAcademicYearRepository studentAcademicYearRepository;
 
     @Override
     @Transactional
@@ -156,57 +159,54 @@ public class ExcelImportServiceImpl implements ExcelImportService {
             throw new RuntimeException("Failed to import Excel file: " + e.getMessage(), e);
         }
     }
-
     @Override
     @Transactional
     public int importStudentsBasic(MultipartFile file, int headerRowNumber) {
         try {
-            List<StudentDTO> studentDTOs = ExcelHelper.excelToBasicStudentDTOs(file.getInputStream(), headerRowNumber);
+            List<ExcelStudentDTO> studentDTOs = ExcelHelper.excelToBasicStudentDTOs(file.getInputStream(), headerRowNumber);
             log.info(">>> Total students parsed from Excel (basic) = {}", studentDTOs.size());
 
             Role studentRole = roleRepository.findByRoleName(AppRole.ROLE_STUDENT)
                     .orElseThrow(() -> new RuntimeException("ROLE_STUDENT not found"));
 
-            // ✅ Fetch the course with ID = 1 only once
             Course defaultCourse = courseRepository.findById(1L)
                     .orElseThrow(() -> new RuntimeException("Course with ID=1 not found"));
 
             int importedCount = 0;
 
-            for (StudentDTO dto : studentDTOs) {
+            for (ExcelStudentDTO dto : studentDTOs) {
 
-                // ✅ Check duplicates by rollNo
-                if (studentRepository.findByRollNo(dto.getRollNo()).isPresent()) {
-                    log.warn("Skipping duplicate: rollNo={}", dto.getRollNo());
-                    continue;
-                }
-
-                // ✅ Create User (username = rollNo, password = dob)
+                // Create User
                 User user = new User();
-                user.setUserName(String.valueOf(dto.getRollNo()));
-                user.setPassword(passwordEncoder.encode(dto.getDob())); // password = dob
+                user.setUserName(dto.getRollNo() != null ? String.valueOf(dto.getRollNo()) : dto.getCandidateName());
+                user.setPassword(passwordEncoder.encode(dto.getDob()));
                 user.setFirstLogin(true);
                 user.setEnabled(true);
                 user.setRole(studentRole);
 
-                // ✅ Create Student entity
+                // Create Student
                 Student student = new Student();
-                student.setRollNo(dto.getRollNo());
                 student.setCandidateName(dto.getCandidateName());
-                student.setDob("01/01/2003");
-                student.setDivision(dto.getDivision());
-                student.setCourseName(dto.getCourseName());
-
-
-                // ✅ Assign course with ID = 1
+                student.setDob(dto.getDob());
                 student.setCourse(defaultCourse);
 
-                // Link user <-> student
+                // Link User
                 student.setUser(user);
                 user.setStudent(student);
 
-                // ✅ Save Student (cascades User as needed)
-                studentRepository.save(student);
+                Student savedStudent = studentRepository.save(student);
+
+                // Create StudentAcademicYear
+                if (dto.getRollNo() != null && dto.getDivision() != null) {
+                    StudentAcademicYear year = StudentAcademicYear.builder()
+                            .student(savedStudent)
+                            .rollNo(dto.getRollNo())
+                            .division(dto.getDivision())
+                            .isActive(true)
+                            .build();
+
+                    studentAcademicYearRepository.save(year);
+                }
 
                 importedCount++;
             }

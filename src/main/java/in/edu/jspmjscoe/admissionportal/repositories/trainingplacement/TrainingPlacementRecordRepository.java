@@ -9,13 +9,15 @@ import java.util.Optional;
 
 public interface TrainingPlacementRecordRepository extends JpaRepository<TrainingPlacementRecord, Long> {
 
-    @Query("SELECT r FROM TrainingPlacementRecord r " +
-            "JOIN FETCH r.student s " +
-            "LEFT JOIN FETCH r.tests t " +
-            "WHERE s.division = :division")
-    List<TrainingPlacementRecord> findByDivision(String division);
+    // find all records for a division
+    List<TrainingPlacementRecord> findByStudentAcademicYear_Division(String division);
 
-    // find record by studentId
-    Optional<TrainingPlacementRecord> findByStudent_StudentId(Long studentId);
+    // find by StudentAcademicYear ID
+    Optional<TrainingPlacementRecord> findByStudentAcademicYear_StudentAcademicYearId(Long studentAcademicYearId);
+
+
+    // Fetch all training & placement records for a given rollNo
+    List<TrainingPlacementRecord> findByStudentAcademicYear_RollNo(Integer rollNo);
+
 
 }

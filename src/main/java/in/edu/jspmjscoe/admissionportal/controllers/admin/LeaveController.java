@@ -1,0 +1,54 @@
+package in.edu.jspmjscoe.admissionportal.controllers.admin;
+
+import in.edu.jspmjscoe.admissionportal.dtos.teacher.LeaveDTO;
+import in.edu.jspmjscoe.admissionportal.model.security.Status;
+import in.edu.jspmjscoe.admissionportal.repositories.teacher.LeaveRepository;
+import in.edu.jspmjscoe.admissionportal.services.teacher.TeacherService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/api/admin/leave")
+public class LeaveController {
+
+    private final LeaveRepository leaveRepository;
+    private final TeacherService teacherService;
+
+    // ------------------- Teacher Leave Endpoints -------------------
+    // Get leave
+    @GetMapping("/get-pending-leaves")
+    public ResponseEntity<List<LeaveDTO>> getAllLeaves() {
+        return ResponseEntity.ok(teacherService.getPendingLeaves());
+    }
+
+    @GetMapping("/pending-leaves/count")
+    public ResponseEntity<Long> getPendingLeavesCount() {
+        long count = leaveRepository.countByStatus(Status.PENDING);
+        return ResponseEntity.ok(count);
+    }
+
+    // ✅ Get all accepted leaves
+    @GetMapping("/get-accepted-leaves")
+    public ResponseEntity<List<LeaveDTO>> getAllAcceptedLeaves() {
+        return ResponseEntity.ok(teacherService.getAcceptedLeaves());
+    }
+
+    // ✅ Accept Leave
+    @PutMapping("/{id}/accept")
+    public ResponseEntity<LeaveDTO> acceptLeave(@PathVariable Long id) {
+        LeaveDTO leave = teacherService.updateLeaveStatus(id, Status.ACCEPTED);
+        return ResponseEntity.ok(leave);
+    }
+
+    // ✅ Reject Leave
+    @PutMapping("/{id}/reject")
+    public ResponseEntity<LeaveDTO> rejectLeave(@PathVariable Long id) {
+        LeaveDTO leave = teacherService.updateLeaveStatus(id, Status.REJECTED);
+        return ResponseEntity.ok(leave);
+    }
+
+}

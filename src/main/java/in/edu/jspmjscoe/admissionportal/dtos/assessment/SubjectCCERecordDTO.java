@@ -10,5 +10,4 @@ public class SubjectCCERecordDTO {
     private List<UnitMarksDTO> units;
     private ExamUpdateRequestDTO midTerm;
     private ExamUpdateRequestDTO endTerm;
-    private Double attendance;
 }

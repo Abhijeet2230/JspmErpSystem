@@ -9,9 +9,8 @@ import lombok.*;
 @Builder
 public class StudentUnitAssessmentDTO {
 
-    private Long id;
+    private Long studentUnitAssessmentId;
     private Long subjectId;   // only ID, not full Subject entity
-    private Long studentId;
     private Integer rollNo;
     private String candidateName;
     private Integer unitNumber;

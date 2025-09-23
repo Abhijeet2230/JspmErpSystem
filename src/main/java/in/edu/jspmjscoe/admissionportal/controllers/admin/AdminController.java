@@ -33,7 +33,6 @@ public class AdminController {
     private final StudentService studentService;
     private final CceInitializationService cceInitializationService;
     private final TeacherService teacherService;
-    private final LeaveRepository leaveRepository;
     private final HeadLeaveRepository headLeaveRepository;
 
     // ------------------- User Endpoints -------------------
@@ -56,70 +55,6 @@ public class AdminController {
         return ResponseEntity.ok(userDTO);
     }
 
-    // ------------------- Teacher Endpoints -------------------
-
-    @GetMapping("/get-accepted-teachers")
-    public ResponseEntity<List<TeacherDTO>> getAllAcceptedTeachers() {
-        return ResponseEntity.ok(teacherService.getAcceptedTeachers());
-    }
-
-    @GetMapping("/get-pending-teachers")
-    public ResponseEntity<List<TeacherDTO>> getAllPendingTeachers() {
-        return ResponseEntity.ok(teacherService.getPendingTeachers());
-    }
-
-    @GetMapping("/view-teachers-details/{id}")
-    public ResponseEntity<TeacherDTO> viewTeacherDetails(@PathVariable Long id) {
-        TeacherDTO teacher = teacherService.getTeacherById(id);
-        return ResponseEntity.ok(teacher);
-    }
-
-    // ✅ Accept Teacher
-    @PutMapping("/teacher/{id}/accept")
-    public ResponseEntity<TeacherDTO> acceptTeacher(@PathVariable Long id) {
-        TeacherDTO teacher = teacherService.updateTeacherStatus(id, Status.ACCEPTED);
-        return ResponseEntity.ok(teacher);
-    }
-
-    // ✅ Reject Teacher
-    @PutMapping("/teacher/{id}/reject")
-    public ResponseEntity<TeacherDTO> rejectTeacher(@PathVariable Long id) {
-        TeacherDTO teacher = teacherService.updateTeacherStatus(id, Status.REJECTED);
-        return ResponseEntity.ok(teacher);
-    }
-
-    // ------------------- Teacher Leave Endpoints -------------------
-    // Get leave
-    @GetMapping("/get-pending-leaves")
-    public ResponseEntity<List<LeaveDTO>> getAllLeaves() {
-        return ResponseEntity.ok(teacherService.getPendingLeaves());
-    }
-
-    @GetMapping("/pending-leaves/count")
-    public ResponseEntity<Long> getPendingLeavesCount() {
-        long count = leaveRepository.countByStatus(Status.PENDING);
-        return ResponseEntity.ok(count);
-    }
-
-    // ✅ Get all accepted leaves
-    @GetMapping("/get-accepted-leaves")
-    public ResponseEntity<List<LeaveDTO>> getAllAcceptedLeaves() {
-        return ResponseEntity.ok(teacherService.getAcceptedLeaves());
-    }
-
-    // ✅ Accept Leave
-    @PutMapping("/leave/{id}/accept")
-    public ResponseEntity<LeaveDTO> acceptLeave(@PathVariable Long id) {
-        LeaveDTO leave = teacherService.updateLeaveStatus(id, Status.ACCEPTED);
-        return ResponseEntity.ok(leave);
-    }
-
-    // ✅ Reject Leave
-    @PutMapping("/leave/{id}/reject")
-    public ResponseEntity<LeaveDTO> rejectLeave(@PathVariable Long id) {
-        LeaveDTO leave = teacherService.updateLeaveStatus(id, Status.REJECTED);
-        return ResponseEntity.ok(leave);
-    }
 
     // ------------------- Head Leave Endpoints -------------------
 // Get pending

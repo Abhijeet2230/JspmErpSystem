@@ -6,14 +6,12 @@ import in.edu.jspmjscoe.admissionportal.exception.ExamNotFoundException;
 import in.edu.jspmjscoe.admissionportal.exception.UnitAssessmentNotFoundException;
 import in.edu.jspmjscoe.admissionportal.mappers.assessment.*;
 import in.edu.jspmjscoe.admissionportal.mappers.subject.SubjectMapper;
-import in.edu.jspmjscoe.admissionportal.model.assessment.Attendance;
 import in.edu.jspmjscoe.admissionportal.model.assessment.StudentExam;
 import in.edu.jspmjscoe.admissionportal.model.assessment.StudentUnitAssessment;
-import in.edu.jspmjscoe.admissionportal.model.student.Student;
-import in.edu.jspmjscoe.admissionportal.repositories.assessment.AttendanceRepository;
+import in.edu.jspmjscoe.admissionportal.model.student.StudentAcademicYear;
 import in.edu.jspmjscoe.admissionportal.repositories.assessment.StudentExamRepository;
 import in.edu.jspmjscoe.admissionportal.repositories.assessment.StudentUnitAssessmentRepository;
-import in.edu.jspmjscoe.admissionportal.repositories.student.StudentRepository;
+import in.edu.jspmjscoe.admissionportal.repositories.student.StudentAcademicYearRepository;
 import in.edu.jspmjscoe.admissionportal.repositories.subject.SubjectRepository;
 import in.edu.jspmjscoe.admissionportal.services.assessment.CceAdminService;
 import lombok.RequiredArgsConstructor;
@@ -22,16 +20,16 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class CceAdminServiceImpl implements CceAdminService {
 
-    private final StudentRepository studentRepository;
+    private final StudentAcademicYearRepository studentAcademicYearRepository;
     private final SubjectRepository subjectRepository;
     private final StudentUnitAssessmentRepository studentUnitAssessmentRepository;
     private final StudentExamRepository examRepository;
-    private final AttendanceRepository attendanceRepository;
 
     private final StudentCCEMapper studentCCEMapper;
     private final StudentUnitAssessmentMapper studentUnitAssessmentMapper;
@@ -39,7 +37,6 @@ public class CceAdminServiceImpl implements CceAdminService {
     private final UnitMarksMapper unitMarksMapper;
     private final StudentWithUnitsMapper studentWithUnitsMapper;
     private final SubjectMapper subjectMapper;
-
 
     // ---------- Helper ----------
     private String getDivisionGroup(String division) {
@@ -53,9 +50,9 @@ public class CceAdminServiceImpl implements CceAdminService {
     // ---------- Students ----------
     @Override
     public List<StudentCCEDTO> getStudentsByDivision(String division) {
-        return studentRepository.findByDivision(division)
-                .stream()
-                .map(studentCCEMapper::toDto)
+        List<StudentAcademicYear> studentYears = studentAcademicYearRepository.findByDivisionAndIsActiveTrue(division);
+        return studentYears.stream()
+                .map(studentCCEMapper::toDto) // map StudentAcademicYear -> DTO
                 .toList();
     }
 
@@ -64,21 +61,27 @@ public class CceAdminServiceImpl implements CceAdminService {
     public List<SubjectDTO> getSubjectsForDivision(String division) {
         String group = getDivisionGroup(division);
         return subjectRepository.findAll().stream()
-                .filter(sub -> "ALL".equalsIgnoreCase(sub.getSubjectGroup()) || group.equalsIgnoreCase(sub.getSubjectGroup()))
-                .map(subjectMapper::toDto)// Assuming SubjectMapper is a singleton via INSTANCE
+                .filter(sub ->
+                        sub.isHasCCE() && // only subjects with hasCCE = true
+                                ("ALL".equalsIgnoreCase(sub.getSubjectGroup()) || group.equalsIgnoreCase(sub.getSubjectGroup()))
+                )
+                .map(subjectMapper::toDto)
                 .toList();
     }
+
 
     // ---------- Unit Assessments ----------
     @Override
     public List<StudentUnitAssessmentDTO> getUnitAssessmentsForDivisionAndSubject(String division, Long subjectId) {
-        List<Long> studentIds = studentRepository.findByDivision(division)
-                .stream().map(Student::getStudentId).toList();
+        List<StudentAcademicYear> studentYears = studentAcademicYearRepository.findByDivisionAndIsActiveTrue(division);
+        List<Long> studentYearIds = studentYears.stream()
+                .map(StudentAcademicYear::getStudentAcademicYearId)
+                .toList();
 
         return studentUnitAssessmentRepository
-                .findByStudentStudentIdInAndSubjectSubjectIdIn(studentIds, Collections.singletonList(subjectId))
+                .findByStudentAcademicYearStudentAcademicYearIdInAndSubjectSubjectIdIn(studentYearIds, Collections.singleton(subjectId))
                 .stream()
-                .map(studentUnitAssessmentMapper::toDto)
+                .map(studentUnitAssessmentMapper::toDTO)
                 .toList();
     }
 
@@ -92,28 +95,32 @@ public class CceAdminServiceImpl implements CceAdminService {
         if (activityMarks != null) unit.setActivityMarks(activityMarks);
 
         studentUnitAssessmentRepository.save(unit);
-        return studentUnitAssessmentMapper.toDto(unit);
+        return studentUnitAssessmentMapper.toDTO(unit);
     }
 
     @Override
     public List<StudentWithUnitsDTO> getStudentsWithUnits(String division, Long subjectId) {
-        List<StudentCCEDTO> students = getStudentsByDivision(division);
-        if (students.isEmpty()) return Collections.emptyList();
+        List<StudentAcademicYear> studentYears = studentAcademicYearRepository.findByDivisionAndIsActiveTrue(division);
+        if (studentYears.isEmpty()) return Collections.emptyList();
 
-        List<Long> studentIds = students.stream().map(StudentCCEDTO::getStudentId).toList();
-        List<StudentUnitAssessment> units = studentUnitAssessmentRepository.findByStudentStudentIdInAndSubjectSubjectIdIn(
-                studentIds, Collections.singletonList(subjectId));
+        List<Long> studentYearIds = studentYears.stream()
+                .map(StudentAcademicYear::getStudentAcademicYearId)
+                .toList();
+
+        List<StudentUnitAssessment> units = studentUnitAssessmentRepository.findByStudentAcademicYearStudentAcademicYearIdInAndSubjectSubjectIdIn(
+                studentYearIds, Collections.singleton(subjectId)
+        );
 
         Map<Long, List<UnitMarksDTO>> studentUnitsMap = units.stream()
                 .collect(Collectors.groupingBy(
-                        u -> u.getStudent().getStudentId(),
+                        u -> u.getStudentAcademicYear().getStudentAcademicYearId(),
                         Collectors.mapping(unitMarksMapper::toDto, Collectors.toList())
                 ));
 
-        return students.stream()
+        return studentYears.stream()
                 .map(s -> {
-                    StudentWithUnitsDTO dto = studentWithUnitsMapper.toDto(studentRepository.getReferenceById(s.getStudentId()));
-                    dto.setUnits(studentUnitsMap.getOrDefault(s.getStudentId(), Collections.emptyList()));
+                    StudentWithUnitsDTO dto = studentWithUnitsMapper.toDto(s);
+                    dto.setUnits(studentUnitsMap.getOrDefault(s.getStudentAcademicYearId(), Collections.emptyList()));
                     return dto;
                 })
                 .toList();
@@ -122,10 +129,12 @@ public class CceAdminServiceImpl implements CceAdminService {
     // ---------- Exams ----------
     @Override
     public List<StudentExamDTO> getExamsForDivisionAndSubject(String division, Long subjectId) {
-        List<Long> studentIds = studentRepository.findByDivision(division)
-                .stream().map(Student::getStudentId).toList();
+        List<StudentAcademicYear> studentYears = studentAcademicYearRepository.findByDivisionAndIsActiveTrue(division);
+        List<Long> studentYearIds = studentYears.stream()
+                .map(StudentAcademicYear::getStudentAcademicYearId)
+                .toList();
 
-        return examRepository.findByStudentStudentIdInAndSubjectSubjectIdIn(studentIds, Collections.singletonList(subjectId))
+        return examRepository.findByStudentAcademicYearStudentAcademicYearIdInAndSubjectSubjectIdIn(studentYearIds, Collections.singleton(subjectId))
                 .stream()
                 .map(studentExamMapper::toDto)
                 .toList();
@@ -143,7 +152,6 @@ public class CceAdminServiceImpl implements CceAdminService {
         return studentExamMapper.toDto(exam);
     }
 
-
     // ---------- Bulk Updates ----------
     @Override
     @Transactional
@@ -152,7 +160,7 @@ public class CceAdminServiceImpl implements CceAdminService {
 
         List<Long> unitIds = updates.stream().map(UnitUpdateRequestDTO::getUnitId).toList();
         Map<Long, StudentUnitAssessment> existingMap = studentUnitAssessmentRepository.findAllById(unitIds)
-                .stream().collect(Collectors.toMap(StudentUnitAssessment::getId, u -> u));
+                .stream().collect(Collectors.toMap(StudentUnitAssessment::getStudentUnitAssessmentId, u -> u));
 
         updates.forEach(req -> {
             StudentUnitAssessment unit = existingMap.get(req.getUnitId());
@@ -163,7 +171,7 @@ public class CceAdminServiceImpl implements CceAdminService {
         });
 
         return studentUnitAssessmentRepository.saveAll(existingMap.values())
-                .stream().map(studentUnitAssessmentMapper::toDto)
+                .stream().map(studentUnitAssessmentMapper::toDTO)
                 .toList();
     }
 
@@ -174,7 +182,7 @@ public class CceAdminServiceImpl implements CceAdminService {
 
         List<Long> examIds = requests.stream().map(ExamUpdateRequestDTO::getExamId).toList();
         Map<Long, StudentExam> existingMap = examRepository.findAllById(examIds)
-                .stream().collect(Collectors.toMap(StudentExam::getId, e -> e));
+                .stream().collect(Collectors.toMap(StudentExam::getStudentExamId, e -> e));
 
         requests.forEach(req -> {
             StudentExam exam = existingMap.get(req.getExamId());
@@ -187,20 +195,18 @@ public class CceAdminServiceImpl implements CceAdminService {
                 .toList();
     }
 
-
     @Override
     public List<StudentUnitAssessmentDTO> getAllUnitsForSubject(List<StudentCCEDTO> students, Long subjectId) {
         if (students == null || students.isEmpty()) return Collections.emptyList();
 
-        List<Long> studentIds = students.stream()
-                .map(StudentCCEDTO::getStudentId)
+        List<Long> studentYearIds = students.stream()
+                .map(StudentCCEDTO::getStudentAcademicYearId)
                 .toList();
 
         return studentUnitAssessmentRepository
-                .findByStudentStudentIdInAndSubjectSubjectIdIn(studentIds, Collections.singletonList(subjectId))
+                .findByStudentAcademicYearStudentAcademicYearIdInAndSubjectSubjectIdIn(studentYearIds, Collections.singleton(subjectId))
                 .stream()
-                .map(studentUnitAssessmentMapper::toDto)
+                .map(studentUnitAssessmentMapper::toDTO)
                 .toList();
     }
-
 }

@@ -15,14 +15,4 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
 
     Optional<Student> findByUser(User user);
 
-    List<Student> findByDivision(String division);
-
-    // ✅ New finder by rollNo
-    Optional<Student> findByRollNo(Integer rollNo);
-
-    // (Optional) If you want by userId directly
-    Optional<Student> findByUser_UserId(Long userId);
-
-    // (Optional) If you want by username directly
-    Optional<Student> findByUser_UserName(String userName);
 }

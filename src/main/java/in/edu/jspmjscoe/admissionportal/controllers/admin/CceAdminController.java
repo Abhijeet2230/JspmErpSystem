@@ -32,16 +32,15 @@ public class CceAdminController {
     }
 
     // ----------------- Unit Assessments -----------------
-    // Get all unit assessments for a subject in a division
     @GetMapping("/divisions/{division}/subjects/{subjectId}/units")
     public ResponseEntity<List<StudentUnitAssessmentDTO>> getUnitAssessments(
             @PathVariable String division,
             @PathVariable Long subjectId) {
+
         List<StudentUnitAssessmentDTO> units = cceAdminService.getUnitAssessmentsForDivisionAndSubject(division, subjectId);
         return ResponseEntity.ok(units);
     }
 
-    // Update unit marks
     @PatchMapping("/units/{unitId}/update")
     public ResponseEntity<StudentUnitAssessmentDTO> updateUnitMarks(
             @PathVariable Long unitId,
@@ -71,7 +70,6 @@ public class CceAdminController {
         return ResponseEntity.ok(updated);
     }
 
-
     // ----------------- Students with Units -----------------
     @GetMapping("/divisions/{division}/subjects/{subjectId}/students-with-units")
     public ResponseEntity<List<StudentWithUnitsDTO>> getStudentsWithUnits(
@@ -90,8 +88,7 @@ public class CceAdminController {
         return ResponseEntity.ok(updatedUnits);
     }
 
-
-    // ✅ Bulk update exam marks
+    // ----------------- Bulk Exam Updates -----------------
     @PatchMapping("/exams/bulk-update")
     public ResponseEntity<List<StudentExamDTO>> updateExamMarksBulk(
             @RequestBody List<ExamUpdateRequestDTO> requests) {
@@ -99,6 +96,4 @@ public class CceAdminController {
         List<StudentExamDTO> updatedExams = cceAdminService.updateExamMarksBulk(requests);
         return ResponseEntity.ok(updatedExams);
     }
-
 }
- 

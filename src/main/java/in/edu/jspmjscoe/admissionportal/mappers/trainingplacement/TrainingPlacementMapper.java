@@ -9,12 +9,11 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface TrainingPlacementMapper {
 
-
     // ---------- Record ----------
-    @Mapping(source = "student.studentId", target = "studentId")
+    @Mapping(source = "studentAcademicYear.studentAcademicYearId", target = "studentAcademicYearId")
     TrainingPlacementRecordDTO toDTO(TrainingPlacementRecord record);
 
-    @Mapping(source = "studentId", target = "student.studentId")
+    @Mapping(source = "studentAcademicYearId", target = "studentAcademicYear.studentAcademicYearId")
     TrainingPlacementRecord toEntity(TrainingPlacementRecordDTO dto);
 
     List<TrainingPlacementRecordDTO> toDTOList(List<TrainingPlacementRecord> records);

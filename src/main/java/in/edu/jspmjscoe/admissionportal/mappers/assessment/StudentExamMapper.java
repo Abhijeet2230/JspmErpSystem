@@ -9,14 +9,15 @@ import org.mapstruct.*;
 public interface StudentExamMapper {
 
     // ---------- Entity -> DTO ----------
-    @Mapping(source = "student.studentId", target = "studentId")
+    @Mapping(source = "studentExamId", target = "studentExamId")
+    @Mapping(source = "studentAcademicYear.studentAcademicYearId", target = "studentAcademicYearId")
     @Mapping(source = "subject.subjectId", target = "subjectId")
     @Mapping(source = "examType", target = "examType", qualifiedByName = "enumToString")
     StudentExamDTO toDto(StudentExam entity);
 
     // ---------- DTO -> Entity ----------
-    @Mapping(source = "studentId", target = "student.studentId")
-    @Mapping(source = "subjectId", target = "subject.subjectId")
+    @Mapping(source = "studentAcademicYearId", target = "studentAcademicYear", ignore = true) // set in service
+    @Mapping(source = "subjectId", target = "subject", ignore = true)                        // set in service
     @Mapping(source = "examType", target = "examType", qualifiedByName = "stringToEnum")
     StudentExam toEntity(StudentExamDTO dto);
 

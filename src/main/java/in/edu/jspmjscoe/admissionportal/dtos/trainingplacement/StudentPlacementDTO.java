@@ -9,6 +9,8 @@ import lombok.*;
 @Builder
 public class StudentPlacementDTO {
 
+    private Long studentAcademicYearId;  // ✅ added for linking
+
     private Integer rollNo;
     private String name;
     private String division;
