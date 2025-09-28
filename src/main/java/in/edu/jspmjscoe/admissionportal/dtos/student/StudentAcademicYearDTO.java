@@ -1,8 +1,14 @@
 package in.edu.jspmjscoe.admissionportal.dtos.student;
 
+import in.edu.jspmjscoe.admissionportal.dtos.achievements.certificate.CertificateDTO;
+import in.edu.jspmjscoe.admissionportal.dtos.achievements.competition.CompetitionDTO;
+import in.edu.jspmjscoe.admissionportal.dtos.achievements.fieldproject.FieldProjectDTO;
+import in.edu.jspmjscoe.admissionportal.dtos.achievements.internship.InternshipDTO;
+import in.edu.jspmjscoe.admissionportal.dtos.achievements.miniproject.MiniProjectDTO;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -23,4 +29,14 @@ public class StudentAcademicYearDTO {
     private LocalDate semesterEndDate;
 
     private Boolean isActive;       // Current semester or not
+
+    private List<CertificateDTO> certificates;
+    private List<InternshipDTO> internships;
+
+    private List<MiniProjectDTO> miniProjects;
+
+    private List<FieldProjectDTO> fieldProjects;
+
+    private List<CompetitionDTO> competitions;
+
 }

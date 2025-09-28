@@ -111,6 +111,18 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(MinioStorageException.class)
+    public ResponseEntity<ErrorResponse> handleMinioStorageException(MinioStorageException ex, HttpServletRequest request) {
+        ErrorResponse response = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .error("File Upload Failed")
+                .message(ex.getMessage())
+                .path(request.getRequestURI())
+                .build();
+        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
 
     @ExceptionHandler(Exception.class) // fallback
     public ResponseEntity<ErrorResponse> handleGeneric(Exception ex, HttpServletRequest request) {

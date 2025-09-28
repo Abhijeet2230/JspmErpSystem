@@ -1,10 +1,13 @@
 package in.edu.jspmjscoe.admissionportal.model.student;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import in.edu.jspmjscoe.admissionportal.model.achievements.*;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "student_academic_years",
@@ -51,5 +54,21 @@ public class StudentAcademicYear {
     private LocalDate semesterEndDate;
 
     @Column(name = "is_active")
-    private Boolean isActive = true; // Current semester or not
+    private Boolean isActive = true;
+
+    @OneToMany(mappedBy = "studentAcademicYear", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Certificate> certificates = new ArrayList<>();
+
+    @OneToMany(mappedBy = "studentAcademicYear", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Internship> internships = new ArrayList<>();
+
+    @OneToMany(mappedBy = "studentAcademicYear", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MiniProject> miniProjects = new ArrayList<>();
+
+    @OneToMany(mappedBy = "studentAcademicYear", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<FieldProject> fieldProjects = new ArrayList<>();
+
+    @OneToMany(mappedBy = "studentAcademicYear", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Competition> competitions = new ArrayList<>();
+
 }
