@@ -32,6 +32,13 @@ public class Leave {
     @Column(nullable = false)
     private LocalTime leaveTime;
 
+    @Column(name = "actual_closer_time")
+    private LocalTime actualCloserTime;
+
+    @Column(name = "leave_hours")
+    private Double leaveHours; // store hours difference
+
+
     @Column(nullable = false)
     private LocalTime closerTime;
 

@@ -4,10 +4,12 @@ import in.edu.jspmjscoe.admissionportal.dtos.teacher.HeadLeaveDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.LeaveDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.TeacherDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.TeacherSubjectDTO;
+import in.edu.jspmjscoe.admissionportal.dtos.teacher.appriasal.TeacherAppraisalDTO;
 import in.edu.jspmjscoe.admissionportal.exception.*;
 import in.edu.jspmjscoe.admissionportal.mappers.teacher.HeadLeaveMapper;
 import in.edu.jspmjscoe.admissionportal.mappers.teacher.LeaveMapper;
 import in.edu.jspmjscoe.admissionportal.mappers.teacher.TeacherMapper;
+import in.edu.jspmjscoe.admissionportal.mappers.teacher.appriasal.TeacherAppraisalMapper;
 import in.edu.jspmjscoe.admissionportal.model.security.AppRole;
 import in.edu.jspmjscoe.admissionportal.model.security.Role;
 import in.edu.jspmjscoe.admissionportal.model.security.Status;
@@ -18,6 +20,7 @@ import in.edu.jspmjscoe.admissionportal.model.teacher.HeadLeave;
 import in.edu.jspmjscoe.admissionportal.model.teacher.Leave;
 import in.edu.jspmjscoe.admissionportal.model.teacher.Teacher;
 import in.edu.jspmjscoe.admissionportal.model.teacher.TeacherSubject;
+import in.edu.jspmjscoe.admissionportal.model.teacher.appriasal.TeacherAppraisal;
 import in.edu.jspmjscoe.admissionportal.repositories.security.RoleRepository;
 import in.edu.jspmjscoe.admissionportal.repositories.security.UserRepository;
 import in.edu.jspmjscoe.admissionportal.repositories.subject.DepartmentRepository;
@@ -25,6 +28,7 @@ import in.edu.jspmjscoe.admissionportal.repositories.subject.SubjectRepository;
 import in.edu.jspmjscoe.admissionportal.repositories.teacher.HeadLeaveRepository;
 import in.edu.jspmjscoe.admissionportal.repositories.teacher.LeaveRepository;
 import in.edu.jspmjscoe.admissionportal.repositories.teacher.TeacherRepository;
+import in.edu.jspmjscoe.admissionportal.repositories.teacher.appriasal.TeacherAppraisalRepository;
 import in.edu.jspmjscoe.admissionportal.security.services.CurrentUserService;
 import in.edu.jspmjscoe.admissionportal.services.teacher.TeacherService;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +36,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -51,6 +60,9 @@ public class TeacherServiceImpl implements TeacherService {
     private final HeadLeaveRepository headLeaveRepository;
     private final HeadLeaveMapper headLeaveMapper;
     private final CurrentUserService currentUserService;
+    private final TeacherAppraisalMapper teacherAppraisalMapper;
+    private final TeacherAppraisalRepository teacherAppraisalRepository;
+
 
     // --------------------- TEACHER CRUD ---------------------
     @Override
@@ -217,6 +229,30 @@ public class TeacherServiceImpl implements TeacherService {
         return leaveMapper.toDTO(savedLeave);
     }
 
+    @Transactional
+    @Override
+    public LeaveDTO endLeaveEarly(Long leaveId, LocalTime actualCloserTime) {
+        Leave leave = leaveRepository.findById(leaveId)
+                .orElseThrow(() -> new ResourceNotFoundException("Leave not found"));
+
+        if (leave.getStatus() != Status.ACCEPTED) {
+            throw new IllegalStateException("Leave is not approved yet");
+        }
+
+        // only update if teacher returned earlier
+        if (actualCloserTime.isBefore(leave.getCloserTime())) {
+            leave.setActualCloserTime(actualCloserTime);
+
+            // calculate hours difference
+            long hours = Duration.between(leave.getLeaveTime(), actualCloserTime).toHours();
+            leave.setLeaveHours((double) hours);
+
+            leaveRepository.save(leave);
+        }
+
+        return leaveMapper.toDTO(leave);
+    }
+
     @Override
     public List<LeaveDTO> getPendingLeaves() {
         List<Leave> leaves = leaveRepository.findByStatus(Status.PENDING);
@@ -251,6 +287,29 @@ public class TeacherServiceImpl implements TeacherService {
         return headLeaveMapper.toDTO(headLeaveRepository.save(headLeave));
     }
 
+    @Transactional
+    @Override
+    public HeadLeaveDTO endHeadLeaveEarly(Long headLeaveId, LocalDate actualToDate) {
+        HeadLeave leave = headLeaveRepository.findById(headLeaveId)
+                .orElseThrow(() -> new ResourceNotFoundException("HeadLeave not found"));
+
+        if (leave.getStatus() != Status.ACCEPTED) {
+            throw new IllegalStateException("Leave is not approved yet");
+        }
+
+        // only update if teacher returned earlier
+        if (actualToDate.isBefore(leave.getToDate())) {
+            leave.setActualToDate(actualToDate);
+
+            int newDays = (int) ChronoUnit.DAYS.between(leave.getFromDate(), actualToDate) + 1;
+            leave.setNumberOfDays(newDays);
+
+            headLeaveRepository.save(leave);
+        }
+
+        return headLeaveMapper.toDTO(leave);
+    }
+
     @Override
     public List<HeadLeaveDTO> getPendingHeadLeaves() {
         List<HeadLeave> leaves = headLeaveRepository.findByStatus(Status.PENDING);
@@ -271,5 +330,32 @@ public class TeacherServiceImpl implements TeacherService {
                 .orElseThrow(() -> new HeadLeaveNotFoundException("Head leave not found with ID: " + id));
         headLeave.setStatus(status);
         return headLeaveMapper.toDTO(headLeaveRepository.save(headLeave));
+    }
+
+    //------------------- TeacherAppriasal --------------------//
+    @Override
+    public TeacherAppraisalDTO createAppraisal(TeacherAppraisalDTO dto) {
+        TeacherAppraisal entity = teacherAppraisalMapper.toEntity(dto);
+        TeacherAppraisal saved = teacherAppraisalRepository.save(entity);
+        return teacherAppraisalMapper.toDTO(saved);
+    }
+
+    @Override
+    public TeacherAppraisalDTO getAppraisalById(Long id) {
+        return teacherAppraisalRepository.findById(id)
+                .map(teacherAppraisalMapper::toDTO)
+                .orElseThrow(() -> new RuntimeException("Appraisal not found with id " + id));
+    }
+
+    @Override
+    public List<TeacherAppraisalDTO> getAppraisalsByTeacher(Long teacherId) {
+        return teacherAppraisalRepository.findByTeacher_TeacherId(teacherId)
+                .stream().map(teacherAppraisalMapper::toDTO).toList();
+    }
+
+    @Override
+    public List<TeacherAppraisalDTO> getAllAppraisals() {
+        return teacherAppraisalRepository.findAll()
+                .stream().map(teacherAppraisalMapper::toDTO).toList();
     }
 }

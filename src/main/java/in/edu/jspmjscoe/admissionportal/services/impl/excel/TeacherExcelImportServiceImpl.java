@@ -8,6 +8,7 @@ import in.edu.jspmjscoe.admissionportal.model.security.User;
 import in.edu.jspmjscoe.admissionportal.model.subject.Department;
 import in.edu.jspmjscoe.admissionportal.model.teacher.Teacher;
 import in.edu.jspmjscoe.admissionportal.repositories.security.RoleRepository;
+import in.edu.jspmjscoe.admissionportal.repositories.security.UserRepository;
 import in.edu.jspmjscoe.admissionportal.repositories.subject.DepartmentRepository;
 import in.edu.jspmjscoe.admissionportal.repositories.teacher.TeacherRepository;
 import in.edu.jspmjscoe.admissionportal.services.excel.TeacherExcelImportService;
@@ -30,6 +31,7 @@ public class TeacherExcelImportServiceImpl implements TeacherExcelImportService 
     private final TeacherRepository teacherRepository;
     private final DepartmentRepository departmentRepository;
     private final RoleRepository roleRepository;
+    private final UserRepository userRepository; // inject UserRepository
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -50,7 +52,7 @@ public class TeacherExcelImportServiceImpl implements TeacherExcelImportService 
 
             for (TeacherDTO dto : teacherDTOs) {
 
-                // duplicate checks: employeeId, officialEmail, aadhaarNumber
+                // duplicate checks
                 boolean duplicate = false;
                 if (dto.getEmployeeId() != null && !dto.getEmployeeId().isBlank()) {
                     if (teacherRepository.findByEmployeeId(dto.getEmployeeId()).isPresent()) {
@@ -77,7 +79,7 @@ public class TeacherExcelImportServiceImpl implements TeacherExcelImportService 
                 if (department == null) {
                     log.warn("Skipping teacher because department not found: {} (teacher: {} {})",
                             dto.getDepartmentName(), dto.getFirstName(), dto.getLastName());
-                    continue; // skip or throw depending on preference
+                    continue;
                 }
 
                 // Create User
@@ -94,6 +96,9 @@ public class TeacherExcelImportServiceImpl implements TeacherExcelImportService 
                 user.setEnabled(true);
                 user.setFirstLogin(true);
 
+                // SAVE USER FIRST
+                userRepository.saveAndFlush(user);
+
                 // Map Teacher entity
                 Teacher teacher = new Teacher();
                 teacher.setFirstName(dto.getFirstName());
@@ -102,6 +107,15 @@ public class TeacherExcelImportServiceImpl implements TeacherExcelImportService 
                 teacher.setPrefix(dto.getPrefix());
                 teacher.setGender(dto.getGender());
                 teacher.setDateOfBirth(dto.getDateOfBirth());
+
+                // Clean/Truncate phone
+                String phone = dto.getPhone();
+                if (phone != null) {
+                    int maxPhoneLength = 15; // adjust to match your DB column length
+                    if (phone.length() > maxPhoneLength) {
+                        phone = phone.substring(0, maxPhoneLength);
+                    }
+                }
                 teacher.setPhone(dto.getPhone());
                 teacher.setPersonalEmail(dto.getPersonalEmail());
 
@@ -124,15 +138,11 @@ public class TeacherExcelImportServiceImpl implements TeacherExcelImportService 
 
                 teacher.setDepartment(department);
 
-                // link user <-> teacher (mirrors student import approach)
+                // link user <-> teacher
                 teacher.setUser(user);
                 try {
-                    // If User entity has setTeacher, set it. If not, this will be ignored at compile-time,
-                    // but in your project User probably has setTeacher() like it had setStudent().
                     user.getClass().getMethod("setTeacher", Teacher.class).invoke(user, teacher);
                 } catch (NoSuchMethodException ignored) {
-                    // If User doesn't have setTeacher, that's fine — the relationship still exists on Teacher side.
-                    // Most likely your User model already has setTeacher/setStudent methods.
                 } catch (Exception e) {
                     log.debug("Could not call user.setTeacher via reflection: {}", e.getMessage());
                 }
@@ -154,14 +164,11 @@ public class TeacherExcelImportServiceImpl implements TeacherExcelImportService 
     }
 
     private Department resolveDepartment(String deptText) {
-
-
         if (deptText == null || deptText.isBlank()) return null;
         String cleaned = deptText.trim();
 
-        // Debug log
         log.debug("Looking up Department for '{}'", cleaned);
-        // Try repository methods (case-insensitive)
+
         Optional<Department> byName = departmentRepository.findByNameIgnoreCase(cleaned);
         if (byName.isPresent()) return byName.get();
 
@@ -172,13 +179,17 @@ public class TeacherExcelImportServiceImpl implements TeacherExcelImportService 
         Department newDept = new Department();
         newDept.setName(cleaned);
 
-        // Optional: generate a code automatically if your entity requires it
-        newDept.setCode(cleaned.replaceAll("\\s+", "_").toUpperCase());
+        // generate a safe code for DB
+        String code = cleaned.replaceAll("\\s+", "_").toUpperCase();
+        int maxLength = 10; // adjust according to your DB column length
+        if (code.length() > maxLength) {
+            code = code.substring(0, maxLength);
+        }
+        newDept.setCode(code);
 
         departmentRepository.saveAndFlush(newDept);
         log.info("Created new Department '{}'", cleaned);
 
         return newDept;
     }
-
 }

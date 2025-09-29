@@ -25,6 +25,9 @@ public class HeadLeave {
     @Column(nullable = false)
     private LocalDate toDate;
 
+    @Column(name = "actual_to_date")
+    private LocalDate actualToDate; // <-- for early end
+
     @Column(nullable = false)
     private int numberOfDays;
 

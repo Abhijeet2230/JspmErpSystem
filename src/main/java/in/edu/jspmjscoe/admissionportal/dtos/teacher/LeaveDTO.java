@@ -17,6 +17,8 @@ public class LeaveDTO {
     private String reason;
     private LocalTime leaveTime;
     private LocalTime closerTime;
+    private LocalTime actualCloserTime;
+    private Double leaveHours;
     private String status;
     // Extra fields
     private Long teacherId;

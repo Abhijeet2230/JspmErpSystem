@@ -4,9 +4,13 @@ import in.edu.jspmjscoe.admissionportal.dtos.teacher.HeadLeaveDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.LeaveDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.TeacherDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.TeacherSubjectDTO;
+import in.edu.jspmjscoe.admissionportal.dtos.teacher.appriasal.TeacherAppraisalDTO;
 import in.edu.jspmjscoe.admissionportal.model.security.Status;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 public interface TeacherService {
@@ -24,6 +28,9 @@ public interface TeacherService {
     LeaveDTO applyLeave(LeaveDTO leaveDTO);
 
 
+    @Transactional
+    LeaveDTO endLeaveEarly(Long leaveId, LocalTime actualCloserTime);
+
     List<LeaveDTO> getPendingLeaves();
 
     List<LeaveDTO> getAcceptedLeaves();
@@ -34,10 +41,22 @@ public interface TeacherService {
     // --------------- Head Leave -------------//
     HeadLeaveDTO applyHeadLeave(HeadLeaveDTO headLeaveDTO);
 
+    @Transactional
+    HeadLeaveDTO endHeadLeaveEarly(Long headLeaveId, LocalDate actualToDate);
+
     List<HeadLeaveDTO> getPendingHeadLeaves();
 
     List<HeadLeaveDTO> getAcceptedHeadLeaves();
 
     HeadLeaveDTO updateHeadLeaveStatus(Long id, Status status);
     TeacherSubjectDTO assignSubjectToTeacher(Long teacherId, Long subjectId);
+
+    //------------------- TeacherAppriasal --------------------//
+    TeacherAppraisalDTO createAppraisal(TeacherAppraisalDTO dto);
+
+    TeacherAppraisalDTO getAppraisalById(Long id);
+
+    List<TeacherAppraisalDTO> getAppraisalsByTeacher(Long teacherId);
+
+    List<TeacherAppraisalDTO> getAllAppraisals();
 }

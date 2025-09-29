@@ -8,8 +8,11 @@ import in.edu.jspmjscoe.admissionportal.repositories.teacher.LeaveRepository;
 import in.edu.jspmjscoe.admissionportal.services.teacher.TeacherService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 @RestController
@@ -26,6 +29,13 @@ public class LeaveController {
     @GetMapping("/get-pending-leaves")
     public ResponseEntity<List<LeaveDTO>> getAllLeaves() {
         return ResponseEntity.ok(teacherService.getPendingLeaves());
+    }
+
+    @PostMapping("/leave/{id}/end")
+    public ResponseEntity<LeaveDTO> endLeaveByAdmin(
+            @PathVariable Long id,
+            @RequestParam LocalTime actualCloserTime) {
+        return ResponseEntity.ok(teacherService.endLeaveEarly(id, actualCloserTime));
     }
 
     @GetMapping("/pending-leaves/count")
@@ -59,6 +69,13 @@ public class LeaveController {
     @GetMapping("/get-pending-head-leaves")
     public ResponseEntity<List<HeadLeaveDTO>> getPendingHeadLeaves() {
         return ResponseEntity.ok(teacherService.getPendingHeadLeaves());
+    }
+
+    @PostMapping("/admin/headleave/{id}/end")
+    public ResponseEntity<HeadLeaveDTO> endHeadLeaveEarly(
+            @PathVariable Long id,
+            @RequestParam LocalDate actualToDate) {
+        return ResponseEntity.ok(teacherService.endHeadLeaveEarly(id, actualToDate));
     }
 
     @GetMapping("/pending-head-leaves/count")

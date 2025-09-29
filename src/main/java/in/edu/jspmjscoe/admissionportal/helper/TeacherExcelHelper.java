@@ -29,28 +29,31 @@ public class TeacherExcelHelper {
 
                 if (currentRowIndex == HEADER_ROW_INDEX) {
                     for (Cell cell : row) {
-                        headerMap.put(cell.getStringCellValue().trim(), cell.getColumnIndex());
+                        String normalizedHeader = normalizeHeader(cell.getStringCellValue());
+                        headerMap.put(normalizedHeader, cell.getColumnIndex());
+                        System.out.println("Header found: '" + normalizedHeader + "'");
                     }
                 } else if (currentRowIndex > HEADER_ROW_INDEX) {
                     TeacherDTO teacher = TeacherDTO.builder()
-                            .firstName(getCellValue(row, headerMap.get("First Name")))
-                            .middleName(getCellValue(row, headerMap.get("Middle Name")))
-                            .lastName(getCellValue(row, headerMap.get("Last Name (Surname)")))
-                            .prefix(getCellValue(row, headerMap.get("Prefix")))
-                            .gender(getCellValue(row, headerMap.get("Gender")))
-                            .dateOfBirth(getCellValue(row, headerMap.get("Date of Birth")))
-                            .phone(getCellValue(row, headerMap.get("Mobile No.")))
-                            .personalEmail(getCellValue(row, headerMap.get("Email Address")))
-                            .officialEmail(getCellValue(row, headerMap.get("Official Email ID (JSPM)\ne.g. maheshshinde@jspmjscoe.edu.in")))
-                            .designation(getCellValue(row, headerMap.get("Present Designation")))
-                            .aadhaarNumber(getCellValue(row, headerMap.get("AADHAAR")))
-                            .bcudId(getCellValue(row, headerMap.get("BCUD ID \ne.g.52201698652")))
-                            .vidwaanId(getCellValue(row, headerMap.get("VIDWAAN ID")))
-                            .orchidId(getCellValue(row, headerMap.get("Orchid ID")))
-                            .googleScholarId(getCellValue(row, headerMap.get("Google Scholar")))
-                            .highestDegree(getCellValue(row, headerMap.get("Highest Degree")))
-                            .specialization(getCellValue(row, headerMap.get("Area of Specialization")))
-                            .degreeUniversity(getCellValue(row, headerMap.get("Mention University where Highest Degree Awarded")))
+                            .firstName(getCellValue(row, headerMap, "First Name"))
+                            .middleName(getCellValue(row, headerMap, "Middle Name"))
+                            .lastName(getCellValue(row, headerMap, "Last Name (Surname)"))
+                            .prefix(getCellValue(row, headerMap, "Prefix"))
+                            .gender(getCellValue(row, headerMap, "Gender"))
+                            .dateOfBirth(getCellValue(row, headerMap, "Date of Birth"))
+                            .phone(getCellValue(row, headerMap, "Mobile No."))
+                            .personalEmail(getCellValue(row, headerMap, "Email Address"))
+                            .officialEmail(getCellValue(row, headerMap, "Official Email ID (JSPM)"))
+                            .departmentName(getCellValue(row, headerMap, "Department"))
+                            .designation(getCellValue(row, headerMap, "Present Designation"))
+                            .aadhaarNumber(getCellValue(row, headerMap, "AADHAAR"))
+                            .bcudId(getCellValue(row, headerMap, "BCUD ID"))
+                            .vidwaanId(getCellValue(row, headerMap, "VIDWAAN ID"))
+                            .orchidId(getCellValue(row, headerMap, "Orchid ID"))
+                            .googleScholarId(getCellValue(row, headerMap, "Google Scholar"))
+                            .highestDegree(getCellValue(row, headerMap, "Highest Degree"))
+                            .specialization(getCellValue(row, headerMap, "Area of Specialization"))
+                            .degreeUniversity(getCellValue(row, headerMap, "Mention University where Highest Degree Awarded"))
                             .build();
 
                     // Skip empty rows (if firstName and lastName are null/blank)
@@ -70,9 +73,28 @@ public class TeacherExcelHelper {
         }
     }
 
-    private static String getCellValue(Row row, Integer index) {
-        if (index == null) return null;
-        Cell cell = row.getCell(index);
+    // ----------------- Helper methods -----------------
+
+    private static String normalizeHeader(String header) {
+        if (header == null) return "";
+        return header.replaceAll("\\r|\\n", " ") // remove newlines
+                .replaceAll("\\s+", " ")   // multiple spaces -> single
+                .trim();
+    }
+
+    private static String getCellValue(Row row, Map<String, Integer> headerMap, String candidate) {
+        if (candidate == null || candidate.isBlank()) return null;
+
+        String normalizedCandidate = normalizeHeader(candidate).toLowerCase();
+        Integer idx = headerMap.entrySet().stream()
+                .filter(e -> normalizeHeader(e.getKey()).toLowerCase().equals(normalizedCandidate))
+                .map(Map.Entry::getValue)
+                .findFirst()
+                .orElse(null);
+
+        if (idx == null) return null;
+
+        Cell cell = row.getCell(idx);
         if (cell == null) return null;
 
         DataFormatter formatter = new DataFormatter();
