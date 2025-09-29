@@ -1,5 +1,6 @@
 package in.edu.jspmjscoe.admissionportal.controllers.exception;
 
+import in.edu.jspmjscoe.admissionportal.dtos.apiresponse.ApiResponse;
 import in.edu.jspmjscoe.admissionportal.dtos.response.ErrorResponse;
 import in.edu.jspmjscoe.admissionportal.exception.*;
 import org.springframework.http.HttpStatus;
@@ -123,6 +124,55 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+
+    @ExceptionHandler(CertificateMarkException.class)
+    public ResponseEntity<ErrorResponse> handleCertificateMarkException(
+            CertificateMarkException ex,
+            HttpServletRequest request) {
+
+        ErrorResponse response = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error("Invalid Certificate Marks")
+                .message(ex.getMessage())
+                .path(request.getRequestURI())
+                .build();
+
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(InternshipMarkException.class)
+    public ResponseEntity<ErrorResponse> handleInternshipMarkException(
+            InternshipMarkException ex,
+            HttpServletRequest request) {
+
+        ErrorResponse response = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error("Invalid Internship Marks")
+                .message(ex.getMessage())
+                .path(request.getRequestURI())
+                .build();
+
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+
+    @ExceptionHandler(CompetitionMarkException.class)
+    public ResponseEntity<ErrorResponse> handleCompetitionMarkException(
+            CompetitionMarkException ex,
+            HttpServletRequest request) {
+
+        ErrorResponse response = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error("Invalid Competition Marks")
+                .message(ex.getMessage())
+                .path(request.getRequestURI())
+                .build();
+
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
 
     @ExceptionHandler(Exception.class) // fallback
     public ResponseEntity<ErrorResponse> handleGeneric(Exception ex, HttpServletRequest request) {

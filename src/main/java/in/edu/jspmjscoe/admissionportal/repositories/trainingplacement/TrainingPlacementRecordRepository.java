@@ -1,5 +1,6 @@
 package in.edu.jspmjscoe.admissionportal.repositories.trainingplacement;
 
+import in.edu.jspmjscoe.admissionportal.model.student.StudentAcademicYear;
 import in.edu.jspmjscoe.admissionportal.model.trainingplacement.TrainingPlacementRecord;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -15,6 +16,8 @@ public interface TrainingPlacementRecordRepository extends JpaRepository<Trainin
     // find by StudentAcademicYear ID
     Optional<TrainingPlacementRecord> findByStudentAcademicYear_StudentAcademicYearId(Long studentAcademicYearId);
 
+
+    Optional<TrainingPlacementRecord> findByStudentAcademicYear(StudentAcademicYear studentAcademicYear);
 
     // Fetch all training & placement records for a given rollNo
     List<TrainingPlacementRecord> findByStudentAcademicYear_RollNo(Integer rollNo);
