@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Comparator;
 import java.util.List;
 
 @RestController
@@ -39,7 +40,13 @@ public class TrainingPlacementController {
     public ResponseEntity<ApiResponse<List<StudentPlacementDTO>>> getStudentsByDivision(
             @PathVariable String division) {
 
-        List<StudentPlacementDTO> students = trainingPlacementService.getStudentsByDivision(division);
+        List<StudentPlacementDTO> students = trainingPlacementService.getStudentsByDivision(division)
+                .stream()
+                .sorted(Comparator.comparingInt(StudentPlacementDTO::getRollNo))
+                .toList(); // Java 16+; for earlier, use .collect(Collectors.toList())
+
+        // If rollNo is String and you want numeric sort, use:
+        // students.sort(Comparator.comparingInt(s -> Integer.parseInt(s.getRollNo())));
 
         ApiResponse<List<StudentPlacementDTO>> response = new ApiResponse<>(
                 HttpStatus.OK.value(),
@@ -49,6 +56,7 @@ public class TrainingPlacementController {
 
         return ResponseEntity.ok(response);
     }
+
 
     /**
      * Bulk update of training placement records.

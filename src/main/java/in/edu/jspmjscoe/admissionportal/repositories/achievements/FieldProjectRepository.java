@@ -2,6 +2,7 @@ package in.edu.jspmjscoe.admissionportal.repositories.achievements;
 
 import in.edu.jspmjscoe.admissionportal.model.achievements.FieldProject;
 import in.edu.jspmjscoe.admissionportal.model.student.Student;
+import in.edu.jspmjscoe.admissionportal.model.student.StudentAcademicYear;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -17,4 +18,9 @@ public interface FieldProjectRepository extends JpaRepository<FieldProject, Long
 
 
     List<FieldProject> findByStudentAcademicYear_Student(Student student);
+
+    List<FieldProject> findByStudentAcademicYear(StudentAcademicYear studentAcademicYear);
+
+    // Add this method
+    List<FieldProject> findByStudentAcademicYearAndSubject_SubjectId(StudentAcademicYear studentAcademicYear, Long subjectId);
 }

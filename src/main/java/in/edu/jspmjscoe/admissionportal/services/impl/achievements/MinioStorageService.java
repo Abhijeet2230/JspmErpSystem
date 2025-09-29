@@ -51,6 +51,7 @@ public class MinioStorageService {
                             .expiry(60 * 60) // 1 hour
                             .build());
         } catch (Exception e) {
+            e.printStackTrace();
             throw new RuntimeException("Failed to generate presigned URL", e);
         }
     }

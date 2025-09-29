@@ -1,5 +1,6 @@
 package in.edu.jspmjscoe.admissionportal.controllers.exception;
 
+import in.edu.jspmjscoe.admissionportal.dtos.apiresponse.ApiResponse;
 import in.edu.jspmjscoe.admissionportal.dtos.response.ErrorResponse;
 import in.edu.jspmjscoe.admissionportal.exception.*;
 import jakarta.servlet.http.HttpServletRequest;
@@ -113,6 +114,56 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.NOT_FOUND, "Head Leave Not Found", ex, request);
     }
 
+    @ExceptionHandler(CertificateMarkException.class)
+    public ResponseEntity<ErrorResponse> handleCertificateMarkException(
+            CertificateMarkException ex,
+            HttpServletRequest request) {
+
+        ErrorResponse response = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error("Invalid Certificate Marks")
+                .message(ex.getMessage())
+                .path(request.getRequestURI())
+                .build();
+
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(InternshipMarkException.class)
+    public ResponseEntity<ErrorResponse> handleInternshipMarkException(
+            InternshipMarkException ex,
+            HttpServletRequest request) {
+
+        ErrorResponse response = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error("Invalid Internship Marks")
+                .message(ex.getMessage())
+                .path(request.getRequestURI())
+                .build();
+
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+
+    @ExceptionHandler(CompetitionMarkException.class)
+    public ResponseEntity<ErrorResponse> handleCompetitionMarkException(
+            CompetitionMarkException ex,
+            HttpServletRequest request) {
+
+        ErrorResponse response = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error("Invalid Competition Marks")
+                .message(ex.getMessage())
+                .path(request.getRequestURI())
+                .build();
+
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(Exception.class) // fallback
     @ExceptionHandler(PendingHeadLeaveExistsException.class)
     public ResponseEntity<ErrorResponse> handlePendingHeadLeaveExists(PendingHeadLeaveExistsException ex, HttpServletRequest request) {
         return buildResponse(HttpStatus.CONFLICT, "Pending Head Leave Exists", ex, request);
