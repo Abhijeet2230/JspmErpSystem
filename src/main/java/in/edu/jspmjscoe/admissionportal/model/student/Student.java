@@ -26,8 +26,7 @@ public class Student {
     @Column(name = "student_id")
     private Long studentId;   // independent PK
 
-    // Unique foreign key to User
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "user_id", unique = true, nullable = false)
     @JsonManagedReference
     private User user;
@@ -41,14 +40,8 @@ public class Student {
     @Column(name = "mobile_no")
     private String mobileNo;
 
-    @Column(name = "roll_no")
-    private Integer rollNo;
-
     @Column(name = "prn_number", unique = true, length = 20)
     private String prnNumber;   // PRN field
-
-    @Column(name = "division")
-    private String division;
 
     @Column(name = "email")
     private String email;
@@ -126,6 +119,11 @@ public class Student {
     @JoinColumn(name = "course_id")
     @JsonBackReference // opposite side of Course.students
     private Course course;
+
+    //🔹 Mapping to academic years
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonManagedReference
+    private List<StudentAcademicYear> studentAcademicYears;
 
     public void addAdmission(Admission admission) {
         admissions.add(admission);

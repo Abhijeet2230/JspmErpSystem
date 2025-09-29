@@ -8,10 +8,11 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
+import java.util.List;
+
 @Repository
 public interface SubjectRepository extends JpaRepository<Subject, Long> {
-    Optional<Subject> findByName(String name);
 
-    @Query("SELECT s FROM Subject s WHERE s.subjectGroup = 'CCE'")
     List<Subject> findByHasCCETrue();
+
 }

@@ -7,19 +7,14 @@ import org.mapstruct.*;
 @Mapper(componentModel = "spring")
 public interface StudentUnitAssessmentMapper {
 
-    // ---------- Entity -> DTO ----------
-    @Mapping(source = "student.studentId", target = "studentId")
-    @Mapping(source = "student.rollNo", target = "rollNo")
-    @Mapping(source = "student.candidateName", target = "candidateName")
+    @Mapping(source = "studentUnitAssessmentId", target = "studentUnitAssessmentId")
+    @Mapping(source = "studentAcademicYear.rollNo", target = "rollNo")
+    @Mapping(source = "studentAcademicYear.student.candidateName", target = "candidateName")
     @Mapping(source = "subject.subjectId", target = "subjectId")
-    StudentUnitAssessmentDTO toDto(StudentUnitAssessment entity);
+    StudentUnitAssessmentDTO toDTO(StudentUnitAssessment entity);
 
-    // ---------- DTO -> Entity ----------
-    @Mapping(source = "studentId", target = "student.studentId")
-    @Mapping(source = "subjectId", target = "subject.subjectId")
+    @Mapping(source = "studentUnitAssessmentId", target = "studentUnitAssessmentId")
+    @Mapping(target = "studentAcademicYear", ignore = true) // pass via service
+    @Mapping(target = "subject", ignore = true)            // pass via service
     StudentUnitAssessment toEntity(StudentUnitAssessmentDTO dto);
-
-    // ---------- Update from DTO (null-safe) ----------
-    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    void updateFromDto(StudentUnitAssessmentDTO dto, @MappingTarget StudentUnitAssessment entity);
 }

@@ -1,7 +1,9 @@
 package in.edu.jspmjscoe.admissionportal.services.excel;
 
+import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+@Service
 public interface ExcelImportService {
 
     /**

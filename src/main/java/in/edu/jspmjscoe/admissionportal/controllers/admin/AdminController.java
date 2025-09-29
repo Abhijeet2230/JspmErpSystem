@@ -4,6 +4,8 @@ import in.edu.jspmjscoe.admissionportal.dtos.assessment.CceInitResult;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.staffrecord.StaffMonthlyReportDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.student.StudentDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.security.UserDTO;
+import in.edu.jspmjscoe.admissionportal.dtos.teacher.HeadLeaveDTO;
+import in.edu.jspmjscoe.admissionportal.dtos.teacher.LeaveDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.TeacherDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.TeacherSubjectDTO;
 import in.edu.jspmjscoe.admissionportal.mappers.teacher.staffrecord.StaffMonthlyReportMapper;
@@ -155,10 +157,9 @@ public class AdminController {
     @PostMapping("/initialize")
     public ResponseEntity<CceInitResult> initializeCceData(
             @RequestParam(defaultValue = "true") boolean units,
-            @RequestParam(defaultValue = "true") boolean exams,
-            @RequestParam(defaultValue = "true") boolean attendance) {
+            @RequestParam(defaultValue = "true") boolean exams) {
 
-        CceInitResult result = cceInitializationService.initializeAll(units, exams, attendance);
+        CceInitResult result = cceInitializationService.initializeAll(units, exams);
         return ResponseEntity.ok(result);
     }
 

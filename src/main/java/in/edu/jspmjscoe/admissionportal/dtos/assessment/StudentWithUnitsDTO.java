@@ -12,8 +12,9 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class StudentWithUnitsDTO {
-    private Long studentId;
-    private String candidateName;
-    private Integer rollNo;
-    private List<UnitMarksDTO> units; // list of 5 units
+
+    private Long studentAcademicYearId;  // replaces studentId
+    private String candidateName;        // optional: from StudentAcademicYear.student
+    private Integer rollNo;              // optional: from StudentAcademicYear
+    private List<UnitMarksDTO> units;    // list of 5 units
 }

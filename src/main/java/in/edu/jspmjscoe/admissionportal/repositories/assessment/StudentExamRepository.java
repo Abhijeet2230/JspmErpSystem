@@ -5,10 +5,16 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
-public interface StudentExamRepository extends JpaRepository<StudentExam, Long> {
-    List<StudentExam> findByStudentStudentIdInAndSubjectSubjectIdIn(Collection<Long> studentIds, Collection<Long> subjectIds);
+public interface StudentExamRepository extends JpaRepository<StudentExam, Long> { ;
 
-    // ✅ add this
-    List<StudentExam> findByStudentStudentId(Long studentId);
+    List<StudentExam> findByStudentAcademicYearStudentAcademicYearId(Long studentAcademicYearId);
+
+    List<StudentExam> findByStudentAcademicYearStudentAcademicYearIdInAndSubjectSubjectIdIn(
+            Collection<Long> studentAcademicYearIds,
+            Collection<Long> subjectIds
+    );
+
+
 }

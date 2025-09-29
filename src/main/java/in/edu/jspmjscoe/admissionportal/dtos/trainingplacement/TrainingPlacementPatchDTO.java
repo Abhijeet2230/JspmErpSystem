@@ -10,7 +10,8 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class TrainingPlacementPatchDTO {
-    private Long studentId;  // identify student
+
+    private Long studentAcademicYearId;   // ✅ instead of studentId
 
     // core fields
     private Double sgpaScore;

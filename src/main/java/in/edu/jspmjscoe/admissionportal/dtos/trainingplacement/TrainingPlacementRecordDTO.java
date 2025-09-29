@@ -11,7 +11,8 @@ import java.util.List;
 public class TrainingPlacementRecordDTO {
 
     private Long id;
-    private Long studentId; // only ID to avoid loading Student entity
+    private Long studentAcademicYearId;   // ✅ instead of studentId
+
 
     // Merit
     private Double sgpaScore;

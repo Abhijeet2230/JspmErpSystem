@@ -2,19 +2,34 @@ package in.edu.jspmjscoe.admissionportal.repositories.assessment;
 
 import in.edu.jspmjscoe.admissionportal.model.assessment.StudentUnitAssessment;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
+@Repository
 public interface StudentUnitAssessmentRepository extends JpaRepository<StudentUnitAssessment, Long> {
-//    // used for bulk existence check (faster than single exists calls)
-   List<StudentUnitAssessment> findByStudentStudentIdInAndSubjectSubjectIdIn(Collection<Long> studentIds, Collection<Long> subjectIds);
 
-    // (optional) for fetching with student + subject
-    @org.springframework.data.jpa.repository.Query("SELECT sua FROM StudentUnitAssessment sua JOIN FETCH sua.student st JOIN FETCH sua.subject subj")
-    List<StudentUnitAssessment> findAllWithStudentAndSubject();
+    // 🔹 Find all assessments for a studentAcademicYear
+    List<StudentUnitAssessment> findByStudentAcademicYearStudentAcademicYearId(Long studentAcademicYearId);
 
-    List<StudentUnitAssessment> findByStudentStudentId(long studentId);
+    // 🔹 Find all assessments for multiple studentAcademicYears (batch fetch)
+    List<StudentUnitAssessment> findByStudentAcademicYearStudentAcademicYearIdIn(List<Long> studentAcademicYearIds);
+
+    // 🔹 Find assessments by subject
+    List<StudentUnitAssessment> findBySubjectSubjectId(Long subjectId);
+
+    // 🔹 Find specific unit assessment
+    StudentUnitAssessment findByStudentAcademicYearStudentAcademicYearIdAndSubjectSubjectIdAndUnitNumber(
+            Long studentAcademicYearId, Long subjectId, Integer unitNumber
+    );
+
+    List<StudentUnitAssessment> findByStudentAcademicYearStudentAcademicYearIdInAndSubjectSubjectIdIn(
+            Collection<Long> studentAcademicYearIds,
+            Collection<Long> subjectIds
+    );
+
 
 
 }

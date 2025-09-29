@@ -14,4 +14,7 @@ public interface TrainingPlacementService {
     void bulkPatch(BulkTrainingPlacementPatchRequest request);
 
     StudentPlacementDTO getMyTrainingPlacement(Long studentId);
+
+    List<StudentPlacementDTO> getStudentsByRollNo(Integer rollNo);
+
 }

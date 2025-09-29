@@ -12,9 +12,10 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class StudentCCEProfileResponseDTO {
-    private Long studentId;
-    private String candidateName;
-    private Integer rollNo;
-    private String division;
-    private List<SubjectCCERecordResponseDTO> subjects;
+
+    private Long studentAcademicYearId;           // replaces studentId
+    private String candidateName;                 // from StudentAcademicYear.student
+    private Integer rollNo;                       // from StudentAcademicYear
+    private String division;                      // from StudentAcademicYear
+    private List<SubjectCCERecordResponseDTO> subjects; // CCE data for subjects in this semester
 }
