@@ -71,7 +71,7 @@ public class LeaveController {
         return ResponseEntity.ok(teacherService.getPendingHeadLeaves());
     }
 
-    @PostMapping("/admin/headleave/{id}/end")
+    @PostMapping("/headleave/{id}/end")
     public ResponseEntity<HeadLeaveDTO> endHeadLeaveEarly(
             @PathVariable Long id,
             @RequestParam LocalDate actualToDate) {

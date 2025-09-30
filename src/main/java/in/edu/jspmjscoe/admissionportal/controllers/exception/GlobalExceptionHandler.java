@@ -163,7 +163,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(Exception.class) // fallback
     @ExceptionHandler(PendingHeadLeaveExistsException.class)
     public ResponseEntity<ErrorResponse> handlePendingHeadLeaveExists(PendingHeadLeaveExistsException ex, HttpServletRequest request) {
         return buildResponse(HttpStatus.CONFLICT, "Pending Head Leave Exists", ex, request);

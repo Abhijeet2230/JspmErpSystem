@@ -30,6 +30,7 @@ import in.edu.jspmjscoe.admissionportal.repositories.teacher.LeaveRepository;
 import in.edu.jspmjscoe.admissionportal.repositories.teacher.TeacherRepository;
 import in.edu.jspmjscoe.admissionportal.repositories.teacher.appriasal.TeacherAppraisalRepository;
 import in.edu.jspmjscoe.admissionportal.security.services.CurrentUserService;
+import in.edu.jspmjscoe.admissionportal.services.impl.achievements.MinioStorageService;
 import in.edu.jspmjscoe.admissionportal.services.teacher.TeacherService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -37,6 +38,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -62,6 +64,8 @@ public class TeacherServiceImpl implements TeacherService {
     private final CurrentUserService currentUserService;
     private final TeacherAppraisalMapper teacherAppraisalMapper;
     private final TeacherAppraisalRepository teacherAppraisalRepository;
+    private final MinioStorageService minioStorageService;
+
 
 
     // --------------------- TEACHER CRUD ---------------------
@@ -330,32 +334,5 @@ public class TeacherServiceImpl implements TeacherService {
                 .orElseThrow(() -> new HeadLeaveNotFoundException("Head leave not found with ID: " + id));
         headLeave.setStatus(status);
         return headLeaveMapper.toDTO(headLeaveRepository.save(headLeave));
-    }
-
-    //------------------- TeacherAppriasal --------------------//
-    @Override
-    public TeacherAppraisalDTO createAppraisal(TeacherAppraisalDTO dto) {
-        TeacherAppraisal entity = teacherAppraisalMapper.toEntity(dto);
-        TeacherAppraisal saved = teacherAppraisalRepository.save(entity);
-        return teacherAppraisalMapper.toDTO(saved);
-    }
-
-    @Override
-    public TeacherAppraisalDTO getAppraisalById(Long id) {
-        return teacherAppraisalRepository.findById(id)
-                .map(teacherAppraisalMapper::toDTO)
-                .orElseThrow(() -> new RuntimeException("Appraisal not found with id " + id));
-    }
-
-    @Override
-    public List<TeacherAppraisalDTO> getAppraisalsByTeacher(Long teacherId) {
-        return teacherAppraisalRepository.findByTeacher_TeacherId(teacherId)
-                .stream().map(teacherAppraisalMapper::toDTO).toList();
-    }
-
-    @Override
-    public List<TeacherAppraisalDTO> getAllAppraisals() {
-        return teacherAppraisalRepository.findAll()
-                .stream().map(teacherAppraisalMapper::toDTO).toList();
     }
 }

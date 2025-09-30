@@ -8,6 +8,7 @@ import in.edu.jspmjscoe.admissionportal.dtos.teacher.appriasal.TeacherAppraisalD
 import in.edu.jspmjscoe.admissionportal.model.security.Status;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -51,12 +52,4 @@ public interface TeacherService {
     HeadLeaveDTO updateHeadLeaveStatus(Long id, Status status);
     TeacherSubjectDTO assignSubjectToTeacher(Long teacherId, Long subjectId);
 
-    //------------------- TeacherAppriasal --------------------//
-    TeacherAppraisalDTO createAppraisal(TeacherAppraisalDTO dto);
-
-    TeacherAppraisalDTO getAppraisalById(Long id);
-
-    List<TeacherAppraisalDTO> getAppraisalsByTeacher(Long teacherId);
-
-    List<TeacherAppraisalDTO> getAllAppraisals();
 }

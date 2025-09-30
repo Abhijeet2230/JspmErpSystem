@@ -15,7 +15,7 @@ public interface StudentUnitAssessmentRepository extends JpaRepository<StudentUn
     // 🔹 Find all assessments for a studentAcademicYear
     List<StudentUnitAssessment> findByStudentAcademicYearStudentAcademicYearId(Long studentAcademicYearId);
 
-    Optional<StudentUnitAssessment> findByStudentAcademicYearIdAndSubjectIdAndUnitNumber(
+    Optional<StudentUnitAssessment> findByStudentAcademicYear_StudentAcademicYearIdAndSubject_SubjectIdAndUnitNumber(
             Long studentAcademicYearId,
             Long subjectId,
             Integer unitNumber

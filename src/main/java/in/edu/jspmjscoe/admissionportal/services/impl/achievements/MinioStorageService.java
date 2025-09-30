@@ -8,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import in.edu.jspmjscoe.admissionportal.exception.MinioStorageException;
 
 import java.io.InputStream;
 
@@ -16,44 +15,68 @@ import java.io.InputStream;
 @RequiredArgsConstructor
 public class MinioStorageService {
 
-    private final MinioClient minioClient;
+    private final MinioClient myMinioClient;     // Teacher appraisal bucket
+    private final MinioClient friendMinioClient; // Friend/student bucket
 
+    // -------------------- Teacher Appraisal --------------------
+    @Value("${minio.bucket-my}")
+    private String myBucket;
+
+    public String uploadTeacherAppraisalFile(MultipartFile file, String objectKey) {
+        return uploadFileToMinio(myMinioClient, myBucket, file, objectKey);
+    }
+
+    public String getPresignedUrlTeacher(String objectKey) {
+        return generatePresignedUrl(myMinioClient, myBucket, objectKey);
+    }
+
+    // -------------------- Friend/Student Bucket --------------------
     @Value("${minio.bucket}")
-    private String bucketName;
+    private String friendBucket;  // Keep same property as before for friend
 
-    public String uploadFile(MultipartFile file, String objectName) {
+    // Existing friend/student methods (do NOT rename)
+    public String uploadFile(MultipartFile file, String objectKey) {
+        return uploadFileToMinio(friendMinioClient, friendBucket, file, objectKey);
+    }
+
+    public String getPresignedUrl(String objectKey) {
+        return generatePresignedUrl(friendMinioClient, friendBucket, objectKey);
+    }
+
+    // -------------------- Shared Helpers --------------------
+    private String uploadFileToMinio(MinioClient client, String bucket, MultipartFile file, String objectKey) {
         try (InputStream is = file.getInputStream()) {
-            minioClient.putObject(
+            client.putObject(
                     PutObjectArgs.builder()
-                            .bucket(bucketName)
-                            .object(objectName)
+                            .bucket(bucket)
+                            .object(objectKey)
                             .stream(is, file.getSize(), -1)
                             .contentType(file.getContentType())
                             .build()
             );
-            return objectName;
+            return objectKey;
         } catch (Exception e) {
-            throw new MinioStorageException("Failed to upload file to MinIO: " + file.getOriginalFilename(), e);
+            throw new RuntimeException("Failed to upload file to MinIO: " + file.getOriginalFilename(), e);
         }
     }
 
-    public String generateObjectKey(String type, Long studentAcademicYearId, String filename) {
-        return type + "/student_" + studentAcademicYearId + "/" + filename;
-    }
-
-    public String getPresignedUrl(String objectKey) {
+    private String generatePresignedUrl(MinioClient client, String bucket, String objectKey) {
         try {
-            return minioClient.getPresignedObjectUrl(
+            return client.getPresignedObjectUrl(
                     GetPresignedObjectUrlArgs.builder()
                             .method(Method.GET)
-                            .bucket(bucketName)
+                            .bucket(bucket)
                             .object(objectKey)
                             .expiry(60 * 60) // 1 hour
-                            .build());
+                            .build()
+            );
         } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("Failed to generate presigned URL", e);
+            throw new RuntimeException("Failed to generate presigned URL for " + objectKey, e);
         }
     }
 
+    // -------------------- Object Key Generator --------------------
+    public String generateObjectKey(String type, Long entityId, String filename) {
+        return type + "/" + entityId + "/" + filename;
+    }
 }

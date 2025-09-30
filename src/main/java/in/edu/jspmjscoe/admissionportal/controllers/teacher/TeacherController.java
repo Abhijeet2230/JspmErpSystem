@@ -5,6 +5,7 @@ import in.edu.jspmjscoe.admissionportal.dtos.teacher.LeaveDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.TeacherDTO;
 import in.edu.jspmjscoe.admissionportal.exception.TeacherNotFoundException;
 import in.edu.jspmjscoe.admissionportal.exception.UserNotFoundException;
+import in.edu.jspmjscoe.admissionportal.mappers.teacher.TeacherMapper;
 import in.edu.jspmjscoe.admissionportal.model.security.User;
 import in.edu.jspmjscoe.admissionportal.model.teacher.Teacher;
 import in.edu.jspmjscoe.admissionportal.repositories.security.UserRepository;
@@ -40,8 +41,12 @@ public class TeacherController {
         Teacher teacher = teacherRepository.findByUser(user)
                 .orElseThrow(() -> new TeacherNotFoundException("User ID: " + user.getUserId()));
 
-        return ResponseEntity.ok(teacher);
+        // 3. Map to DTO (department name is already included in mapper)
+        TeacherDTO teacherDTO = TeacherMapper.toDTO(teacher);
+
+        return ResponseEntity.ok(teacherDTO);
     }
+
 
     // Get teacher by id
     @GetMapping("/{id}")
@@ -60,6 +65,5 @@ public class TeacherController {
     public ResponseEntity<HeadLeaveDTO> applyHeadLeave(@RequestBody HeadLeaveDTO headLeaveDTO) {
         return ResponseEntity.ok(teacherService.applyHeadLeave(headLeaveDTO));
     }
-
 
 }

@@ -2,20 +2,23 @@ package in.edu.jspmjscoe.admissionportal.controllers.teacher.appriasal;
 
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.appriasal.TeacherAppraisalDTO;
 import in.edu.jspmjscoe.admissionportal.services.teacher.TeacherService;
+import in.edu.jspmjscoe.admissionportal.services.teacher.appraisal.TeacherAppraisalService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/teacher/appraisals")
 @RequiredArgsConstructor
 public class TeacherAppraisalController {
 
-    private final TeacherService appraisalService;
+    private final TeacherAppraisalService teacherAppraisalService;
 
+    // -------------------- CREATE APPRAISAL --------------------
     @PostMapping(consumes = "multipart/form-data")
     public ResponseEntity<TeacherAppraisalDTO> createAppraisal(
             @RequestPart("data") TeacherAppraisalDTO dto,
@@ -23,33 +26,15 @@ public class TeacherAppraisalController {
             @RequestPart(value = "photo", required = false) MultipartFile photo,
             @RequestPart(value = "video", required = false) MultipartFile video
     ) {
-        // Example: save files to disk/cloud, and set paths into DTO
-        if (document != null) {
-            dto.setAppraisalDocumentPath("/uploads/docs/" + document.getOriginalFilename());
-        }
-        if (photo != null) {
-            dto.setActivityPhotoPath("/uploads/photos/" + photo.getOriginalFilename());
-        }
-        if (video != null) {
-            dto.setActivityVideoPath("/uploads/videos/" + video.getOriginalFilename());
-        }
-
-        return ResponseEntity.ok(appraisalService.createAppraisal(dto));
+        TeacherAppraisalDTO saved = teacherAppraisalService.createAppraisal(dto, document, photo, video);
+        return ResponseEntity.ok(saved);
     }
 
-
-    @GetMapping("/{id}")
-    public ResponseEntity<TeacherAppraisalDTO> getAppraisal(@PathVariable Long id) {
-        return ResponseEntity.ok(appraisalService.getAppraisalById(id));
-    }
-
+    // -------------------- GET APPRAISALS BY TEACHER --------------------
     @GetMapping("/teacher/{teacherId}")
     public ResponseEntity<List<TeacherAppraisalDTO>> getAppraisalsByTeacher(@PathVariable Long teacherId) {
-        return ResponseEntity.ok(appraisalService.getAppraisalsByTeacher(teacherId));
+        List<TeacherAppraisalDTO> dtos = teacherAppraisalService.getAppraisalsByTeacher(teacherId);
+        return ResponseEntity.ok(dtos);
     }
 
-    @GetMapping
-    public ResponseEntity<List<TeacherAppraisalDTO>> getAllAppraisals() {
-        return ResponseEntity.ok(appraisalService.getAllAppraisals());
-    }
 }

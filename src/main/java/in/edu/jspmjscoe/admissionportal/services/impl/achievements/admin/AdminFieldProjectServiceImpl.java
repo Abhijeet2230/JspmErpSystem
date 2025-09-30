@@ -19,7 +19,7 @@ public class AdminFieldProjectServiceImpl implements AdminFieldProjectService {
     @Transactional
     public void updateFieldProject(FieldProjectUpdateRequestDTO request) {
         StudentUnitAssessment assessment = studentUnitAssessmentRepository
-                .findByStudentAcademicYearIdAndSubjectIdAndUnitNumber(
+                .findByStudentAcademicYear_StudentAcademicYearIdAndSubject_SubjectIdAndUnitNumber(
                         request.getStudentAcademicYearId(),
                         request.getSubjectId(),
                         request.getUnitNumber()
@@ -35,7 +35,7 @@ public class AdminFieldProjectServiceImpl implements AdminFieldProjectService {
     public void updateFieldProjectBulk(FieldProjectBulkUpdateRequestDTO request) {
         request.getUnitMarks().forEach((unitNumber, marks) -> {
             StudentUnitAssessment assessment = studentUnitAssessmentRepository
-                    .findByStudentAcademicYearIdAndSubjectIdAndUnitNumber(
+                    .findByStudentAcademicYear_StudentAcademicYearIdAndSubject_SubjectIdAndUnitNumber(
                             request.getStudentAcademicYearId(),
                             request.getSubjectId(),
                             unitNumber
