@@ -1,4 +1,4 @@
-package in.edu.jspmjscoe.admissionportal.exception;
+package in.edu.jspmjscoe.admissionportal.exception.trainingplacement;
 
 public class TrainingPlacementNotFoundException extends RuntimeException {
     public TrainingPlacementNotFoundException(Long studentId, String testName) {

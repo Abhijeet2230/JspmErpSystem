@@ -1,7 +1,7 @@
 package in.edu.jspmjscoe.admissionportal.services.impl.achievements.admin;
 
 import in.edu.jspmjscoe.admissionportal.dtos.achievements.competition.CompetitionUpdateResultDTO;
-import in.edu.jspmjscoe.admissionportal.exception.CompetitionMarkException;
+import in.edu.jspmjscoe.admissionportal.exception.achievement.CompetitionMarkException;
 import in.edu.jspmjscoe.admissionportal.model.achievements.Competition;
 import in.edu.jspmjscoe.admissionportal.model.student.StudentAcademicYear;
 import in.edu.jspmjscoe.admissionportal.model.trainingplacement.TrainingPlacementRecord;

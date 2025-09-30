@@ -1,7 +1,7 @@
 package in.edu.jspmjscoe.admissionportal.services.impl.achievements.admin;
 
 import in.edu.jspmjscoe.admissionportal.dtos.achievements.certificate.CertificateUpdateResultDTO;
-import in.edu.jspmjscoe.admissionportal.exception.CertificateMarkException;
+import in.edu.jspmjscoe.admissionportal.exception.achievement.CertificateMarkException;
 import in.edu.jspmjscoe.admissionportal.model.achievements.Certificate;
 import in.edu.jspmjscoe.admissionportal.model.student.StudentAcademicYear;
 import in.edu.jspmjscoe.admissionportal.model.trainingplacement.TrainingPlacementRecord;

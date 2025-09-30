@@ -7,6 +7,6 @@ import java.util.List;
 
 @Data
 @AllArgsConstructor
-public class FieldProjectBulkUpdateRequestDTO {
-    private List<FieldProjectUpdateRequestDTO> updates;
+public class FieldProjectBulkUpdateResultDTO {
+    private List<FieldProjectSingleUpdateResultDTO> updates;
 }

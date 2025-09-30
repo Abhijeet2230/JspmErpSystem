@@ -1,8 +1,17 @@
 package in.edu.jspmjscoe.admissionportal.controllers.exception;
 
-import in.edu.jspmjscoe.admissionportal.dtos.apiresponse.ApiResponse;
 import in.edu.jspmjscoe.admissionportal.dtos.response.ErrorResponse;
 import in.edu.jspmjscoe.admissionportal.exception.*;
+import in.edu.jspmjscoe.admissionportal.exception.achievement.CertificateMarkException;
+import in.edu.jspmjscoe.admissionportal.exception.achievement.CompetitionMarkException;
+import in.edu.jspmjscoe.admissionportal.exception.achievement.FieldProjectMarkException;
+import in.edu.jspmjscoe.admissionportal.exception.achievement.InternshipMarkException;
+import in.edu.jspmjscoe.admissionportal.exception.cce.ExamNotFoundException;
+import in.edu.jspmjscoe.admissionportal.exception.cce.UnitAssessmentNotFoundException;
+import in.edu.jspmjscoe.admissionportal.exception.minio.MinioStorageException;
+import in.edu.jspmjscoe.admissionportal.exception.security.InvalidCredentialsException;
+import in.edu.jspmjscoe.admissionportal.exception.trainingplacement.InvalidTrainingPlacementRequestException;
+import in.edu.jspmjscoe.admissionportal.exception.trainingplacement.TrainingPlacementNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
@@ -167,6 +176,22 @@ public class GlobalExceptionHandler {
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.BAD_REQUEST.value())
                 .error("Invalid Competition Marks")
+                .message(ex.getMessage())
+                .path(request.getRequestURI())
+                .build();
+
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(FieldProjectMarkException.class)
+    public ResponseEntity<ErrorResponse> handleFieldProjectMarkException(
+            FieldProjectMarkException ex,
+            HttpServletRequest request) {
+
+        ErrorResponse response = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error("Invalid Field Project Marks")
                 .message(ex.getMessage())
                 .path(request.getRequestURI())
                 .build();

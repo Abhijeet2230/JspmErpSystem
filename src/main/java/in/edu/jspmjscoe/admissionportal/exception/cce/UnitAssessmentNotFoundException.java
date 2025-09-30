@@ -1,4 +1,4 @@
-package in.edu.jspmjscoe.admissionportal.exception;
+package in.edu.jspmjscoe.admissionportal.exception.cce;
 
 public class UnitAssessmentNotFoundException extends RuntimeException {
 

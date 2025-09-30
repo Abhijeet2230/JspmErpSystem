@@ -2,19 +2,25 @@ package in.edu.jspmjscoe.admissionportal.services.impl.assessment;
 
 import in.edu.jspmjscoe.admissionportal.dtos.assessment.*;
 import in.edu.jspmjscoe.admissionportal.dtos.subject.SubjectDTO;
-import in.edu.jspmjscoe.admissionportal.exception.ExamNotFoundException;
-import in.edu.jspmjscoe.admissionportal.exception.UnitAssessmentNotFoundException;
+import in.edu.jspmjscoe.admissionportal.exception.ResourceNotFoundException;
+import in.edu.jspmjscoe.admissionportal.exception.cce.ExamNotFoundException;
+import in.edu.jspmjscoe.admissionportal.exception.cce.UnitAssessmentNotFoundException;
 import in.edu.jspmjscoe.admissionportal.mappers.assessment.*;
 import in.edu.jspmjscoe.admissionportal.mappers.subject.SubjectMapper;
 import in.edu.jspmjscoe.admissionportal.model.assessment.StudentExam;
 import in.edu.jspmjscoe.admissionportal.model.assessment.StudentUnitAssessment;
+import in.edu.jspmjscoe.admissionportal.model.security.User;
+import in.edu.jspmjscoe.admissionportal.model.student.Student;
 import in.edu.jspmjscoe.admissionportal.model.student.StudentAcademicYear;
 import in.edu.jspmjscoe.admissionportal.repositories.assessment.StudentExamRepository;
 import in.edu.jspmjscoe.admissionportal.repositories.assessment.StudentUnitAssessmentRepository;
+import in.edu.jspmjscoe.admissionportal.repositories.security.UserRepository;
 import in.edu.jspmjscoe.admissionportal.repositories.student.StudentAcademicYearRepository;
+import in.edu.jspmjscoe.admissionportal.repositories.student.StudentRepository;
 import in.edu.jspmjscoe.admissionportal.repositories.subject.SubjectRepository;
 import in.edu.jspmjscoe.admissionportal.services.assessment.CceAdminService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,7 +36,8 @@ public class CceAdminServiceImpl implements CceAdminService {
     private final SubjectRepository subjectRepository;
     private final StudentUnitAssessmentRepository studentUnitAssessmentRepository;
     private final StudentExamRepository examRepository;
-
+    private final UserRepository userRepository;
+    private final StudentRepository studentRepository;
     private final StudentCCEMapper studentCCEMapper;
     private final StudentUnitAssessmentMapper studentUnitAssessmentMapper;
     private final StudentExamMapper studentExamMapper;
@@ -209,4 +216,27 @@ public class CceAdminServiceImpl implements CceAdminService {
                 .map(studentUnitAssessmentMapper::toDTO)
                 .toList();
     }
+
+
+    @Override
+    public List<SubjectDTO> getSubjectsForLoggedInStudent(UserDetails userDetails) {
+        // 1. Find logged-in user
+        User user = userRepository.findByUserName(userDetails.getUsername())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        // 2. Get student by user
+        Student student = studentRepository.findByUser(user)
+                .orElseThrow(() -> new ResourceNotFoundException("Student profile not found"));
+
+        // 3. Get current academic year (latest batch year)
+        StudentAcademicYear academicYear = student.getStudentAcademicYears().stream()
+                .max(Comparator.comparing(StudentAcademicYear::getBatchYear))
+                .orElseThrow(() -> new ResourceNotFoundException("No academic year found for student"));
+
+        String division = academicYear.getDivision();
+
+        // 4. Reuse existing division → subjects logic
+        return getSubjectsForDivision(division);
+    }
+
 }

@@ -2,11 +2,9 @@ package in.edu.jspmjscoe.admissionportal.services.impl.student;
 
 import in.edu.jspmjscoe.admissionportal.dtos.security.ChangePasswordRequest;
 import in.edu.jspmjscoe.admissionportal.dtos.student.StudentDTO;
-import in.edu.jspmjscoe.admissionportal.exception.InvalidCredentialsException;
+import in.edu.jspmjscoe.admissionportal.exception.security.InvalidCredentialsException;
 import in.edu.jspmjscoe.admissionportal.exception.ResourceNotFoundException;
 import in.edu.jspmjscoe.admissionportal.mappers.student.StudentMapper;
-import in.edu.jspmjscoe.admissionportal.model.student.Gender;
-import in.edu.jspmjscoe.admissionportal.model.student.Student;
 import in.edu.jspmjscoe.admissionportal.model.security.User;
 import in.edu.jspmjscoe.admissionportal.repositories.student.StudentRepository;
 import in.edu.jspmjscoe.admissionportal.repositories.security.UserRepository;
@@ -16,7 +14,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service

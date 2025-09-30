@@ -1,4 +1,4 @@
-package in.edu.jspmjscoe.admissionportal.exception;
+package in.edu.jspmjscoe.admissionportal.exception.achievement;
 
 public class InvalidCertificateMarksException extends RuntimeException {
     public InvalidCertificateMarksException(Long certificateId, Double marks) {

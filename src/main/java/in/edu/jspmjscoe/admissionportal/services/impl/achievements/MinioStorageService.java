@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import in.edu.jspmjscoe.admissionportal.exception.MinioStorageException;
+import in.edu.jspmjscoe.admissionportal.exception.minio.MinioStorageException;
 
 import java.io.InputStream;
 

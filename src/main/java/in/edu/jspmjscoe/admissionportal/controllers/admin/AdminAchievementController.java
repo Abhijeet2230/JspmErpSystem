@@ -3,12 +3,12 @@ package in.edu.jspmjscoe.admissionportal.controllers.admin;
 import in.edu.jspmjscoe.admissionportal.dtos.achievements.admin.AdminAchievementResponseDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.achievements.certificate.CertificateUpdateResultDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.achievements.competition.CompetitionUpdateResultDTO;
+import in.edu.jspmjscoe.admissionportal.dtos.achievements.fieldproject.FieldProjectBulkUpdateRequestDTO;
+import in.edu.jspmjscoe.admissionportal.dtos.achievements.fieldproject.FieldProjectBulkUpdateResultDTO;
+import in.edu.jspmjscoe.admissionportal.dtos.achievements.fieldproject.FieldProjectUpdateResultDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.achievements.internship.InternshipUpdateResultDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.apiresponse.ApiResponse;
-import in.edu.jspmjscoe.admissionportal.services.achievements.admin.AdminAchievementService;
-import in.edu.jspmjscoe.admissionportal.services.achievements.admin.AdminCertificateService;
-import in.edu.jspmjscoe.admissionportal.services.achievements.admin.AdminCompetitionService;
-import in.edu.jspmjscoe.admissionportal.services.achievements.admin.AdminInternshipService;
+import in.edu.jspmjscoe.admissionportal.services.achievements.admin.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +24,7 @@ public class AdminAchievementController {
     private final AdminCertificateService adminCertificateService;
     private final AdminInternshipService adminInternshipService;
     private final AdminCompetitionService adminCompetitionService;
+    private final AdminFieldProjectService adminFieldProjectService;
 
     /**
      * Fetch achievements dynamically based on filters.
@@ -99,6 +100,24 @@ public class AdminAchievementController {
                 new ApiResponse<>(200, "Competition marks updated successfully", result)
         );
     }
+
+
+    @PatchMapping("/fieldprojects/marks/bulk")
+    public ResponseEntity<ApiResponse<FieldProjectBulkUpdateResultDTO>> updateFieldProjectMarksBulk(
+            @RequestBody FieldProjectBulkUpdateRequestDTO bulkRequest) {
+
+        FieldProjectBulkUpdateResultDTO result = adminFieldProjectService.updateFieldProjectsBulk(bulkRequest);
+
+        ApiResponse<FieldProjectBulkUpdateResultDTO> response = new ApiResponse<>(
+                200,
+                "Field project marks updated successfully",
+                result
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
+
 
 
 

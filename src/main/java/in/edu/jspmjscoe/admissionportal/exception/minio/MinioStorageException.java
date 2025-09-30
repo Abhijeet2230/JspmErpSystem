@@ -1,4 +1,4 @@
-package in.edu.jspmjscoe.admissionportal.exception;
+package in.edu.jspmjscoe.admissionportal.exception.minio;
 
 public class MinioStorageException extends RuntimeException {
 

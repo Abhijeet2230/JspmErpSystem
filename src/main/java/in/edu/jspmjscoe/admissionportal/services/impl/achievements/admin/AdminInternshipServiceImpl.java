@@ -1,7 +1,7 @@
 package in.edu.jspmjscoe.admissionportal.services.impl.achievements.admin;
 
 import in.edu.jspmjscoe.admissionportal.dtos.achievements.internship.InternshipUpdateResultDTO;
-import in.edu.jspmjscoe.admissionportal.exception.InternshipMarkException;
+import in.edu.jspmjscoe.admissionportal.exception.achievement.InternshipMarkException;
 import in.edu.jspmjscoe.admissionportal.model.achievements.Internship;
 import in.edu.jspmjscoe.admissionportal.model.student.StudentAcademicYear;
 import in.edu.jspmjscoe.admissionportal.model.trainingplacement.TrainingPlacementRecord;

@@ -1,4 +1,4 @@
-package in.edu.jspmjscoe.admissionportal.exception;
+package in.edu.jspmjscoe.admissionportal.exception.achievement;
 
 public class CompetitionMarkException extends RuntimeException {
     public CompetitionMarkException(String message) {

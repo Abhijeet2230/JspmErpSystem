@@ -1,14 +1,18 @@
 package in.edu.jspmjscoe.admissionportal.dtos.achievements.fieldproject;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class FieldProjectUpdateRequestDTO {
-    private Long studentAcademicYearId;
-    private Long subjectId;
-    private Integer unitNumber;   // 1–5
-    private Double marks;         // out of 10
+    private Long fieldProjectId;         // FieldProject row ID
+    private Long studentAcademicYearId;  // Student link
+    private Long subjectId;              // Subject link
+    private Integer unitNumber;          // Unit number (1..5)
+    private Double marks;                // Marks out of 10
 }

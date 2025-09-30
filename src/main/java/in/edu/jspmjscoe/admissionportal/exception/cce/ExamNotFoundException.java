@@ -1,4 +1,4 @@
-package in.edu.jspmjscoe.admissionportal.exception;
+package in.edu.jspmjscoe.admissionportal.exception.cce;
 
 public class ExamNotFoundException extends RuntimeException {
 

@@ -2,13 +2,15 @@ package in.edu.jspmjscoe.admissionportal.controllers.student;
 
 import in.edu.jspmjscoe.admissionportal.dtos.assessment.studentside.StudentCCEProfileResponseDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.security.ChangePasswordRequest;
+import in.edu.jspmjscoe.admissionportal.dtos.subject.SubjectDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.trainingplacement.StudentPlacementDTO;
 import in.edu.jspmjscoe.admissionportal.exception.ResourceNotFoundException;
-import in.edu.jspmjscoe.admissionportal.exception.UnauthorizedException;
+import in.edu.jspmjscoe.admissionportal.exception.security.UnauthorizedException;
 import in.edu.jspmjscoe.admissionportal.model.student.Student;
 import in.edu.jspmjscoe.admissionportal.model.security.User;
 import in.edu.jspmjscoe.admissionportal.repositories.student.StudentRepository;
 import in.edu.jspmjscoe.admissionportal.repositories.security.UserRepository;
+import in.edu.jspmjscoe.admissionportal.services.assessment.CceAdminService;
 import in.edu.jspmjscoe.admissionportal.services.assessment.StudentCCEProfileService;
 import in.edu.jspmjscoe.admissionportal.services.student.StudentService;
 import in.edu.jspmjscoe.admissionportal.services.trainingplacement.TrainingPlacementService;
@@ -18,6 +20,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/student")
 @RequiredArgsConstructor
@@ -26,9 +30,11 @@ public class StudentController {
     private final StudentRepository studentRepository;
     private final UserRepository userRepository;
     private final StudentService studentService;
-    private final StudentCCEProfileService studentCCEProfileService; // ✅ Inject service
+    private final StudentCCEProfileService studentCCEProfileService;
     private final TrainingPlacementService trainingPlacementService;
+    private final CceAdminService cceAdminService;
 
+    
 
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentStudent(@AuthenticationPrincipal UserDetails userDetails) {
@@ -100,5 +106,16 @@ public class StudentController {
 
         return ResponseEntity.ok(placement);
     }
+
+
+    // ----------------- Subjects for Logged In Student -----------------
+    @GetMapping("/subjects")
+    public ResponseEntity<List<SubjectDTO>> getSubjectsForLoggedInStudent(
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        List<SubjectDTO> subjects = cceAdminService.getSubjectsForLoggedInStudent(userDetails);
+        return ResponseEntity.ok(subjects);
+    }
+
 
 }
