@@ -1,4 +1,4 @@
-package in.edu.jspmjscoe.admissionportal.controllers.admin;
+package in.edu.jspmjscoe.admissionportal.controllers.admin.teacher;
 
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.LeaveDTO;
 import in.edu.jspmjscoe.admissionportal.model.security.Status;
@@ -12,7 +12,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/admin/leave")
+@RequestMapping("/api/admin")
 public class LeaveController {
 
     private final LeaveRepository leaveRepository;

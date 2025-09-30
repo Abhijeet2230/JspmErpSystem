@@ -1,11 +1,13 @@
-package in.edu.jspmjscoe.admissionportal.controllers.admin;
+package in.edu.jspmjscoe.admissionportal.controllers.admin.achievement;
 
 import in.edu.jspmjscoe.admissionportal.dtos.achievements.admin.AdminAchievementResponseDTO;
+import in.edu.jspmjscoe.admissionportal.dtos.achievements.certificate.CertificateMarksBulkUpdateRequestDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.achievements.certificate.CertificateUpdateResultDTO;
+import in.edu.jspmjscoe.admissionportal.dtos.achievements.competition.CompetitionMarksBulkUpdateRequestDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.achievements.competition.CompetitionUpdateResultDTO;
-import in.edu.jspmjscoe.admissionportal.dtos.achievements.fieldproject.FieldProjectBulkUpdateRequestDTO;
-import in.edu.jspmjscoe.admissionportal.dtos.achievements.fieldproject.FieldProjectBulkUpdateResultDTO;
-import in.edu.jspmjscoe.admissionportal.dtos.achievements.fieldproject.FieldProjectUpdateResultDTO;
+import in.edu.jspmjscoe.admissionportal.dtos.achievements.fieldproject.request.FieldProjectBulkUpdateRequestDTO;
+import in.edu.jspmjscoe.admissionportal.dtos.achievements.fieldproject.response.FieldProjectBulkUpdateResultDTO;
+import in.edu.jspmjscoe.admissionportal.dtos.achievements.internship.InternshipMarksBulkUpdateRequestDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.achievements.internship.InternshipUpdateResultDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.apiresponse.ApiResponse;
 import in.edu.jspmjscoe.admissionportal.services.achievements.admin.*;
@@ -61,8 +63,10 @@ public class AdminAchievementController {
 
     @PatchMapping("/certificates/marks/bulk")
     public ResponseEntity<ApiResponse<CertificateUpdateResultDTO>> updateCertificateMarksBulk(
-            @RequestBody Map<Long, Double> certificateMarks) {
-        CertificateUpdateResultDTO result = adminCertificateService.assignCertificateMarksBulk(certificateMarks);
+            @RequestBody CertificateMarksBulkUpdateRequestDTO request) {
+
+        CertificateUpdateResultDTO result = adminCertificateService
+                .assignCertificateMarksBulk(request.getUpdates());
 
         ApiResponse<CertificateUpdateResultDTO> response = new ApiResponse<>(
                 200,
@@ -75,10 +79,10 @@ public class AdminAchievementController {
 
     @PatchMapping("/internships/marks/bulk")
     public ResponseEntity<ApiResponse<InternshipUpdateResultDTO>> updateInternshipMarksBulk(
-            @RequestBody Map<Long, Double> internshipMarks) {
+            @RequestBody InternshipMarksBulkUpdateRequestDTO request) {
 
-
-        InternshipUpdateResultDTO result = adminInternshipService.assignInternshipMarksBulk(internshipMarks);
+        InternshipUpdateResultDTO result = adminInternshipService
+                .assignInternshipMarksBulk(request.getUpdates());
 
         ApiResponse<InternshipUpdateResultDTO> response = new ApiResponse<>(
                 200,
@@ -90,11 +94,13 @@ public class AdminAchievementController {
     }
 
 
+
     @PatchMapping("/competitions/marks/bulk")
     public ResponseEntity<ApiResponse<CompetitionUpdateResultDTO>> updateCompetitionMarksBulk(
-            @RequestBody Map<Long, Double> competitionMarks) {
+            @RequestBody CompetitionMarksBulkUpdateRequestDTO request) {
 
-        CompetitionUpdateResultDTO result = adminCompetitionService.assignCompetitionMarksBulk(competitionMarks);
+        CompetitionUpdateResultDTO result = adminCompetitionService
+                .assignCompetitionMarksBulk(request.getUpdates());
 
         return ResponseEntity.ok(
                 new ApiResponse<>(200, "Competition marks updated successfully", result)
@@ -116,10 +122,6 @@ public class AdminAchievementController {
 
         return ResponseEntity.ok(response);
     }
-
-
-
-
 
 }
 

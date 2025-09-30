@@ -1,5 +1,6 @@
 package in.edu.jspmjscoe.admissionportal.services.impl.achievements.admin;
 
+import in.edu.jspmjscoe.admissionportal.dtos.achievements.competition.CompetitionMarksUpdateDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.achievements.competition.CompetitionUpdateResultDTO;
 import in.edu.jspmjscoe.admissionportal.exception.achievement.CompetitionMarkException;
 import in.edu.jspmjscoe.admissionportal.model.achievements.Competition;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,28 +28,41 @@ public class AdminCompetitionServiceImpl implements AdminCompetitionService {
 
     @Override
     @Transactional
-    public CompetitionUpdateResultDTO assignCompetitionMarksBulk(Map<Long, Double> competitionMarks) {
-        // 1️⃣ Fetch competitions by IDs
+    public CompetitionUpdateResultDTO assignCompetitionMarksBulk(List<CompetitionMarksUpdateDTO> updates) {
+        if (updates == null || updates.isEmpty()) {
+            return new CompetitionUpdateResultDTO(List.of(), 0.0);
+        }
+
+        Map<Long, Double> competitionMarks = updates.stream()
+                .collect(Collectors.toMap(
+                        CompetitionMarksUpdateDTO::getCompetitionId,
+                        CompetitionMarksUpdateDTO::getMarks,
+                        (existing, replacement) -> replacement // handle duplicates
+                ));
+
         List<Competition> competitions = competitionRepository.findAllById(competitionMarks.keySet());
 
-        // 2️⃣ Update marks
-        competitions.forEach(comp -> {
-            Double marks = competitionMarks.get(comp.getCompetitionId());
+        if (competitions.isEmpty()) {
+            throw new CompetitionMarkException("No valid competitions found for provided IDs.");
+        }
+
+        competitions.forEach(competition -> {
+            Double marks = competitionMarks.get(competition.getCompetitionId());
             if (marks == null) return;
 
             if (marks < 0 || marks > MAX_MARK_PER_COMPETITION) {
                 throw new CompetitionMarkException(
-                        "Invalid marks (" + marks + ") for competitionId=" + comp.getCompetitionId()
+                        "Invalid marks (" + marks + ") for competitionId=" + competition.getCompetitionId()
                                 + ". Allowed range: 0–" + MAX_MARK_PER_COMPETITION
                 );
             }
 
-            comp.setMarks(marks);
+            competition.setMarks(marks);
         });
 
         competitionRepository.saveAll(competitions);
 
-        // 3️⃣ Recalculate score for student (all belong to same student in bulk)
+
         StudentAcademicYear studentAcademicYear = competitions.get(0).getStudentAcademicYear();
         double recalculatedScore = recalcAndSaveCompetitionScore(studentAcademicYear);
 

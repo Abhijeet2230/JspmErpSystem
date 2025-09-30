@@ -1,4 +1,4 @@
-package in.edu.jspmjscoe.admissionportal.controllers.admin;
+package in.edu.jspmjscoe.admissionportal.controllers.admin.trainingplacement;
 
 import in.edu.jspmjscoe.admissionportal.dtos.apiresponse.ApiResponse;
 import in.edu.jspmjscoe.admissionportal.dtos.trainingplacement.BulkTrainingPlacementPatchRequest;

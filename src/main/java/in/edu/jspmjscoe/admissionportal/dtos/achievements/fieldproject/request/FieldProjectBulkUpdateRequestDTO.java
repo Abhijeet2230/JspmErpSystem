@@ -1,4 +1,4 @@
-package in.edu.jspmjscoe.admissionportal.dtos.achievements.fieldproject;
+package in.edu.jspmjscoe.admissionportal.dtos.achievements.fieldproject.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

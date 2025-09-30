@@ -1,4 +1,4 @@
-package in.edu.jspmjscoe.admissionportal.controllers.admin;
+package in.edu.jspmjscoe.admissionportal.controllers.admin.teacher;
 
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.TeacherDTO;
 import in.edu.jspmjscoe.admissionportal.model.security.Status;

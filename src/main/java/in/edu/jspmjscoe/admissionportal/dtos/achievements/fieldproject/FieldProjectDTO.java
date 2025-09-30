@@ -25,6 +25,5 @@ public class FieldProjectDTO {
 
     // 🔹 New fields
     private Long subjectId;               // linked subject ID
-    private String subjectName;           // subject name
     private Integer unitNumber;
 }
