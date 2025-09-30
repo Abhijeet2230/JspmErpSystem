@@ -5,6 +5,8 @@ import in.edu.jspmjscoe.admissionportal.services.teacher.TeacherService;
 import in.edu.jspmjscoe.admissionportal.services.teacher.appraisal.TeacherAppraisalService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,11 +24,12 @@ public class TeacherAppraisalController {
     @PostMapping(consumes = "multipart/form-data")
     public ResponseEntity<TeacherAppraisalDTO> createAppraisal(
             @RequestPart("data") TeacherAppraisalDTO dto,
+            @AuthenticationPrincipal UserDetails userDetails,
             @RequestPart(value = "document", required = false) MultipartFile document,
             @RequestPart(value = "photo", required = false) MultipartFile photo,
             @RequestPart(value = "video", required = false) MultipartFile video
     ) {
-        TeacherAppraisalDTO saved = teacherAppraisalService.createAppraisal(dto, document, photo, video);
+        TeacherAppraisalDTO saved = teacherAppraisalService.createAppraisal(dto,userDetails,document, photo, video);
         return ResponseEntity.ok(saved);
     }
 

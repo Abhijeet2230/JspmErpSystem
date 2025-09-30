@@ -54,6 +54,10 @@ public class TeacherAppraisal {
     @Column(nullable = false)
     private String naacCriteria;      // Multiple selection allowed in frontend, comma-separated
 
+    // ----------------- Admin Marks -----------------
+    @Column(nullable = true)
+    private Double marks;  // Nullable initially; admin will set later
+
     @Column(nullable = false)
     private String appraisalDocumentPath;
 
@@ -61,4 +65,5 @@ public class TeacherAppraisal {
     private String activityPhotoPath;
 
     private String activityVideoPath;
+
 }

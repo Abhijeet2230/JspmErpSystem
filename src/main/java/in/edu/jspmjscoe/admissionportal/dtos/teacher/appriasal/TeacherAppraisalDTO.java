@@ -26,8 +26,10 @@ public class TeacherAppraisalDTO {
     private String eventType;
     private String nbaCriteria;
     private String naacCriteria;
+    private Double marks;
 
     private String appraisalDocumentPath;
     private String activityPhotoPath;
     private String activityVideoPath;
+
 }

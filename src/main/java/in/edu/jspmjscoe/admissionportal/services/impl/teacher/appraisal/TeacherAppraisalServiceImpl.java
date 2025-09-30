@@ -1,19 +1,23 @@
 package in.edu.jspmjscoe.admissionportal.services.impl.teacher.appraisal;
 
-import in.edu.jspmjscoe.admissionportal.dtos.teacher.TeacherDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.appriasal.TeacherAppraisalDTO;
+import in.edu.jspmjscoe.admissionportal.dtos.teacher.appriasal.TeacherAppraisalMarksDTO;
 import in.edu.jspmjscoe.admissionportal.exception.ResourceNotFoundException;
 import in.edu.jspmjscoe.admissionportal.exception.TeacherNotFoundException;
 import in.edu.jspmjscoe.admissionportal.mappers.teacher.appriasal.TeacherAppraisalMapper;
+import in.edu.jspmjscoe.admissionportal.model.security.User;
 import in.edu.jspmjscoe.admissionportal.model.teacher.Teacher;
 import in.edu.jspmjscoe.admissionportal.model.teacher.appriasal.TeacherAppraisal;
+import in.edu.jspmjscoe.admissionportal.repositories.security.UserRepository;
 import in.edu.jspmjscoe.admissionportal.repositories.teacher.TeacherRepository;
 import in.edu.jspmjscoe.admissionportal.repositories.teacher.appriasal.TeacherAppraisalRepository;
 import in.edu.jspmjscoe.admissionportal.services.impl.achievements.MinioStorageService;
-import in.edu.jspmjscoe.admissionportal.services.teacher.TeacherService;
 import in.edu.jspmjscoe.admissionportal.services.teacher.appraisal.TeacherAppraisalService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -26,15 +30,23 @@ public class TeacherAppraisalServiceImpl implements TeacherAppraisalService {
     private final MinioStorageService minioStorageService;
     private final TeacherAppraisalMapper teacherAppraisalMapper;
     private final TeacherRepository teacherRepository;
+    private final UserRepository userRepository;
 
     @Override
     public TeacherAppraisalDTO createAppraisal(TeacherAppraisalDTO dto,
+                                               @AuthenticationPrincipal UserDetails userDetails,
                                                MultipartFile document,
                                                MultipartFile photo,
                                                MultipartFile video) {
 
+        User user = userRepository.findByUserName(userDetails.getUsername())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        Teacher teacher = teacherRepository.findByUser(user)
+                .orElseThrow(() -> new ResourceNotFoundException("Teacher not found"));
+
         // 1️⃣ Fetch the full Teacher entity based on teacherId
-        Teacher teacherEntity = teacherRepository.findById(dto.getTeacherId())
+        Teacher teacherEntity = teacherRepository.findById(teacher.getTeacherId())
                 .orElseThrow(() -> new TeacherNotFoundException("Teacher not found with ID: " + dto.getTeacherId()));
 
         // Build full name and set in DTO for response
@@ -127,6 +139,24 @@ public class TeacherAppraisalServiceImpl implements TeacherAppraisalService {
                 })
                 .toList();
     }
+
+    @Override
+    @Transactional
+    public List<TeacherAppraisalDTO> bulkUpdateMarks(List<TeacherAppraisalMarksDTO> marksList) {
+        List<TeacherAppraisalDTO> updatedAppraisals = marksList.stream().map(m -> {
+            TeacherAppraisal appraisal = teacherAppraisalRepository.findById(m.getAppraisalId())
+                    .orElseThrow(() -> new RuntimeException("Appraisal not found with ID: " + m.getAppraisalId()));
+
+            appraisal.setMarks(m.getMarks()); // entity is managed, no need for save()
+            return teacherAppraisalMapper.toDTO(appraisal);
+        }).toList();
+
+        teacherAppraisalRepository.flush(); // 🔥 force changes to DB
+
+        return updatedAppraisals;
+    }
+
+
 
     @Override
     public List<TeacherAppraisalDTO> getAppraisalsByTeacher(Long teacherId) {
