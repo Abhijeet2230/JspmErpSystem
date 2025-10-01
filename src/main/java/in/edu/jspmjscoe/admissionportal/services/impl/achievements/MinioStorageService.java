@@ -1,14 +1,14 @@
 package in.edu.jspmjscoe.admissionportal.services.impl.achievements;
 
-import io.minio.GetPresignedObjectUrlArgs;
+import io.minio.GetObjectArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
-import io.minio.http.Method;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import in.edu.jspmjscoe.admissionportal.exception.minio.MinioStorageException;
+import in.edu.jspmjscoe.admissionportal.exception.minio.AchievementFileAccessException;
 
 import java.io.InputStream;
 
@@ -21,6 +21,9 @@ public class MinioStorageService {
     @Value("${minio.bucket}")
     private String bucketName;
 
+    /**
+     * Upload a file to MinIO
+     */
     public String uploadFile(MultipartFile file, String objectName) {
         try (InputStream is = file.getInputStream()) {
             minioClient.putObject(
@@ -33,26 +36,45 @@ public class MinioStorageService {
             );
             return objectName;
         } catch (Exception e) {
-            throw new MinioStorageException("Failed to upload file to MinIO: " + file.getOriginalFilename(), e);
+            throw new AchievementFileAccessException(
+                    "Failed to upload file to MinIO: " + file.getOriginalFilename(), e
+            );
         }
     }
 
+    /**
+     * Generate structured object key
+     */
     public String generateObjectKey(String type, Long studentAcademicYearId, String filename) {
         return type + "/student_" + studentAcademicYearId + "/" + filename;
     }
 
-    public String getPresignedUrl(String objectKey) {
+    /**
+     * Stream file from MinIO
+     */
+    public InputStreamResource getFile(String objectKey) {
+        validateObjectKey(objectKey);
         try {
-            return minioClient.getPresignedObjectUrl(
-                    GetPresignedObjectUrlArgs.builder()
-                            .method(Method.GET)
+            InputStream inputStream = minioClient.getObject(
+                    GetObjectArgs.builder()
                             .bucket(bucketName)
                             .object(objectKey)
-                            .expiry(60 * 60) // 1 hour
-                            .build());
+                            .build()
+            );
+            return new InputStreamResource(inputStream);
         } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("Failed to generate presigned URL", e);
+            throw new AchievementFileAccessException(
+                    "Failed to fetch file from MinIO: " + objectKey, e
+            );
+        }
+    }
+
+    /**
+     * Basic object key validation
+     */
+    private void validateObjectKey(String objectKey) {
+        if (objectKey.contains("..") || objectKey.startsWith("/")) {
+            throw new AchievementFileAccessException("Invalid object key: " + objectKey);
         }
     }
 

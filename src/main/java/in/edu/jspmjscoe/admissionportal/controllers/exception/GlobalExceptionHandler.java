@@ -8,6 +8,7 @@ import in.edu.jspmjscoe.admissionportal.exception.achievement.FieldProjectMarkEx
 import in.edu.jspmjscoe.admissionportal.exception.achievement.InternshipMarkException;
 import in.edu.jspmjscoe.admissionportal.exception.cce.ExamNotFoundException;
 import in.edu.jspmjscoe.admissionportal.exception.cce.UnitAssessmentNotFoundException;
+import in.edu.jspmjscoe.admissionportal.exception.minio.AchievementFileAccessException;
 import in.edu.jspmjscoe.admissionportal.exception.minio.MinioStorageException;
 import in.edu.jspmjscoe.admissionportal.exception.security.InvalidCredentialsException;
 import in.edu.jspmjscoe.admissionportal.exception.trainingplacement.InvalidTrainingPlacementRequestException;
@@ -197,6 +198,21 @@ public class GlobalExceptionHandler {
                 .build();
 
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(AchievementFileAccessException.class)
+    public ResponseEntity<ErrorResponse> handleAchievementFileAccessException(
+            AchievementFileAccessException ex, HttpServletRequest request) {
+
+        ErrorResponse response = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .error("File Access Failed")
+                .message(ex.getMessage())
+                .path(request.getRequestURI())
+                .build();
+
+        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(Exception.class) // fallback

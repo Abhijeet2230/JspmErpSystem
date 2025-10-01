@@ -7,8 +7,11 @@ import in.edu.jspmjscoe.admissionportal.dtos.achievements.fieldproject.response.
 import in.edu.jspmjscoe.admissionportal.exception.achievement.FieldProjectMarkException;
 import in.edu.jspmjscoe.admissionportal.model.achievements.FieldProject;
 import in.edu.jspmjscoe.admissionportal.model.assessment.StudentUnitAssessment;
+import in.edu.jspmjscoe.admissionportal.model.trainingplacement.TrainingPlacementRecord;
 import in.edu.jspmjscoe.admissionportal.repositories.achievements.FieldProjectRepository;
 import in.edu.jspmjscoe.admissionportal.repositories.assessment.StudentUnitAssessmentRepository;
+import in.edu.jspmjscoe.admissionportal.repositories.trainingplacement.TrainingPlacementRecordRepository;
+import in.edu.jspmjscoe.admissionportal.repositories.student.StudentAcademicYearRepository;
 import in.edu.jspmjscoe.admissionportal.services.achievements.admin.AdminFieldProjectService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +26,10 @@ public class AdminFieldProjectServiceImpl implements AdminFieldProjectService {
 
     private final FieldProjectRepository fieldProjectRepository;
     private final StudentUnitAssessmentRepository studentUnitAssessmentRepository;
+    private final TrainingPlacementRecordRepository trainingPlacementRecordRepository;
+    private final StudentAcademicYearRepository studentAcademicYearRepository;
+
+    private static final double MAX_MARK_PER_UNIT = 10.0;
 
     // Single update
     @Override
@@ -44,13 +51,14 @@ public class AdminFieldProjectServiceImpl implements AdminFieldProjectService {
             FieldProjectSingleUpdateResultDTO result = processSingleUpdate(request);
             resultList.add(result);
         }
+
         return new FieldProjectBulkUpdateResultDTO(resultList);
     }
 
     // Helper method to process single update
     private FieldProjectSingleUpdateResultDTO processSingleUpdate(FieldProjectUpdateRequestDTO request) {
         // 1️⃣ Validate marks
-        if (request.getMarks() == null || request.getMarks() < 0 || request.getMarks() > 10) {
+        if (request.getMarks() == null || request.getMarks() < 0 || request.getMarks() > MAX_MARK_PER_UNIT) {
             throw new FieldProjectMarkException("Invalid marks: " + request.getMarks() + ". Allowed range 0–10");
         }
 
@@ -75,7 +83,10 @@ public class AdminFieldProjectServiceImpl implements AdminFieldProjectService {
         assessment.setActivityMarks(request.getMarks());
         studentUnitAssessmentRepository.save(assessment);
 
-        // 4️⃣ Return single update DTO
+        // 4️⃣ Update TrainingPlacementRecord courseProject score
+        recalcAndSaveCourseProjectScore(request.getStudentAcademicYearId());
+
+        // 5️⃣ Return single update DTO
         return new FieldProjectSingleUpdateResultDTO(
                 fieldProject.getFieldProjectId(),
                 request.getStudentAcademicYearId(),
@@ -83,5 +94,39 @@ public class AdminFieldProjectServiceImpl implements AdminFieldProjectService {
                 request.getUnitNumber(),
                 request.getMarks()
         );
+    }
+
+    // Recalculate courseProject score for student
+    private void recalcAndSaveCourseProjectScore(Long studentAcademicYearId) {
+        List<FieldProject> allFieldProjects = fieldProjectRepository
+                .findByStudentAcademicYear_StudentAcademicYearId(studentAcademicYearId);
+
+        if (allFieldProjects.isEmpty()) {
+            return; // nothing to calculate
+        }
+
+        double totalObtained = allFieldProjects.stream()
+                .filter(fp -> fp.getMarks() != null && fp.getMarks() > 0)
+                .mapToDouble(FieldProject::getMarks)
+                .sum();
+
+        double totalPossible = allFieldProjects.size() * MAX_MARK_PER_UNIT;
+
+        double convertedScore = (totalObtained / totalPossible) * 10.0;
+        double convertedScoreRounded = Math.round(convertedScore * 100.0) / 100.0;
+
+        TrainingPlacementRecord tpr = trainingPlacementRecordRepository
+                .findByStudentAcademicYear_StudentAcademicYearId(studentAcademicYearId)
+                .orElseGet(() -> {
+                    TrainingPlacementRecord r = new TrainingPlacementRecord();
+                    r.setStudentAcademicYear(
+                            studentAcademicYearRepository.findById(studentAcademicYearId)
+                                    .orElseThrow(() -> new FieldProjectMarkException("StudentAcademicYear not found"))
+                    );
+                    return r;
+                });
+
+        tpr.setCourseProject(convertedScoreRounded);
+        trainingPlacementRecordRepository.save(tpr);
     }
 }
