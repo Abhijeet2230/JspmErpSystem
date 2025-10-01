@@ -1,38 +1,58 @@
-version: "3.9"
+version: "3.8"
 
 services:
-  mysql:
-    image: mysql:8.0
-    container_name: admission_mysql
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: jspm_jscoe
-    ports:
-      - "3306:3306"
-    networks:
-      - admission-network
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  admissionportal:
-    build: .
-    container_name: admission_app
+  app:
+    build: .  # Build from Dockerfile
     depends_on:
-      mysql:
+      postgres:
+        condition: service_healthy
+      minio:
         condition: service_healthy
     ports:
       - "8080:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/jspm_jscoe?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/jspm_jscoe
+      SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: root
-      SPRING_JPA_HIBERNATE_DDL_AUTO: update
-    networks:
-      - admission-network
+      MINIO_URL: http://minio:9000
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin
 
-networks:
-  admission-network:
-    driver: bridge
+  postgres:
+    image: postgres:15
+    container_name: admission_postgres
+    environment:
+      POSTGRES_DB: jspm_jscoe
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    image: minio/minio
+    container_name: admission_minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin
+    ports:
+      - "9000:9000"  # S3 API
+      - "9001:9001"  # MinIO Web Console
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+  minio_data:
