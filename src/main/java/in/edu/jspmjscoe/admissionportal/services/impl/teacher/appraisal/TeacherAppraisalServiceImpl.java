@@ -156,8 +156,6 @@ public class TeacherAppraisalServiceImpl implements TeacherAppraisalService {
         return updatedAppraisals;
     }
 
-
-
     @Override
     public List<TeacherAppraisalDTO> getAppraisalsByTeacher(Long teacherId) {
         return teacherAppraisalRepository.findByTeacher_TeacherId(teacherId)

@@ -163,18 +163,6 @@ public class AdminController {
         return ResponseEntity.ok(result);
     }
 
-    // ---------- 1. Initialize report for teacher ----------
-    @PostMapping("/initialize/{teacherId}")
-    public ResponseEntity<StaffMonthlyReportDTO> initializeReport(
-            @PathVariable Long teacherId,
-            @RequestParam int year,
-            @RequestParam int month) {
-
-        StaffMonthlyReport report = staffMonthlyReportService.initializeForTeacher(teacherId, year, month);
-        StaffMonthlyReportDTO dto = staffMonthlyReportMapper.toDto(report);
-        return ResponseEntity.ok(dto);
-    }
-
     // ------------------- Teacher Excel Import Endpoint -------------------
     @PostMapping("/import-teachers")
     public ResponseEntity<String> importTeachers(

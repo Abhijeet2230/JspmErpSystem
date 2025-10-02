@@ -1,6 +1,8 @@
 package in.edu.jspmjscoe.admissionportal.services.teacher.staffrecord;
 
+import in.edu.jspmjscoe.admissionportal.dtos.teacher.staffrecord.BulkStaffUpdateDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.staffrecord.StaffMonthlyReportDTO;
+import in.edu.jspmjscoe.admissionportal.mappers.teacher.staffrecord.BulkStaffUpdateMapper;
 import in.edu.jspmjscoe.admissionportal.mappers.teacher.staffrecord.StaffMonthlyReportMapper;
 import in.edu.jspmjscoe.admissionportal.model.teacher.staffrecord.StaffMonthlyReport;
 import in.edu.jspmjscoe.admissionportal.model.teacher.Teacher;
@@ -23,6 +25,7 @@ public class StaffMonthlyReportService {
     private final StaffMonthlyReportRepository staffMonthlyReportRepository;
     private final TeacherRepository teacherRepository;
     private final StaffMonthlyReportMapper staffMonthlyReportMapper;
+    private final BulkStaffUpdateMapper bulkStaffUpdateMapper;
 
     public StaffMonthlyReport initializeForTeacher(Long teacherId, int year, int month) {
         Teacher teacher = teacherRepository.findById(teacherId)
@@ -72,53 +75,24 @@ public class StaffMonthlyReportService {
     }
 
     @Transactional
-    public void bulkUpdate(List<StaffMonthlyReport> reports) {
-        for (StaffMonthlyReport report : reports) {
-            if (report.getTeacher() != null && report.getTeacher().getTeacherId() != null) {
-                Teacher teacher = teacherRepository.findById(report.getTeacher().getTeacherId())
-                        .orElseThrow(() -> new RuntimeException(
-                                "Teacher not found with ID " + report.getTeacher().getTeacherId()));
-                report.setTeacher(teacher);
-                report.setDepartment(teacher.getDepartment());
+    public void bulkUpdate(List<BulkStaffUpdateDTO> dtos) {
+        for (BulkStaffUpdateDTO dto : dtos) {
+            Teacher teacher = teacherRepository.findById(dto.getTeacherId())
+                    .orElseThrow(() -> new RuntimeException("Teacher not found with ID " + dto.getTeacherId()));
 
-                // 🔑 Check if record exists for same teacher + year + month
-                StaffMonthlyReport existing = staffMonthlyReportRepository
-                        .findByTeacherTeacherIdAndYearAndMonth(
-                                teacher.getTeacherId(),
-                                report.getYear(),
-                                report.getMonth()
-                        )
-                        .orElse(null);
+            StaffMonthlyReport existing = staffMonthlyReportRepository
+                    .findByTeacherTeacherIdAndYearAndMonth(dto.getTeacherId(), dto.getYear(), dto.getMonth())
+                    .orElseThrow(() -> new RuntimeException(
+                            "Report not found for teacher " + dto.getTeacherId() + " in " + dto.getMonth() + "/" + dto.getYear()
+                    ));
 
-                if (existing != null) {
-                    // Update existing
-                    existing.setDaysInMonth(report.getDaysInMonth());
-                    existing.setFirstAndThirdSaturday(report.getFirstAndThirdSaturday());
-                    existing.setSundays(report.getSundays());
-                    existing.setOtherHolidays(report.getOtherHolidays());
-                    existing.setActualWorkingDays(report.getActualWorkingDays());
-                    existing.setWorkingOnHoliday(report.getWorkingOnHoliday());
-                    existing.setCl(report.getCl());
-                    existing.setCompOff(report.getCompOff());
-                    existing.setMl(report.getMl());
-                    existing.setEl(report.getEl());
-                    existing.setOdOrDl(report.getOdOrDl());
-                    existing.setLwp(report.getLwp());
-                    existing.setSpecialLeave(report.getSpecialLeave());
-                    existing.setGatePass(report.getGatePass());
-                    existing.setActualPresentDays(report.getActualPresentDays());
-                    existing.setPaidDays(report.getPaidDays());
-                    existing.setPresentPercentage(report.getPresentPercentage());
-                    existing.setRemark(report.getRemark());
+            // Apply only changing fields
+            bulkStaffUpdateMapper.updateEntityFromDto(dto, existing);
 
-                    staffMonthlyReportRepository.save(existing);
-                } else {
-                    // Insert new
-                    staffMonthlyReportRepository.save(report);
-                }
-            }
+            staffMonthlyReportRepository.save(existing);
         }
     }
+
 
     public List<StaffMonthlyReport> getReportsByTeacher(Long teacherId) {
         return staffMonthlyReportRepository.findByTeacherTeacherId(teacherId);
@@ -135,6 +109,7 @@ public class StaffMonthlyReportService {
 
         int sundays = 0;
         int firstAndThirdSaturday = 0;
+
         for (int day = 1; day <= daysInMonth; day++) {
             LocalDate date = ym.atDay(day);
             if (date.getDayOfWeek() == DayOfWeek.SUNDAY) sundays++;
@@ -148,33 +123,21 @@ public class StaffMonthlyReportService {
         List<StaffMonthlyReportDTO> dtos = new ArrayList<>();
 
         for (Teacher teacher : teachers) {
-            StaffMonthlyReportDTO dto = StaffMonthlyReportDTO.builder()
-                    .teacher(staffMonthlyReportMapper.mapTeacherToBasicDTO(teacher))
-                    .year(year)
-                    .month(month)
-                    .daysInMonth(daysInMonth)
-                    .firstAndThirdSaturday(firstAndThirdSaturday)
-                    .sundays(sundays)
-                    .otherHolidays(0)
-                    .actualWorkingDays(0)
-                    .workingOnHoliday(0)
-                    .cl(0)
-                    .compOff(0)
-                    .ml(0)
-                    .el(0)
-                    .odOrDl(0)
-                    .lwp(0)
-                    .specialLeave(0)
-                    .gatePass(0)
-                    .actualPresentDays(0)
-                    .paidDays(0)
-                    .presentPercentage(0.0)
-                    .remark("")
-                    .build();
+            // Check if report exists
+            StaffMonthlyReport report = staffMonthlyReportRepository
+                    .findByTeacherTeacherIdAndYearAndMonth(teacher.getTeacherId(), year, month)
+                    .orElseGet(() -> initializeForTeacher(teacher.getTeacherId(), year, month)); // Auto-initialize if missing
 
-            dtos.add(dto);
+            // Update calculated fields in case month details changed
+            report.setDaysInMonth(daysInMonth);
+            report.setFirstAndThirdSaturday(firstAndThirdSaturday);
+            report.setSundays(sundays);
+            staffMonthlyReportRepository.save(report); // ensure DB is updated
+
+            dtos.add(staffMonthlyReportMapper.toDto(report));
         }
 
         return dtos;
     }
+
 }

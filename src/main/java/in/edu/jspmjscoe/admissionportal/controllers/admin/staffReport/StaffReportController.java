@@ -1,6 +1,7 @@
 package in.edu.jspmjscoe.admissionportal.controllers.admin.staffReport;
 
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.TeacherDTO;
+import in.edu.jspmjscoe.admissionportal.dtos.teacher.staffrecord.BulkStaffUpdateDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.staffrecord.StaffMonthlyReportDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.staffrecord.TeacherBasicDTO;
 import in.edu.jspmjscoe.admissionportal.mappers.teacher.staffrecord.StaffMonthlyReportMapper;
@@ -29,7 +30,7 @@ public class StaffReportController {
     private final TeacherRepository teacherRepository;
 
     // ----------------- Fetch basic teacher info -----------------
-    @GetMapping("/admin/teachers/basic")
+    @GetMapping("/basic")
     public ResponseEntity<List<TeacherBasicDTO>> getAllTeachersBasic() {
         List<TeacherBasicDTO> teacherBasics = teacherRepository.findAllTeacherBasics();
         return ResponseEntity.ok(teacherBasics);
@@ -47,16 +48,13 @@ public class StaffReportController {
 
     // ----------------- Bulk Update for Staff Record -----------------
     @PutMapping("/bulk-update")
-    public ResponseEntity<String> bulkUpdate(@RequestBody List<StaffMonthlyReportDTO> dtos) {
-        List<StaffMonthlyReport> entities = dtos.stream()
-                .map(staffMonthlyReportMapper::toEntity)
-                .collect(Collectors.toList());
-        staffMonthlyReportService.bulkUpdate(entities);
+    public ResponseEntity<String> bulkUpdate(@RequestBody List<BulkStaffUpdateDTO> dtos) {
+        staffMonthlyReportService.bulkUpdate(dtos);
         return ResponseEntity.ok("✅ Bulk update completed successfully!");
     }
 
     // ----------------- Fetch all reports for a teacher -----------------
-    @GetMapping("/teacher/{teacherId}")
+    @GetMapping("/{teacherId}")
     public ResponseEntity<List<StaffMonthlyReportDTO>> getReportsByTeacher(@PathVariable Long teacherId) {
         List<StaffMonthlyReport> reports = staffMonthlyReportService.getReportsByTeacher(teacherId);
         List<StaffMonthlyReportDTO> dtos = reports.stream()
@@ -66,7 +64,7 @@ public class StaffReportController {
     }
 
     // ----------------- Fetch all reports for a department -----------------
-    @GetMapping("/department/{departmentId}")
+    @GetMapping("/{departmentId}")
     public ResponseEntity<List<StaffMonthlyReportDTO>> getReportsByDepartment(@PathVariable Long departmentId) {
         List<StaffMonthlyReport> reports = staffMonthlyReportService.getReportsByDepartment(departmentId);
         List<StaffMonthlyReportDTO> dtos = reports.stream()
