@@ -71,6 +71,7 @@ public class AdminController {
 
     // ------------------- Teacher Endpoints -------------------
 
+
     @GetMapping("/get-accepted-teachers")
     public ResponseEntity<List<TeacherDTO>> getAllAcceptedTeachers() {
         return ResponseEntity.ok(teacherService.getAcceptedTeachers());
@@ -103,12 +104,17 @@ public class AdminController {
 
     @PostMapping("/assign-subject")
     public ResponseEntity<TeacherSubjectDTO> assignSubjectToTeacher(
-            @RequestParam Long teacherId,
-            @RequestParam Long subjectId) {
+            @RequestBody TeacherSubjectDTO requestDto) {
 
-        TeacherSubjectDTO tsDto = teacherService.assignSubjectToTeacher(teacherId, subjectId);
+        TeacherSubjectDTO tsDto = teacherService.assignSubjectToTeacher(
+                requestDto.getTeacherId(),
+                requestDto.getSubjectId(),
+                requestDto.getDivision()
+        );
         return ResponseEntity.ok(tsDto);
     }
+
+
 
     // ------------------- Excel Import Endpoint -------------------
 

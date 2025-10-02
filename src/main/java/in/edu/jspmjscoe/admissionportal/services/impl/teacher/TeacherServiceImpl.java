@@ -4,7 +4,6 @@ import in.edu.jspmjscoe.admissionportal.dtos.teacher.HeadLeaveDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.LeaveDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.TeacherDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.TeacherSubjectDTO;
-import in.edu.jspmjscoe.admissionportal.dtos.teacher.appriasal.TeacherAppraisalDTO;
 import in.edu.jspmjscoe.admissionportal.exception.*;
 import in.edu.jspmjscoe.admissionportal.mappers.teacher.HeadLeaveMapper;
 import in.edu.jspmjscoe.admissionportal.mappers.teacher.LeaveMapper;
@@ -20,7 +19,6 @@ import in.edu.jspmjscoe.admissionportal.model.teacher.HeadLeave;
 import in.edu.jspmjscoe.admissionportal.model.teacher.Leave;
 import in.edu.jspmjscoe.admissionportal.model.teacher.Teacher;
 import in.edu.jspmjscoe.admissionportal.model.teacher.TeacherSubject;
-import in.edu.jspmjscoe.admissionportal.model.teacher.appriasal.TeacherAppraisal;
 import in.edu.jspmjscoe.admissionportal.repositories.security.RoleRepository;
 import in.edu.jspmjscoe.admissionportal.repositories.security.UserRepository;
 import in.edu.jspmjscoe.admissionportal.repositories.subject.DepartmentRepository;
@@ -38,7 +36,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -115,7 +112,7 @@ public class TeacherServiceImpl implements TeacherService {
         Teacher teacher = TeacherMapper.toEntity(teacherDTO, user, department);
 
         // 4️⃣ Set default status
-        teacher.setStatus(Status.PENDING);
+        teacher.setStatus(Status.ACCEPTED);
 
         // 6️⃣ Save teacher with teacherSubjects
         Teacher savedTeacher = teacherRepository.save(teacher);
@@ -180,30 +177,31 @@ public class TeacherServiceImpl implements TeacherService {
 
     // --------------------- Assign Teacher ---------------------
 
-    // TeacherServiceImpl.java
     @Override
-    public TeacherSubjectDTO assignSubjectToTeacher(Long teacherId, Long subjectId) {
+    public TeacherSubjectDTO assignSubjectToTeacher(Long teacherId, Long subjectId, String division) {
         Teacher teacher = teacherRepository.findById(teacherId)
                 .orElseThrow(() -> new TeacherNotFoundException("Teacher not found with ID: " + teacherId));
         Subject subject = subjectRepository.findById(subjectId)
                 .orElseThrow(() -> new SubjectNotFoundException("Subject not found with ID: " + subjectId));
 
-        // check duplicate
+        // check duplicate (same teacher, subject, division)
         boolean alreadyAssigned = teacher.getTeacherSubjects().stream()
-                .anyMatch(ts -> ts.getSubject().getSubjectId().equals(subjectId));
+                .anyMatch(ts -> ts.getSubject().getSubjectId().equals(subjectId)
+                        && ts.getDivision().equalsIgnoreCase(division));
         if (alreadyAssigned) {
-            throw new IllegalStateException("Teacher already assigned to this subject");
+            throw new IllegalStateException("Teacher already assigned to this subject in division " + division);
         }
 
         TeacherSubject ts = TeacherSubject.builder()
                 .teacher(teacher)
                 .subject(subject)
+                .division(division) // ✅ set division
                 .build();
 
-        teacher.addTeacherSubject(ts);  // maintain relationship
+        teacher.addTeacherSubject(ts);
         subject.addTeacherSubject(ts);
 
-        teacherRepository.save(teacher); // cascades TeacherSubject
+        teacherRepository.save(teacher);
 
         return TeacherSubjectDTO.builder()
                 .teacherSubjectId(ts.getTeacherSubjectId())
@@ -211,8 +209,10 @@ public class TeacherServiceImpl implements TeacherService {
                 .teacherName(teacher.getFirstName() + " " + teacher.getLastName())
                 .subjectId(subject.getSubjectId())
                 .subjectName(subject.getName())
+                .division(division)  // ✅ return division
                 .build();
     }
+
 
     // --------------------- TEACHER LEAVES ---------------------
     @Override

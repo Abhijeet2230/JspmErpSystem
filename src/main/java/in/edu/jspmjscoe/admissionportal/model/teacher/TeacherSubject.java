@@ -32,5 +32,5 @@ public class TeacherSubject {
     private Subject subject;
 
     @Column(name = "division", length = 5)
-    private String division;
+    private String division;  // e.g. "A", "B", "C"
 }

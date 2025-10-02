@@ -5,6 +5,7 @@ import in.edu.jspmjscoe.admissionportal.model.security.Status;
 import in.edu.jspmjscoe.admissionportal.repositories.teacher.LeaveRepository;
 import in.edu.jspmjscoe.admissionportal.services.teacher.TeacherService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,7 +20,6 @@ public class AdminTeacherController {
     private final TeacherService teacherService;
 
     // ------------------- Teacher Endpoints -------------------
-
     @GetMapping("/get-accepted-teachers")
     public ResponseEntity<List<TeacherDTO>> getAllAcceptedTeachers() {
         return ResponseEntity.ok(teacherService.getAcceptedTeachers());

@@ -20,6 +20,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.transaction.Transactional;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -106,7 +110,25 @@ public class TeacherExcelImportServiceImpl implements TeacherExcelImportService 
                 teacher.setLastName(dto.getLastName());
                 teacher.setPrefix(dto.getPrefix());
                 teacher.setGender(dto.getGender());
-                teacher.setDateOfBirth(dto.getDateOfBirth());
+                // Convert Date of Birth to yyyy-MM-dd
+                String dobStr = dto.getDateOfBirth();
+                String formattedDob = null;
+                if (dobStr != null && !dobStr.isBlank()) {
+                    try {
+                        // Excel might give dd-MMM-yyyy (e.g., 24-Jan-2025)
+                        SimpleDateFormat excelFormat = new SimpleDateFormat("dd-MMM-yyyy");
+                        Date dobDate = excelFormat.parse(dobStr);
+
+                        // Target format yyyy-MM-dd
+                        SimpleDateFormat targetFormat = new SimpleDateFormat("yyyy-MM-dd");
+                        formattedDob = targetFormat.format(dobDate);
+                    } catch (ParseException e) {
+                        log.warn("Could not parse DOB '{}', using original string", dobStr);
+                        formattedDob = dobStr; // fallback
+                    }
+                }
+                teacher.setDateOfBirth(formattedDob);
+
 
                 // Clean/Truncate phone
                 String phone = dto.getPhone();

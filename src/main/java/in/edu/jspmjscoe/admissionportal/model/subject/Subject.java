@@ -40,7 +40,7 @@ public class Subject {
     @Column(name="has_CCE")
     private Boolean hasCCE;
 
-    @Column(name = "code", nullable = false, unique = true, length = 20)
+    @Column(name = "code", nullable = false, unique = true, length = 50)
     private String code;
 
     @Column(name = "theory_credits")
@@ -55,7 +55,7 @@ public class Subject {
     @Column(name = "semester", nullable = false)
     private Integer semester;
 
-    @Column(name = "subject_type", length = 20)
+    @Column(name = "subject_type", length = 50)
     private String subjectType = "Theory"; // Theory, Lab, Project
 
     @Column(name = "subject_category", length = 20)

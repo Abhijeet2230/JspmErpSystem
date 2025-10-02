@@ -25,6 +25,9 @@ public interface TeacherService {
     Long getCurrentUserId();
 
     TeacherDTO updateTeacherStatus(Long id, Status status);
+
+    TeacherSubjectDTO assignSubjectToTeacher(Long teacherId, Long subjectId, String division);
+
     // New Leave Features
     LeaveDTO applyLeave(LeaveDTO leaveDTO);
 
@@ -50,6 +53,6 @@ public interface TeacherService {
     List<HeadLeaveDTO> getAcceptedHeadLeaves();
 
     HeadLeaveDTO updateHeadLeaveStatus(Long id, Status status);
-    TeacherSubjectDTO assignSubjectToTeacher(Long teacherId, Long subjectId);
+
 
 }
