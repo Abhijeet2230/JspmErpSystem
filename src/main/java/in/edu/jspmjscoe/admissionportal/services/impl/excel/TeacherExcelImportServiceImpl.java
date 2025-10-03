@@ -116,15 +116,15 @@ public class TeacherExcelImportServiceImpl implements TeacherExcelImportService 
                 if (dobStr != null && !dobStr.isBlank()) {
                     try {
                         // Excel might give dd-MMM-yyyy (e.g., 24-Jan-2025)
-                        SimpleDateFormat excelFormat = new SimpleDateFormat("dd-MMM-yyyy");
-                        Date dobDate = excelFormat.parse(dobStr);
+                        SimpleDateFormat excelFormat = new SimpleDateFormat("dd-MMM-yyyy", java.util.Locale.ENGLISH);
+                        Date dobDate = excelFormat.parse(dobStr.trim());
 
                         // Target format yyyy-MM-dd
                         SimpleDateFormat targetFormat = new SimpleDateFormat("yyyy-MM-dd");
                         formattedDob = targetFormat.format(dobDate);
                     } catch (ParseException e) {
                         log.warn("Could not parse DOB '{}', using original string", dobStr);
-                        formattedDob = dobStr; // fallback
+                        formattedDob = dobStr.trim(); // fallback
                     }
                 }
                 teacher.setDateOfBirth(formattedDob);
@@ -138,7 +138,7 @@ public class TeacherExcelImportServiceImpl implements TeacherExcelImportService 
                         phone = phone.substring(0, maxPhoneLength);
                     }
                 }
-                teacher.setPhone(dto.getPhone());
+                teacher.setPhone(phone);
                 teacher.setPersonalEmail(dto.getPersonalEmail());
 
                 teacher.setOfficialEmail(dto.getOfficialEmail());
