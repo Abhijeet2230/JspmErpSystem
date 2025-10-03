@@ -104,18 +104,25 @@
 			<version>5.4.0</version>
 		</dependency>
 
-		<!-- Apache Commons Compress (upgraded to safe version) -->
+		<!-- Apache Commons Compress (required by POI) -->
 		<dependency>
 			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-lang3</artifactId>
-			<version>3.18.0</version>
+			<artifactId>commons-compress</artifactId>
+			<version>1.26.1</version> <!-- safe, latest stable -->
 		</dependency>
-		<!-- Required by POI -->
+
+		<!-- Optional but recommended POI dependencies -->
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-collections4</artifactId>
 			<version>4.4</version>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-math3</artifactId>
+			<version>3.6.1</version>
+		</dependency>
+
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>

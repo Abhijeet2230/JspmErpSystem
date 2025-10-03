@@ -159,11 +159,12 @@ public class ExcelImportServiceImpl implements ExcelImportService {
             throw new RuntimeException("Failed to import Excel file: " + e.getMessage(), e);
         }
     }
+
     @Override
     @Transactional
-    public int importStudentsBasic(MultipartFile file, int headerRowNumber) {
+    public int importStudentsBasic(MultipartFile file) {
         try {
-            List<ExcelStudentDTO> studentDTOs = ExcelHelper.excelToBasicStudentDTOs(file.getInputStream(), headerRowNumber);
+            List<ExcelStudentDTO> studentDTOs = ExcelHelper.excelToBasicStudentDTOs(file.getInputStream());
             log.info(">>> Total students parsed from Excel (basic) = {}", studentDTOs.size());
 
             Role studentRole = roleRepository.findByRoleName(AppRole.ROLE_STUDENT)
@@ -202,6 +203,10 @@ public class ExcelImportServiceImpl implements ExcelImportService {
                             .student(savedStudent)
                             .rollNo(dto.getRollNo())
                             .division(dto.getDivision())
+                            .semester(1)
+                            .batchYear("2025-26")
+                            .yearOfStudy(1)
+                            .course(defaultCourse)
                             .isActive(true)
                             .build();
 
@@ -219,7 +224,6 @@ public class ExcelImportServiceImpl implements ExcelImportService {
             throw new RuntimeException("Failed to import Excel file (basic): " + e.getMessage(), e);
         }
     }
-
 
 }
 

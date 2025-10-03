@@ -157,19 +157,23 @@ public class ExcelHelper {
         }
     }
 
-    public static List<ExcelStudentDTO> excelToBasicStudentDTOs(InputStream is, int headerRowNumber) {
+    public static List<ExcelStudentDTO> excelToBasicStudentDTOs(InputStream is) {
         try (Workbook workbook = new XSSFWorkbook(is)) {
             Sheet sheet = workbook.getSheetAt(0); // First sheet
 
-            int headerRowIndex = headerRowNumber - 1;
+            int headerRowIndex = 3;
             Row headerRow = sheet.getRow(headerRowIndex);
-            if (headerRow == null) throw new RuntimeException("Header row not found at row " + headerRowNumber);
+            if (headerRow == null) throw new RuntimeException("Header row not found at row ");
 
+            // ---- Build header map, normalize headers ----
             Map<String, Integer> headerMap = new HashMap<>();
             for (Cell cell : headerRow) {
-                String header = cell.toString().trim();
-                if (!header.isEmpty()) headerMap.put(header, cell.getColumnIndex());
+                String header = normalizeCell(cell.toString());
+                if (!header.isEmpty()) {
+                    headerMap.put(header, cell.getColumnIndex());
+                }
             }
+            System.out.println("Header Map: " + headerMap);
 
             List<ExcelStudentDTO> students = new ArrayList<>();
 
@@ -179,27 +183,43 @@ public class ExcelHelper {
 
                 ExcelStudentDTO dto = new ExcelStudentDTO();
 
-                // Candidate Name
-                dto.setCandidateName(getCellString(row, headerMap, "Candidate Name"));
+                // ----- Candidate Name -----
+                String candidateName = normalizeCell(getCellString(row, headerMap, "Candidate Name"));
 
-                // DOB (default if missing)
-                dto.setDob(getCellString(row, headerMap, "DOB") != null ? getCellString(row, headerMap, "DOB") : "01/08/2003");
-
-                // Course Name
-                dto.setCourseName(getCellString(row, headerMap, "Course Name"));
-
-                // Roll No
-                String rollNoStr = getCellString(row, headerMap, "Roll No");
-                if (rollNoStr != null) {
+                // ----- Roll No -----
+                String rollNoStr = normalizeCell(getCellString(row, headerMap, "Roll No"));
+                Integer rollNo = null;
+                if (rollNoStr != null && !rollNoStr.isEmpty()) {
                     try {
-                        dto.setRollNo(Integer.parseInt(rollNoStr));
+                        rollNo = (int) Double.parseDouble(rollNoStr); // handles numeric-like strings
                     } catch (NumberFormatException e) {
-                        dto.setRollNo(null);
+                        System.out.println("Failed to parse Roll No at row " + (i + 1) + ": " + rollNoStr);
                     }
                 }
 
-                // Division
-                dto.setDivision(getCellString(row, headerMap, "DIV"));
+                // Skip row only if both are really missing
+                if ((candidateName == null || candidateName.isEmpty()) && rollNo == null) {
+                    System.out.println("Skipping row " + (i + 1) +
+                            ": RollNo='" + rollNoStr + "', CandidateName='" + candidateName + "'");
+                    continue;
+                }
+
+                dto.setCandidateName(candidateName);
+                dto.setRollNo(rollNo);
+
+                // ----- DOB (default if missing) -----
+                String dob = normalizeCell(getCellString(row, headerMap, "DOB"));
+                dto.setDob(dob != null && !dob.isEmpty() ? dob : "01/08/2003");
+
+                // ----- Course Name -----
+                dto.setCourseName(normalizeCell(getCellString(row, headerMap, "Course Name")));
+
+                // ----- Division -----
+                dto.setDivision(normalizeCell(getCellString(row, headerMap, "DIV")));
+
+                // Debug: print row values
+                System.out.println("Row " + (i + 1) + " => RollNo=" + rollNo + ", Name='" + candidateName +
+                        "', Course='" + dto.getCourseName() + "', DIV='" + dto.getDivision() + "'");
 
                 students.add(dto);
             }
@@ -211,8 +231,13 @@ public class ExcelHelper {
         }
     }
 
-
-
+    // ----- Helper method to normalize cell strings -----
+    private static String normalizeCell(String s) {
+        if (s == null) return null;
+        return s.replace("\u00A0", " ")   // non-breaking space
+                .replace("\u200B", "")    // zero-width space
+                .trim();
+    }
 
     // ---------------- Helper methods for name-based access ----------------
 

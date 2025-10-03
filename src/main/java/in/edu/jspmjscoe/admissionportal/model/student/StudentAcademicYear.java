@@ -2,6 +2,7 @@ package in.edu.jspmjscoe.admissionportal.model.student;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import in.edu.jspmjscoe.admissionportal.model.achievements.*;
+import in.edu.jspmjscoe.admissionportal.model.subject.Course;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -52,6 +53,10 @@ public class StudentAcademicYear {
 
     @Column(name = "semester_end_date")
     private LocalDate semesterEndDate;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "course_id", nullable = false)
+    private Course course;
 
     @Column(name = "is_active")
     private Boolean isActive = true;

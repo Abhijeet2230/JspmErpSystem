@@ -145,15 +145,14 @@ public class AdminController {
     // ✅ Upload Excel and Import Students with header row number
     @PostMapping("/import")
     public ResponseEntity<String> importDemoStudents(
-            @RequestParam("file") MultipartFile file,
-            @RequestParam(name = "headerRowNumber", defaultValue = "1") int headerRowNumber) {
+            @RequestParam("file") MultipartFile file) {
 
         if (file.isEmpty()) {
             return ResponseEntity.badRequest().body("Please upload a valid Excel file.");
         }
 
         // Pass the headerRowNumber to your service
-        int importedCount = excelImportService.importStudentsBasic(file, headerRowNumber);
+        int importedCount = excelImportService.importStudentsBasic(file);
 
         return ResponseEntity.ok(importedCount + " students imported successfully.");
     }
