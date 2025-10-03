@@ -111,17 +111,24 @@ public class TeacherExcelImportServiceImpl implements TeacherExcelImportService 
                 teacher.setPrefix(dto.getPrefix());
                 teacher.setGender(dto.getGender());
                 // Convert Date of Birth to yyyy-MM-dd
+                // Convert Date of Birth to yyyy-MM-dd
+                // Convert Date of Birth to yyyy-MM-dd
                 String dobStr = dto.getDateOfBirth();
                 String formattedDob = null;
                 if (dobStr != null && !dobStr.isBlank()) {
                     try {
-                        // Excel might give dd-MMM-yyyy (e.g., 24-Jan-2025)
+                        String cleanedDob = dobStr.trim()
+                                .replace("\"", "") // remove all quotes
+                                .replace("Sept", "Sep"); // normalize Excel month
+
+                        // Excel gives dd-MMM-yyyy (e.g., 24-Jan-2025)
                         SimpleDateFormat excelFormat = new SimpleDateFormat("dd-MMM-yyyy", java.util.Locale.ENGLISH);
-                        Date dobDate = excelFormat.parse(dobStr.trim());
+                        Date dobDate = excelFormat.parse(cleanedDob);
 
                         // Target format yyyy-MM-dd
                         SimpleDateFormat targetFormat = new SimpleDateFormat("yyyy-MM-dd");
                         formattedDob = targetFormat.format(dobDate);
+
                     } catch (ParseException e) {
                         log.warn("Could not parse DOB '{}', using original string", dobStr);
                         formattedDob = dobStr.trim(); // fallback
