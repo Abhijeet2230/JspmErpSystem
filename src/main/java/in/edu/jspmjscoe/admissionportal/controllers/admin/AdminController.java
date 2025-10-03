@@ -91,7 +91,7 @@ public class AdminController {
         }
 
         // Pass the headerRowNumber to your service
-        int importedCount = excelImportService.importStudentsBasic(file, headerRowNumber);
+        int importedCount = excelImportService.importStudentsBasic(file);
 
         return ResponseEntity.ok(importedCount + " students imported successfully.");
     }

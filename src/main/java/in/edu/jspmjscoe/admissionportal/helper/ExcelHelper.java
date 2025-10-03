@@ -157,22 +157,28 @@ public class ExcelHelper {
         }
     }
 
-    public static List<ExcelStudentDTO> excelToBasicStudentDTOs(InputStream is, int headerRowNumber) {
+
+    public static List<ExcelStudentDTO> excelToBasicStudentDTOs(InputStream is) {
         try (Workbook workbook = new XSSFWorkbook(is)) {
             Sheet sheet = workbook.getSheetAt(0); // First sheet
 
-            int headerRowIndex = headerRowNumber - 1;
+            // Always assume header is the first row (row 0)
+            int headerRowIndex = 3;
             Row headerRow = sheet.getRow(headerRowIndex);
-            if (headerRow == null) throw new RuntimeException("Header row not found at row " + headerRowNumber);
+            if (headerRow == null) throw new RuntimeException("Header row not found at row 1");
 
+            // Build headerMap -> column index for each header name
             Map<String, Integer> headerMap = new HashMap<>();
             for (Cell cell : headerRow) {
                 String header = cell.toString().trim();
-                if (!header.isEmpty()) headerMap.put(header, cell.getColumnIndex());
+                if (!header.isEmpty()) {
+                    headerMap.put(header, cell.getColumnIndex());
+                }
             }
 
             List<ExcelStudentDTO> students = new ArrayList<>();
 
+            // Loop through rows starting from row 1 (below header)
             for (int i = headerRowIndex + 1; i <= sheet.getLastRowNum(); i++) {
                 Row row = sheet.getRow(i);
                 if (row == null) continue;
@@ -183,7 +189,8 @@ public class ExcelHelper {
                 dto.setCandidateName(getCellString(row, headerMap, "Candidate Name"));
 
                 // DOB (default if missing)
-                dto.setDob(getCellString(row, headerMap, "DOB") != null ? getCellString(row, headerMap, "DOB") : "01/08/2003");
+                String dob = getCellString(row, headerMap, "DOB");
+                dto.setDob(dob != null ? dob : "01/08/2003");
 
                 // Course Name
                 dto.setCourseName(getCellString(row, headerMap, "Course Name"));
@@ -210,6 +217,7 @@ public class ExcelHelper {
             throw new RuntimeException("Failed to parse Excel file: " + e.getMessage(), e);
         }
     }
+
 
 
 

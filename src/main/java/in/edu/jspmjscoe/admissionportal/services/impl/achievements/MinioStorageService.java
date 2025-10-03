@@ -78,4 +78,15 @@ public class MinioStorageService {
         }
     }
 
+    /**
+     * Uploads a student's profile picture to MinIO and returns the object key/path
+     */
+    public String uploadStudentProfilePic(MultipartFile file, Long studentId) {
+        // Create a structured object key for student profile
+        String objectKey = "student-profiles/student_" + studentId + "/" + file.getOriginalFilename();
+
+        // Use existing generic upload method
+        return uploadFile(file, objectKey);
+    }
+
 }

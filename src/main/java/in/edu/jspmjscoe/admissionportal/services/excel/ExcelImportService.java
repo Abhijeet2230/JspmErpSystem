@@ -14,5 +14,5 @@ public interface ExcelImportService {
      */
     int importStudents(MultipartFile file);
 
-    int importStudentsBasic(MultipartFile file, int headerRowNumber);
+    int importStudentsBasic(MultipartFile file);
 }

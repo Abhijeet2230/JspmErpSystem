@@ -11,8 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Mapper(componentModel = "spring")
 public abstract class CertificateViewMapper {
 
-
-
     @Mapping(target = "fileUrl", source = "minioObjectKey")
     public abstract CertificateViewDTO toDTO(Certificate certificate);
 
