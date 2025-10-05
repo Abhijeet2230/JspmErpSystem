@@ -1,13 +1,13 @@
 package in.edu.jspmjscoe.admissionportal.controllers.auth;
 
-import in.edu.jspmjscoe.admissionportal.exception.InvalidPasswordException;
+import in.edu.jspmjscoe.admissionportal.exception.security.InvalidPasswordException;
 import in.edu.jspmjscoe.admissionportal.model.security.Status;
 import in.edu.jspmjscoe.admissionportal.model.security.User;
 import in.edu.jspmjscoe.admissionportal.model.teacher.Teacher;
 import in.edu.jspmjscoe.admissionportal.repositories.security.UserRepository;
 import in.edu.jspmjscoe.admissionportal.repositories.teacher.TeacherRepository;
 import in.edu.jspmjscoe.admissionportal.security.jwt.JwtUtils;
-import in.edu.jspmjscoe.admissionportal.exception.InvalidUsernameException;
+import in.edu.jspmjscoe.admissionportal.exception.security.InvalidUsernameException;
 import in.edu.jspmjscoe.admissionportal.security.response.LoginResponse;
 import in.edu.jspmjscoe.admissionportal.security.request.LoginRequest;
 import lombok.RequiredArgsConstructor;

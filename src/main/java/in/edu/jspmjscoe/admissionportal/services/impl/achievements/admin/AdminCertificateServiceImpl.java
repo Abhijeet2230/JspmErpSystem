@@ -1,7 +1,8 @@
 package in.edu.jspmjscoe.admissionportal.services.impl.achievements.admin;
 
+import in.edu.jspmjscoe.admissionportal.dtos.achievements.certificate.CertificateMarksUpdateDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.achievements.certificate.CertificateUpdateResultDTO;
-import in.edu.jspmjscoe.admissionportal.exception.CertificateMarkException;
+import in.edu.jspmjscoe.admissionportal.exception.achievement.CertificateMarkException;
 import in.edu.jspmjscoe.admissionportal.model.achievements.Certificate;
 import in.edu.jspmjscoe.admissionportal.model.student.StudentAcademicYear;
 import in.edu.jspmjscoe.admissionportal.model.trainingplacement.TrainingPlacementRecord;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,11 +28,26 @@ public class AdminCertificateServiceImpl implements AdminCertificateService {
 
     @Override
     @Transactional
-    public CertificateUpdateResultDTO assignCertificateMarksBulk(Map<Long, Double> certificateMarks) {
-        // 1️⃣ Fetch all certificates by IDs
+    public CertificateUpdateResultDTO assignCertificateMarksBulk(List<CertificateMarksUpdateDTO> updates) {
+        if (updates == null || updates.isEmpty()) {
+            return new CertificateUpdateResultDTO(List.of(), 0.0);
+        }
+
+        Map<Long, Double> certificateMarks = updates.stream()
+                .collect(Collectors.toMap(
+                        CertificateMarksUpdateDTO::getCertificateId,
+                        CertificateMarksUpdateDTO::getMarks,
+                        (existing, replacement) -> replacement // handle duplicates
+                ));
+
+        // Fetch certificates
         List<Certificate> certificates = certificateRepository.findAllById(certificateMarks.keySet());
 
-        // 2️⃣ Update each certificate's marks
+        if (certificates.isEmpty()) {
+            throw new CertificateMarkException("No valid certificates found for provided IDs.");
+        }
+
+        // Update marks
         certificates.forEach(cert -> {
             Double marks = certificateMarks.get(cert.getCertificateId());
             if (marks == null) return;
@@ -51,12 +68,12 @@ public class AdminCertificateServiceImpl implements AdminCertificateService {
         StudentAcademicYear studentAcademicYear = certificates.get(0).getStudentAcademicYear();
         double recalculatedScore = recalcAndSaveCertificateScore(studentAcademicYear);
 
-        // return DTO with IDs + score
         return new CertificateUpdateResultDTO(
                 certificates.stream().map(Certificate::getCertificateId).toList(),
                 recalculatedScore
         );
     }
+
 
     private double recalcAndSaveCertificateScore(StudentAcademicYear studentAcademicYear) {
         List<Certificate> allCertificates = certificateRepository.findByStudentAcademicYear(studentAcademicYear);

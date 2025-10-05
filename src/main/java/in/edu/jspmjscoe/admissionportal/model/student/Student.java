@@ -89,6 +89,13 @@ public class Student {
     @Column(name = "religious_minority")
     private String religiousMinority;
 
+    @Column(name = "profile_picture_path")
+    private String profilePicturePath;   // e.g. "student_123/profile.jpg"
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "blood_group", length = 15)
+    private BloodGroup bloodGroup;
+
     @OneToOne(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private Parent parent;

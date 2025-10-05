@@ -11,19 +11,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Mapper(componentModel = "spring")
 public abstract class FieldProjectViewMapper {
 
-    @Autowired
-    protected MinioStorageService minioStorageService;
 
-    @Mapping(target = "videoUrl", source = "videoMinioKey", qualifiedByName = "objectKeyToUrl")
-    @Mapping(target = "pdfUrl", source = "pdfMinioKey", qualifiedByName = "objectKeyToUrl")
+    @Mapping(target = "videoUrl", source = "videoMinioKey")
+    @Mapping(target = "pdfUrl", source = "pdfMinioKey")
     @Mapping(target = "subjectId", source = "subject.subjectId")
     @Mapping(target = "subjectName", source = "subject.name")
     @Mapping(target = "unitNumber", source = "unitNumber")
     public abstract FieldProjectViewDTO toDTO(FieldProject fieldProject);
 
-    @Named("objectKeyToUrl")
-    protected String objectKeyToUrl(String objectKey) {
-        if (objectKey == null) return null;
-        return minioStorageService.getPresignedUrl(objectKey);
-    }
+
 }

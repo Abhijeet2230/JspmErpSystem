@@ -1,7 +1,0 @@
-package in.edu.jspmjscoe.admissionportal.exception;
-
-public class UnauthorizedException extends RuntimeException {
-    public UnauthorizedException(String message) {
-        super(message);
-    }
-}

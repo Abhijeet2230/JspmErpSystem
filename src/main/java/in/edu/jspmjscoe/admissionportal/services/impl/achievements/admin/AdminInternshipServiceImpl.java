@@ -1,7 +1,8 @@
 package in.edu.jspmjscoe.admissionportal.services.impl.achievements.admin;
 
+import in.edu.jspmjscoe.admissionportal.dtos.achievements.internship.InternshipMarksUpdateDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.achievements.internship.InternshipUpdateResultDTO;
-import in.edu.jspmjscoe.admissionportal.exception.InternshipMarkException;
+import in.edu.jspmjscoe.admissionportal.exception.achievement.InternshipMarkException;
 import in.edu.jspmjscoe.admissionportal.model.achievements.Internship;
 import in.edu.jspmjscoe.admissionportal.model.student.StudentAcademicYear;
 import in.edu.jspmjscoe.admissionportal.model.trainingplacement.TrainingPlacementRecord;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,26 +28,41 @@ public class AdminInternshipServiceImpl implements AdminInternshipService {
 
     @Override
     @Transactional
-    public InternshipUpdateResultDTO assignInternshipMarksBulk(Map<Long, Double> internshipMarks) {
+    public InternshipUpdateResultDTO assignInternshipMarksBulk(List<InternshipMarksUpdateDTO> updates) {
+        if (updates == null || updates.isEmpty()) {
+            return new InternshipUpdateResultDTO(List.of(), 0.0);
+        }
+
+        Map<Long, Double> internshipMarks = updates.stream()
+                .collect(Collectors.toMap(
+                        InternshipMarksUpdateDTO::getInternshipId,
+                        InternshipMarksUpdateDTO::getMarks,
+                        (existing, replacement) -> replacement // handle duplicates
+                ));
+
         List<Internship> internships = internshipRepository.findAllById(internshipMarks.keySet());
 
-        internships.forEach(i -> {
-            Double marks = internshipMarks.get(i.getInternshipId());
+        if (internships.isEmpty()) {
+            throw new InternshipMarkException("No valid internships found for provided IDs.");
+        }
+
+        internships.forEach(internship -> {
+            Double marks = internshipMarks.get(internship.getInternshipId());
             if (marks == null) return;
 
             if (marks < 0 || marks > MAX_MARK_PER_INTERNSHIP) {
                 throw new InternshipMarkException(
-                        "Invalid marks (" + marks + ") for internshipId=" + i.getInternshipId()
+                        "Invalid marks (" + marks + ") for internshipId=" + internship.getInternshipId()
                                 + ". Allowed range: 0–" + MAX_MARK_PER_INTERNSHIP
                 );
             }
 
-            i.setMarks(marks);
+            internship.setMarks(marks);
         });
 
         internshipRepository.saveAll(internships);
 
-        // Pick the student (all internships belong to the same student in bulk)
+        // recalc total score for student
         StudentAcademicYear studentAcademicYear = internships.get(0).getStudentAcademicYear();
         double recalculatedScore = recalcAndSaveInternshipScore(studentAcademicYear);
 
@@ -54,6 +71,7 @@ public class AdminInternshipServiceImpl implements AdminInternshipService {
                 recalculatedScore
         );
     }
+
 
     private double recalcAndSaveInternshipScore(StudentAcademicYear studentAcademicYear) {
         List<Internship> allInternships = internshipRepository.findByStudentAcademicYear(studentAcademicYear);

@@ -11,16 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Mapper(componentModel = "spring")
 public abstract class MiniProjectViewMapper {
 
-    @Autowired
-    protected MinioStorageService minioStorageService;
-
-    @Mapping(target = "videoUrl", source = "videoMinioKey", qualifiedByName = "objectKeyToUrl")
-    @Mapping(target = "pdfUrl", source = "pdfMinioKey", qualifiedByName = "objectKeyToUrl")
+    @Mapping(target = "videoUrl", source = "videoMinioKey")
+    @Mapping(target = "pdfUrl", source = "pdfMinioKey")
     public abstract MiniProjectViewDTO toDTO(MiniProject miniProject);
 
-    @Named("objectKeyToUrl")
-    protected String objectKeyToUrl(String objectKey) {
-        if (objectKey == null) return null;
-        return minioStorageService.getPresignedUrl(objectKey);
-    }
 }

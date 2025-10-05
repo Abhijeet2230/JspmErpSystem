@@ -1,7 +1,7 @@
 package in.edu.jspmjscoe.admissionportal.services.impl.trainingplacement;
 
 import in.edu.jspmjscoe.admissionportal.dtos.trainingplacement.*;
-import in.edu.jspmjscoe.admissionportal.exception.TrainingPlacementNotFoundException;
+import in.edu.jspmjscoe.admissionportal.exception.trainingplacement.TrainingPlacementNotFoundException;
 import in.edu.jspmjscoe.admissionportal.mappers.trainingplacement.TrainingPlacementMapper;
 import in.edu.jspmjscoe.admissionportal.model.student.StudentAcademicYear;
 import in.edu.jspmjscoe.admissionportal.model.trainingplacement.*;

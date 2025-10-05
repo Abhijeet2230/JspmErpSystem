@@ -11,15 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Mapper(componentModel = "spring")
 public abstract class CertificateViewMapper {
 
-    @Autowired
-    protected MinioStorageService minioStorageService;
-
-    @Mapping(target = "fileUrl", source = "minioObjectKey", qualifiedByName = "objectKeyToUrl")
+    @Mapping(target = "fileUrl", source = "minioObjectKey")
     public abstract CertificateViewDTO toDTO(Certificate certificate);
 
-    @Named("objectKeyToUrl")
-    protected String objectKeyToUrl(String objectKey) {
-        if (objectKey == null) return null;
-        return minioStorageService.getPresignedUrl(objectKey);
-    }
 }

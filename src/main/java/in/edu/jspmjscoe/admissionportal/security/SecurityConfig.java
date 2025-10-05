@@ -54,6 +54,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/admin/**","/actuator/**").hasRole("ADMIN")
                 .requestMatchers("/api/student/**").hasRole("STUDENT")
                 .requestMatchers("/api/teacher/**").hasRole("TEACHER")
+                .requestMatchers("/api/files/**").permitAll()
                 .requestMatchers(
                         "/api/auth/public/**",
                         "/api/csrf-token",
@@ -78,6 +79,14 @@ public class SecurityConfig {
         http.exceptionHandling(exception
                 -> exception.authenticationEntryPoint(unauthorizedHandler));
         http.addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class);
+
+        // ✅ allow iframe from same origin (your frontend + backend are usually same host in prod)
+
+        http.headers(headers -> headers
+                .frameOptions(frame -> frame.sameOrigin())
+                .contentSecurityPolicy(csp -> csp.policyDirectives("frame-ancestors 'self' " + frontendUrl))
+        );
+
         http.csrf(AbstractHttpConfigurer::disable);
         http.httpBasic(withDefaults());
         return http.build();
@@ -122,22 +131,6 @@ public class SecurityConfig {
                     -> roleRepository.save(new Role(AppRole.ROLE_TEACHER)));
 
 
-            if (!userRepository.existsByUserName("user1")) {
-                User user1 = new User();
-                user1.setUserName("user1");  // ✅ required
-                user1.setPassword(passwordEncoder.encode("password1"));
-                user1.setRole(studentRole);
-                userRepository.save(user1);
-            }
-
-            if (!userRepository.existsByUserName("admin")) {
-                User admin = new User();
-                admin.setUserName("admin");  // ✅ required
-                admin.setPassword(passwordEncoder.encode("adminPass"));
-                admin.setRole(adminRole);
-                userRepository.save(admin);
-            }
-
             if (!userRepository.existsByUserName("admin1")) {
                 User admin = new User();
                 admin.setUserName("admin1");  // ✅ required
@@ -146,7 +139,6 @@ public class SecurityConfig {
                 admin.setFirstLogin(false);
                 userRepository.save(admin);
             }
-
 
             // Create default teacher
             if (!userRepository.existsByUserName("teacher")) {

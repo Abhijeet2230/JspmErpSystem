@@ -33,6 +33,10 @@ public class StudentAcademicYear {
     @JsonBackReference
     private Student student;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "course_id", nullable = false)
+    private Course course;
+
     @Column(name = "year_of_study", nullable = false)
     private Integer yearOfStudy;   // 1 = FE, 2 = SE, etc.
 
