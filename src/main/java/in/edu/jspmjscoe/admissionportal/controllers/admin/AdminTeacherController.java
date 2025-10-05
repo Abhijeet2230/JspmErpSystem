@@ -1,14 +1,17 @@
 package in.edu.jspmjscoe.admissionportal.controllers.admin;
 
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.TeacherDTO;
+import in.edu.jspmjscoe.admissionportal.dtos.teacher.attendance.AttendanceSessionDTO;
 import in.edu.jspmjscoe.admissionportal.model.security.Status;
 import in.edu.jspmjscoe.admissionportal.repositories.teacher.LeaveRepository;
 import in.edu.jspmjscoe.admissionportal.services.teacher.TeacherService;
+import in.edu.jspmjscoe.admissionportal.services.teacher.attendance.AttendanceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -18,6 +21,7 @@ public class AdminTeacherController {
 
     private final LeaveRepository leaveRepository;
     private final TeacherService teacherService;
+    private final AttendanceService attendanceService;
 
     // ------------------- Teacher Endpoints -------------------
     @GetMapping("/get-accepted-teachers")
@@ -48,6 +52,17 @@ public class AdminTeacherController {
     public ResponseEntity<TeacherDTO> rejectTeacher(@PathVariable Long id) {
         TeacherDTO teacher = teacherService.updateTeacherStatus(id, Status.REJECTED);
         return ResponseEntity.ok(teacher);
+    }
+
+    @GetMapping("/get-attendance-session")
+    public ResponseEntity<List<AttendanceSessionDTO>> getAttendanceForAdmin(
+            @RequestParam String subjectName,
+            @RequestParam String division,
+            @RequestParam String date
+    ) {
+        LocalDate attendanceDate = LocalDate.parse(date); // format: "yyyy-MM-dd"
+        List<AttendanceSessionDTO> sessions = attendanceService.getAttendanceSessionsByFilter(subjectName, division, attendanceDate);
+        return ResponseEntity.ok(sessions);
     }
 
 }

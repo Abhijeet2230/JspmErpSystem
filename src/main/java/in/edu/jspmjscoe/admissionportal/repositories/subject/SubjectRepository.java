@@ -9,10 +9,11 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
-import java.util.List;
 
 @Repository
 public interface SubjectRepository extends JpaRepository<Subject, Long> {
     Optional<Subject> findByNameAndCourseAndSemester(String name, Course course, Integer semester);
     List<Subject> findByHasCCETrue();
+    Optional<Subject> findByNameIgnoreCase(String name);
+
 }
