@@ -58,10 +58,6 @@ public class StudentAcademicYear {
     @Column(name = "semester_end_date")
     private LocalDate semesterEndDate;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "course_id", nullable = false)
-    private Course course;
-
     @Column(name = "is_active")
     private Boolean isActive = true;
 

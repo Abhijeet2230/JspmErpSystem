@@ -1,8 +1,10 @@
 package in.edu.jspmjscoe.admissionportal.services.impl.achievements;
 
 import io.minio.GetObjectArgs;
+import io.minio.GetPresignedObjectUrlArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
+import io.minio.http.Method;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.InputStreamResource;
@@ -16,48 +18,42 @@ import java.io.InputStream;
 @RequiredArgsConstructor
 public class MinioStorageService {
 
-    private final MinioClient minioClient;
+    private final MinioClient myMinioClient;     // Teacher appraisal bucket
+    private final MinioClient friendMinioClient; // Friend/student bucket
 
+    // -------------------- Teacher Appraisal --------------------
+    @Value("${minio.bucket-teacher}")
+    private String myBucket;
+
+    public String uploadTeacherAppraisalFile(MultipartFile file, String objectKey) {
+        return uploadFileToMinio(myMinioClient, myBucket, file, objectKey);
+    }
+
+    public String getPresignedUrlTeacher(String objectKey) {
+        return generatePresignedUrl(myMinioClient, myBucket, objectKey);
+    }
+
+    // -------------------- Friend/Student Bucket --------------------
     @Value("${minio.bucket}")
-    private String bucketName;
+    private String friendBucket;
 
-    /**
-     * Upload a file to MinIO
-     */
-    public String uploadFile(MultipartFile file, String objectName) {
-        try (InputStream is = file.getInputStream()) {
-            minioClient.putObject(
-                    PutObjectArgs.builder()
-                            .bucket(bucketName)
-                            .object(objectName)
-                            .stream(is, file.getSize(), -1)
-                            .contentType(file.getContentType())
-                            .build()
-            );
-            return objectName;
-        } catch (Exception e) {
-            throw new AchievementFileAccessException(
-                    "Failed to upload file to MinIO: " + file.getOriginalFilename(), e
-            );
-        }
+    public String uploadFile(MultipartFile file, String objectKey) {
+        return uploadFileToMinio(friendMinioClient, friendBucket, file, objectKey);
+    }
+
+    public String getPresignedUrl(String objectKey) {
+        return generatePresignedUrl(friendMinioClient, friendBucket, objectKey);
     }
 
     /**
-     * Generate structured object key
-     */
-    public String generateObjectKey(String type, Long studentAcademicYearId, String filename) {
-        return type + "/student_" + studentAcademicYearId + "/" + filename;
-    }
-
-    /**
-     * Stream file from MinIO
+     * Stream file from Friend/Student MinIO bucket
      */
     public InputStreamResource getFile(String objectKey) {
         validateObjectKey(objectKey);
         try {
-            InputStream inputStream = minioClient.getObject(
+            InputStream inputStream = friendMinioClient.getObject(
                     GetObjectArgs.builder()
-                            .bucket(bucketName)
+                            .bucket(friendBucket)
                             .object(objectKey)
                             .build()
             );
@@ -69,24 +65,56 @@ public class MinioStorageService {
         }
     }
 
-    /**
-     * Basic object key validation
-     */
+    // -------------------- Shared Helpers --------------------
+    private String uploadFileToMinio(MinioClient client, String bucket, MultipartFile file, String objectKey) {
+        try (InputStream is = file.getInputStream()) {
+            client.putObject(
+                    PutObjectArgs.builder()
+                            .bucket(bucket)
+                            .object(objectKey)
+                            .stream(is, file.getSize(), -1)
+                            .contentType(file.getContentType())
+                            .build()
+            );
+            return objectKey;
+        } catch (Exception e) {
+            throw new AchievementFileAccessException(
+                    "Failed to upload file to MinIO: " + file.getOriginalFilename(), e
+            );
+        }
+    }
+
+    private String generatePresignedUrl(MinioClient client, String bucket, String objectKey) {
+        try {
+            return client.getPresignedObjectUrl(
+                    GetPresignedObjectUrlArgs.builder()
+                            .method(Method.GET)
+                            .bucket(bucket)
+                            .object(objectKey)
+                            .expiry(60 * 60) // 1 hour
+                            .build()
+            );
+        } catch (Exception e) {
+            throw new AchievementFileAccessException(
+                    "Failed to generate presigned URL for " + objectKey, e
+            );
+        }
+    }
+
+    // -------------------- Object Key Utilities --------------------
+    public String generateObjectKey(String type, Long entityId, String filename) {
+        // Preserves friend's structured format for students
+        return type + "/student_" + entityId + "/" + filename;
+    }
+
     private void validateObjectKey(String objectKey) {
         if (objectKey.contains("..") || objectKey.startsWith("/")) {
             throw new AchievementFileAccessException("Invalid object key: " + objectKey);
         }
     }
 
-    /**
-     * Uploads a student's profile picture to MinIO and returns the object key/path
-     */
     public String uploadStudentProfilePic(MultipartFile file, Long studentId) {
-        // Create a structured object key for student profile
         String objectKey = "student-profiles/student_" + studentId + "/" + file.getOriginalFilename();
-
-        // Use existing generic upload method
         return uploadFile(file, objectKey);
     }
-
 }

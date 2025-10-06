@@ -63,42 +63,4 @@ public class LeaveController {
         LeaveDTO leave = teacherService.updateLeaveStatus(id, Status.REJECTED);
         return ResponseEntity.ok(leave);
     }
-
-    // ------------------- Head Leave Endpoints -------------------
-// Get pending
-    @GetMapping("/get-pending-head-leaves")
-    public ResponseEntity<List<HeadLeaveDTO>> getPendingHeadLeaves() {
-        return ResponseEntity.ok(teacherService.getPendingHeadLeaves());
-    }
-
-    @PostMapping("/headleave/{id}/end")
-    public ResponseEntity<HeadLeaveDTO> endHeadLeaveEarly(
-            @PathVariable Long id,
-            @RequestParam LocalDate actualToDate) {
-        return ResponseEntity.ok(teacherService.endHeadLeaveEarly(id, actualToDate));
-    }
-
-    @GetMapping("/pending-head-leaves/count")
-    public ResponseEntity<Long> getPendingHeadLeavesCount() {
-        long count = headLeaveRepository.countByStatus(Status.PENDING);
-        return ResponseEntity.ok(count);
-    }
-
-    // Get accepted
-    @GetMapping("/get-accepted-head-leaves")
-    public ResponseEntity<List<HeadLeaveDTO>> getAcceptedHeadLeaves() {
-        return ResponseEntity.ok(teacherService.getAcceptedHeadLeaves());
-    }
-
-    // Accept Head Leave
-    @PutMapping("/head-leave/{id}/accept")
-    public ResponseEntity<HeadLeaveDTO> acceptHeadLeave(@PathVariable Long id) {
-        return ResponseEntity.ok(teacherService.updateHeadLeaveStatus(id, Status.ACCEPTED));
-    }
-
-    // Reject Head Leave
-    @PutMapping("/head-leave/{id}/reject")
-    public ResponseEntity<HeadLeaveDTO> rejectHeadLeave(@PathVariable Long id) {
-        return ResponseEntity.ok(teacherService.updateHeadLeaveStatus(id, Status.REJECTED));
-    }
 }

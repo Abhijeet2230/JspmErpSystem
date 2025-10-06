@@ -179,7 +179,6 @@ public class GlobalExceptionHandler {
     }
 
     // ---------------- Fallback ----------------
-    @ExceptionHandler(Exception.class)
     @ExceptionHandler(FieldProjectMarkException.class)
     public ResponseEntity<ErrorResponse> handleFieldProjectMarkException(
             FieldProjectMarkException ex,
