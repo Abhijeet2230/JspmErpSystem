@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -59,6 +60,18 @@ public class AdminAchievementServiceImpl implements AdminAchievementService {
                         division
                 )
         );
+
+        // 2️⃣ Sort students by rollNo (numeric)
+        studentAcademicYears.sort((s1, s2) -> {
+            try {
+                return Integer.compare(
+                        Integer.parseInt(String.valueOf(s1.getRollNo())),
+                        Integer.parseInt(String.valueOf(s2.getRollNo()))
+                );
+            } catch (NumberFormatException e) {
+                return s1.getRollNo().compareTo(s2.getRollNo());
+            }
+        });
 
         if (studentAcademicYears.isEmpty()) {
             return new AdminAchievementResponseDTO<>(achievementType, Collections.emptyList());
