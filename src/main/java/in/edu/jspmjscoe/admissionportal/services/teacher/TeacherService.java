@@ -1,5 +1,6 @@
 package in.edu.jspmjscoe.admissionportal.services.teacher;
 
+import in.edu.jspmjscoe.admissionportal.dtos.security.ChangePasswordRequest;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.HeadLeaveDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.LeaveDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.TeacherDTO;
@@ -15,6 +16,7 @@ import java.time.LocalTime;
 import java.util.List;
 
 public interface TeacherService {
+    void changePassword(String username, ChangePasswordRequest request);
     List<TeacherDTO> getAllTeachers();
     List<TeacherDTO> getAcceptedTeachers();
     List<TeacherDTO> getPendingTeachers();

@@ -1,5 +1,6 @@
 package in.edu.jspmjscoe.admissionportal.controllers.admin.teacher;
 
+import in.edu.jspmjscoe.admissionportal.dtos.security.ChangePasswordRequest;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.TeacherDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.attendance.AttendanceSessionDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.attendance.StudentMonthlyAttendanceDTO;
@@ -10,6 +11,8 @@ import in.edu.jspmjscoe.admissionportal.services.teacher.attendance.AttendanceSe
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -23,6 +26,7 @@ public class AdminTeacherController {
     private final LeaveRepository leaveRepository;
     private final TeacherService teacherService;
     private final AttendanceService attendanceService;
+
 
     // ------------------- Teacher Endpoints -------------------
     @GetMapping("/get-accepted-teachers")

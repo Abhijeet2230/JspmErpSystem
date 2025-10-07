@@ -1,5 +1,6 @@
 package in.edu.jspmjscoe.admissionportal.controllers.teacher;
 
+import in.edu.jspmjscoe.admissionportal.dtos.security.ChangePasswordRequest;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.HeadLeaveDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.LeaveDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.TeacherDTO;
@@ -26,6 +27,25 @@ public class TeacherController {
     private final TeacherRepository teacherRepository;
     private final UserRepository userRepository;
 
+    // ------------ Change Teacher Password ------------//
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePassword(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestBody ChangePasswordRequest request) {
+
+        if (userDetails == null) {
+            return ResponseEntity.status(401).body("Unauthorized");
+        }
+
+        try {
+            teacherService.changePassword(userDetails.getUsername(), request);
+            return ResponseEntity.ok("Password changed successfully");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(500).body("Could not change password");
+        }
+    }
     // ✅ Get the currently logged-in teacher's details
     @GetMapping("/profile")
     public ResponseEntity<?> getCurrentTeacher(@AuthenticationPrincipal UserDetails userDetails) {

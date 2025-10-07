@@ -1,10 +1,12 @@
 package in.edu.jspmjscoe.admissionportal.services.impl.teacher;
 
+import in.edu.jspmjscoe.admissionportal.dtos.security.ChangePasswordRequest;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.HeadLeaveDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.LeaveDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.TeacherDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.TeacherSubjectDTO;
 import in.edu.jspmjscoe.admissionportal.exception.*;
+import in.edu.jspmjscoe.admissionportal.exception.security.InvalidCredentialsException;
 import in.edu.jspmjscoe.admissionportal.mappers.teacher.HeadLeaveMapper;
 import in.edu.jspmjscoe.admissionportal.mappers.teacher.LeaveMapper;
 import in.edu.jspmjscoe.admissionportal.mappers.teacher.TeacherMapper;
@@ -73,6 +75,28 @@ public class TeacherServiceImpl implements TeacherService {
         return teacherRepository.findAll().stream()
                 .map(TeacherMapper::toDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public void changePassword(String username, ChangePasswordRequest request) {
+        // Load user by username
+        User user = userRepository.findByUserName(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with username: " + username));
+
+        // Check old password
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+            throw new InvalidCredentialsException("Old password is incorrect");
+        }
+
+        // Set new password
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+
+        // Flip first login flag if applicable
+        if (user.isFirstLogin()) {
+            user.setFirstLogin(false);
+        }
+
+        userRepository.save(user);
     }
 
     @Override
