@@ -1,4 +1,4 @@
-package in.edu.jspmjscoe.admissionportal.services.impl.achievements;
+package in.edu.jspmjscoe.admissionportal.services.impl.minio;
 
 import in.edu.jspmjscoe.admissionportal.dtos.achievements.miniproject.MiniProjectDTO;
 import in.edu.jspmjscoe.admissionportal.exception.ResourceNotFoundException;

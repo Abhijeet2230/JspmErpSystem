@@ -14,6 +14,7 @@ import in.edu.jspmjscoe.admissionportal.repositories.security.UserRepository;
 import in.edu.jspmjscoe.admissionportal.repositories.student.StudentAcademicYearRepository;
 import in.edu.jspmjscoe.admissionportal.repositories.student.StudentRepository;
 import in.edu.jspmjscoe.admissionportal.services.achievements.*;
+import in.edu.jspmjscoe.admissionportal.services.impl.minio.MinioStorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;

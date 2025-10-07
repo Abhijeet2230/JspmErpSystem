@@ -1,4 +1,4 @@
-package in.edu.jspmjscoe.admissionportal.services.impl.achievements;
+package in.edu.jspmjscoe.admissionportal.services.impl.minio;
 
 import io.minio.GetObjectArgs;
 import io.minio.MinioClient;

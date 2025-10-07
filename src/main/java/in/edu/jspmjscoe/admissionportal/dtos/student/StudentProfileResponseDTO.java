@@ -10,16 +10,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class StudentProfileUpdateDTO {
-
+public class StudentProfileResponseDTO {
+    private Long studentId;
+    private String candidateName;  // for display only
     private String email;
     private String mobileNo;
     private String dob;
     private BloodGroup bloodGroup;
-
     private String profilePicturePath;
 
-    // address details
     private String addressLine1;
     private String addressLine2;
     private String addressLine3;
@@ -30,4 +29,8 @@ public class StudentProfileUpdateDTO {
     private String pincode;
 
     private String parentContactNo;
+
+    // New fields
+    private String division;
+    private Integer rollNo;
 }

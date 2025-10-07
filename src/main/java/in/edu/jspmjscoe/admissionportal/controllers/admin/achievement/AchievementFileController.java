@@ -1,6 +1,6 @@
 package in.edu.jspmjscoe.admissionportal.controllers.admin.achievement;
 
-import in.edu.jspmjscoe.admissionportal.services.impl.achievements.MinioStorageService;
+import in.edu.jspmjscoe.admissionportal.services.impl.minio.MinioStorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
