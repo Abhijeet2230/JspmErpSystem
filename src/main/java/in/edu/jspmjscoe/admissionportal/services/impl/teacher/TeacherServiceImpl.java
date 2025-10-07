@@ -26,6 +26,7 @@ import in.edu.jspmjscoe.admissionportal.repositories.subject.SubjectRepository;
 import in.edu.jspmjscoe.admissionportal.repositories.teacher.HeadLeaveRepository;
 import in.edu.jspmjscoe.admissionportal.repositories.teacher.LeaveRepository;
 import in.edu.jspmjscoe.admissionportal.repositories.teacher.TeacherRepository;
+import in.edu.jspmjscoe.admissionportal.repositories.teacher.TeacherSubjectRepository;
 import in.edu.jspmjscoe.admissionportal.repositories.teacher.appriasal.TeacherAppraisalRepository;
 import in.edu.jspmjscoe.admissionportal.security.services.CurrentUserService;
 import in.edu.jspmjscoe.admissionportal.services.impl.achievements.MinioStorageService;
@@ -62,6 +63,7 @@ public class TeacherServiceImpl implements TeacherService {
     private final TeacherAppraisalMapper teacherAppraisalMapper;
     private final TeacherAppraisalRepository teacherAppraisalRepository;
     private final MinioStorageService minioStorageService;
+    private final TeacherSubjectRepository teacherSubjectRepository;
 
 
 
@@ -178,42 +180,47 @@ public class TeacherServiceImpl implements TeacherService {
     // --------------------- Assign Teacher ---------------------
 
     @Override
-    public TeacherSubjectDTO assignSubjectToTeacher(Long teacherId, Long subjectId, String division) {
-        Teacher teacher = teacherRepository.findById(teacherId)
-                .orElseThrow(() -> new TeacherNotFoundException("Teacher not found with ID: " + teacherId));
-        Subject subject = subjectRepository.findById(subjectId)
-                .orElseThrow(() -> new SubjectNotFoundException("Subject not found with ID: " + subjectId));
+    public TeacherSubjectDTO assignSubjectToTeacherByName(String teacherName, String subjectName, String division) {
+        // 1️⃣ Resolve teacher by full name
+        String[] nameParts = teacherName.trim().split("\\s+", 2);
+        String firstName = nameParts[0];
+        String lastName = nameParts.length > 1 ? nameParts[1] : "";
 
-        // check duplicate (same teacher, subject, division)
+        Teacher teacher = teacherRepository.findByFirstNameAndLastName(firstName, lastName)
+                .orElseThrow(() -> new TeacherNotFoundException("Teacher not found with name: " + teacherName));
+
+        // 2️⃣ Resolve subject by name
+        Subject subject = subjectRepository.findByNameIgnoreCase(subjectName)
+                .orElseThrow(() -> new SubjectNotFoundException("Subject not found with name: " + subjectName));
+
+        // 3️⃣ Check for duplicate assignment
         boolean alreadyAssigned = teacher.getTeacherSubjects().stream()
-                .anyMatch(ts -> ts.getSubject().getSubjectId().equals(subjectId)
+                .anyMatch(ts -> ts.getSubject().getSubjectId().equals(subject.getSubjectId())
                         && ts.getDivision().equalsIgnoreCase(division));
         if (alreadyAssigned) {
             throw new IllegalStateException("Teacher already assigned to this subject in division " + division);
         }
 
+        // 4️⃣ Create TeacherSubject and save
         TeacherSubject ts = TeacherSubject.builder()
                 .teacher(teacher)
                 .subject(subject)
-                .division(division) // ✅ set division
+                .division(division)
                 .build();
 
         teacher.addTeacherSubject(ts);
-        subject.addTeacherSubject(ts);
+        teacherSubjectRepository.save(ts); // saves and populates teacherSubjectId
 
-        teacherRepository.save(teacher);
-
+        // 5️⃣ Return DTO
         return TeacherSubjectDTO.builder()
                 .teacherSubjectId(ts.getTeacherSubjectId())
                 .teacherId(teacher.getTeacherId())
                 .teacherName(teacher.getFirstName() + " " + teacher.getLastName())
                 .subjectId(subject.getSubjectId())
                 .subjectName(subject.getName())
-                .division(division)  // ✅ return division
+                .division(division)
                 .build();
     }
-
-
     // --------------------- TEACHER LEAVES ---------------------
     @Override
     public LeaveDTO applyLeave(LeaveDTO leaveDTO) {

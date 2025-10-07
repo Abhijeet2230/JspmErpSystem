@@ -2,6 +2,7 @@ package in.edu.jspmjscoe.admissionportal.services.impl.teacher.attendance;
 
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.attendance.AttendanceSessionDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.attendance.StudentAttendanceDTO;
+import in.edu.jspmjscoe.admissionportal.dtos.teacher.attendance.StudentMonthlyAttendanceDTO;
 import in.edu.jspmjscoe.admissionportal.mappers.teacher.attendance.AttendanceMapper;
 import in.edu.jspmjscoe.admissionportal.model.student.Student;
 import in.edu.jspmjscoe.admissionportal.model.student.StudentAcademicYear;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -119,4 +121,67 @@ public class AttendanceServiceImpl implements AttendanceService {
                 .toList();
     }
 
+    @Override
+    public List<StudentMonthlyAttendanceDTO> getMonthlyAttendance(String subjectName, String division, int year, int month) {
+
+        Teacher teacher = currentUserService.getCurrentTeacher();
+
+        Subject subject = subjectRepository.findByNameIgnoreCase(subjectName)
+                .orElseThrow(() -> new RuntimeException("Subject not found"));
+
+        // Get all sessions for that subject, division, and month
+        List<AttendanceSession> sessions = attendanceSessionRepository.findAll().stream()
+                .filter(s -> s.getSubject().getName().equalsIgnoreCase(subjectName)
+                        && s.getDivision().equalsIgnoreCase(division)
+                        && s.getDate().getYear() == year
+                        && s.getDate().getMonthValue() == month)
+                .toList();
+
+        if (sessions.isEmpty()) {
+            throw new RuntimeException("No attendance found for given filters");
+        }
+
+        // Get all students involved in those sessions
+        List<Student> allStudents = sessions.get(0).getStudentAttendances().stream()
+                .map(AttendanceStudent::getStudent)
+                .toList();
+
+        return allStudents.stream().map(student -> {
+
+            // ✅ Avoid duplicate key issue (use LinkedHashMap and merge)
+            Map<String, Integer> attendanceMap = new java.util.LinkedHashMap<>();
+            sessions.forEach(s -> {
+                s.getStudentAttendances().stream()
+                        .filter(sa -> sa.getStudent().getStudentId().equals(student.getStudentId()))
+                        .findFirst()
+                        .ifPresent(sa -> attendanceMap.put(
+                                s.getDate().toString(),
+                                sa.getStatus().equalsIgnoreCase("present") ? 1 : 0
+                        ));
+            });
+
+            int totalDays = attendanceMap.size();
+            int presentDays = (int) attendanceMap.values().stream().filter(v -> v == 1).count();
+            double percentage = totalDays == 0 ? 0.0 : (presentDays * 100.0) / totalDays;
+
+            // ✅ Fetch rollNo from active academic year for that semester/division
+            String rollNo = student.getStudentAcademicYears().stream()
+                    .filter(ay -> ay.getIsActive() && ay.getDivision().equalsIgnoreCase(division))
+                    .findFirst()
+                    .map(ay -> String.valueOf(ay.getRollNo()))
+                    .orElse(null);
+
+            return StudentMonthlyAttendanceDTO.builder()
+                    .studentId(student.getStudentId())
+                    .studentName(student.getCandidateName())
+                    .rollNo(rollNo)
+                    .division(division)
+                    .subjectName(subject.getName())
+                    .attendanceByDate(attendanceMap)
+                    .totalDays(totalDays)
+                    .presentDays(presentDays)
+                    .percentage(percentage)
+                    .build();
+        }).toList();
+    }
 }

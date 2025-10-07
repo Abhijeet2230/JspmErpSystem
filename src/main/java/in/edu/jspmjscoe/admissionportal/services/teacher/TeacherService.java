@@ -26,11 +26,10 @@ public interface TeacherService {
 
     TeacherDTO updateTeacherStatus(Long id, Status status);
 
-    TeacherSubjectDTO assignSubjectToTeacher(Long teacherId, Long subjectId, String division);
+    TeacherSubjectDTO assignSubjectToTeacherByName(String teacherName, String subjectName, String division);
 
     // New Leave Features
     LeaveDTO applyLeave(LeaveDTO leaveDTO);
-
 
     @Transactional
     LeaveDTO endLeaveEarly(Long leaveId, LocalTime actualCloserTime);

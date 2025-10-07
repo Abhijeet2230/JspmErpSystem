@@ -71,17 +71,9 @@ public class Subject {
     private ElectiveGroup electiveGroup;
 
     // inside Subject.java
-    @OneToMany(mappedBy = "subject",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true,
-            fetch = FetchType.LAZY)
-    @JsonManagedReference
+    @OneToMany(mappedBy = "subject")
+    @JsonBackReference
     private List<TeacherSubject> teacherSubjects = new ArrayList<>();
-
-    public void addTeacherSubject(TeacherSubject ts) {
-        teacherSubjects.add(ts);
-        ts.setSubject(this);
-    }
 
     @Column(name = "status", length = 20)
     private String status = "Active";

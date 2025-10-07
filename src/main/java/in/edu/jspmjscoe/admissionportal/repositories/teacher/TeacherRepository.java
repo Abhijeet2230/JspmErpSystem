@@ -23,6 +23,8 @@ public interface TeacherRepository extends JpaRepository<Teacher, Long> {
     Optional<Teacher> findByOfficialEmail(String officialEmail);
     Optional<Teacher> findByAadhaarNumber(String aadhaar);
 
+    Optional<Teacher> findByFirstNameAndLastName(String firstName, String lastName);
+
     // Projection query to fetch only needed fields
     @Query("SELECT new in.edu.jspmjscoe.admissionportal.dtos.teacher.staffrecord.TeacherBasicDTO(" +
             "t.teacherId, CONCAT(t.firstName, ' ', t.lastName), t.designation, d.departmentId, d.name) " +

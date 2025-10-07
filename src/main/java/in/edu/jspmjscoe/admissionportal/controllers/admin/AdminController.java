@@ -103,16 +103,17 @@ public class AdminController {
     }
 
     @PostMapping("/assign-subject")
-    public ResponseEntity<TeacherSubjectDTO> assignSubjectToTeacher(
-            @RequestBody TeacherSubjectDTO requestDto) {
+    public ResponseEntity<TeacherSubjectDTO> assignSubjectToTeacher(@RequestBody TeacherSubjectDTO requestDto) {
 
-        TeacherSubjectDTO tsDto = teacherService.assignSubjectToTeacher(
-                requestDto.getTeacherId(),
-                requestDto.getSubjectId(),
+        TeacherSubjectDTO tsDto = teacherService.assignSubjectToTeacherByName(
+                requestDto.getTeacherName(),
+                requestDto.getSubjectName(),
                 requestDto.getDivision()
         );
+
         return ResponseEntity.ok(tsDto);
     }
+
 
 
 

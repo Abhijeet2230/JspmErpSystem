@@ -2,6 +2,7 @@ package in.edu.jspmjscoe.admissionportal.controllers.teacher.attendance;
 
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.attendance.AttendanceSessionDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.attendance.StudentAttendanceDTO;
+import in.edu.jspmjscoe.admissionportal.dtos.teacher.attendance.StudentMonthlyAttendanceDTO;
 import in.edu.jspmjscoe.admissionportal.services.teacher.attendance.AttendanceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -33,4 +34,15 @@ public class AttendanceController {
         return ResponseEntity.ok(attendanceService.createAttendanceSession(dto));
     }
 
+    @GetMapping("/monthly")
+    public ResponseEntity<List<StudentMonthlyAttendanceDTO>> getMonthlyAttendance(
+            @RequestParam String subjectName,
+            @RequestParam String division,
+            @RequestParam int year,
+            @RequestParam int month
+    ) {
+        return ResponseEntity.ok(
+                attendanceService.getMonthlyAttendance(subjectName, division, year, month)
+        );
+    }
 }
