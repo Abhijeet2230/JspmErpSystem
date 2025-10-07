@@ -2,6 +2,7 @@ package in.edu.jspmjscoe.admissionportal.controllers.admin.teacher;
 
 import in.edu.jspmjscoe.admissionportal.dtos.security.ChangePasswordRequest;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.TeacherDTO;
+import in.edu.jspmjscoe.admissionportal.dtos.teacher.attendance.AdminStudentSubjectAttendanceDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.attendance.AttendanceSessionDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.attendance.StudentMonthlyAttendanceDTO;
 import in.edu.jspmjscoe.admissionportal.model.security.Status;
@@ -68,6 +69,16 @@ public class AdminTeacherController {
         LocalDate attendanceDate = LocalDate.parse(date); // format: "yyyy-MM-dd"
         List<AttendanceSessionDTO> sessions = attendanceService.getAttendanceSessionsByFilter(subjectName, division, attendanceDate);
         return ResponseEntity.ok(sessions);
+    }
+
+    @GetMapping("/monthly/subject-wise")
+    public ResponseEntity<List<AdminStudentSubjectAttendanceDTO>> getMonthlySubjectWise(
+            @RequestParam String division,
+            @RequestParam int year,
+            @RequestParam int month) {
+
+        List<AdminStudentSubjectAttendanceDTO> data = attendanceService.getMonthlySubjectWiseAttendanceForAdmin(division, year, month);
+        return ResponseEntity.ok(data);
     }
 
 }
