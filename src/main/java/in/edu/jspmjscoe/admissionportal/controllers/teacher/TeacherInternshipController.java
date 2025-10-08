@@ -5,8 +5,6 @@ import in.edu.jspmjscoe.admissionportal.exception.ResourceNotFoundException;
 import in.edu.jspmjscoe.admissionportal.model.internship.PostingStatus;
 import in.edu.jspmjscoe.admissionportal.services.internship.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -39,7 +37,7 @@ public class TeacherInternshipController {
     private final GuestLectureService guestLectureService;
     private final TrainingSkillWorkshopService trainingSkillWorkshopService;
     private final IndustrialVisitService industrialVisitService;
-    private final StudentProfileService studentProfileService;
+    private final StudentInternshipProfileService studentProfileService;
     private final ResumeService resumeService;
 
     // ==================== COMPANY VIEWING ====================

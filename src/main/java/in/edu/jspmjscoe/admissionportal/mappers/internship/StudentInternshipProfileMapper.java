@@ -7,7 +7,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
-public interface StudentProfileMapper {
+public interface StudentInternshipProfileMapper {
 
     // Entity → DTO
     @Mapping(source = "student.studentId", target = "studentId")

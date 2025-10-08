@@ -5,7 +5,7 @@ import in.edu.jspmjscoe.admissionportal.exception.ResourceNotFoundException;
 
 import in.edu.jspmjscoe.admissionportal.services.internship.FileStorageService;
 import in.edu.jspmjscoe.admissionportal.services.internship.ResumeService;
-import in.edu.jspmjscoe.admissionportal.services.internship.StudentProfileService;
+import in.edu.jspmjscoe.admissionportal.services.internship.StudentInternshipProfileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,7 +23,7 @@ import java.util.UUID;
 public class ResumeServiceImpl implements ResumeService {
 
     private final FileStorageService fileStorageService;
-    private final StudentProfileService studentProfileService;
+    private final StudentInternshipProfileService studentProfileService;
     
     @Value("${app.resume.bucket-name:student-resumes}")
     private String resumeBucketName;

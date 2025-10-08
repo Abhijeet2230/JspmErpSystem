@@ -20,7 +20,7 @@ import java.util.List;
 public class ApplicationFormServiceImpl implements ApplicationFormService {
 
     private final StudentRepository studentRepository;
-    private final StudentProfileService studentProfileService;
+    private final StudentInternshipProfileService studentProfileService;
     private final InternshipPostingService internshipPostingService;
     private final PlacementService placementService;
     private final InternshipApplicationService internshipApplicationService;

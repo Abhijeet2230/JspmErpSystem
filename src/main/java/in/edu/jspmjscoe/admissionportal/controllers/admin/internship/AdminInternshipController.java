@@ -13,7 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -41,7 +40,7 @@ public class AdminInternshipController {
     private final GuestLectureService guestLectureService;
     private final TrainingSkillWorkshopService trainingSkillWorkshopService;
     private final IndustrialVisitService industrialVisitService;
-    private final StudentProfileService studentProfileService;
+    private final StudentInternshipProfileService studentProfileService;
     private final ResumeService resumeService;
 
     // ==================== COMPANY MANAGEMENT ====================
