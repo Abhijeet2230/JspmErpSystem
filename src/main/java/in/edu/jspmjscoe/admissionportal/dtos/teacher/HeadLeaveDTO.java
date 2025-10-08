@@ -13,6 +13,7 @@ public class HeadLeaveDTO {
     private Long headLeaveId;
     private LocalDate fromDate;
     private LocalDate toDate;
+    private LocalDate actualToDate;
     private int numberOfDays;
     private String reason;
     private String prefixSuffix;

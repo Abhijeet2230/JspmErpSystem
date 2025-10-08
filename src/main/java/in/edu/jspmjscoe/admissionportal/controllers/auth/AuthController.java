@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -89,12 +90,16 @@ public class AuthController {
 
         String jwtToken = jwtUtils.generateTokenFromUsername(userDetails);
 
-        LoginResponse response = new LoginResponse(
-                userDetails.getUsername(),
-                roles,
-                jwtToken,
-                user.isFirstLogin()
-        );
+        // ✅ Fetch designation only if teacher
+        String designation = null;
+        if (roles.contains("ROLE_TEACHER")) {
+            Teacher teacher = teacherRepository.findByUser(user).orElse(null);
+            if (teacher != null) {
+                designation = teacher.getDesignation(); // assuming field exists in Teacher entity
+            }
+        }
+
+        LoginResponse response = new LoginResponse(userDetails.getUsername(), roles, jwtToken, user.isFirstLogin(),designation);
 
         return ResponseEntity.ok(response);
     }

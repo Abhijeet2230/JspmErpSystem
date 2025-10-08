@@ -9,18 +9,16 @@ import org.mapstruct.*;
 @Mapper(componentModel = "spring")
 public interface TeacherSubjectMapper {
 
-    // ===== Entity -> DTO =====
     @Mapping(source = "teacher.teacherId", target = "teacherId")
     @Mapping(source = "subject.subjectId", target = "subjectId")
+    @Mapping(source = "teacher.firstName", target = "teacherName")  // optional concat later
     TeacherSubjectDTO toDto(TeacherSubject teacherSubject);
 
-    // ===== DTO -> Entity =====
     @InheritInverseConfiguration
     @Mapping(target = "teacher", expression = "java(mapTeacher(dto.getTeacherId()))")
     @Mapping(target = "subject", expression = "java(mapSubject(dto.getSubjectId()))")
     TeacherSubject toEntity(TeacherSubjectDTO dto);
 
-    // ---------- Helper methods ----------
     default Teacher mapTeacher(Long teacherId) {
         if (teacherId == null) return null;
         Teacher t = new Teacher();
@@ -35,3 +33,4 @@ public interface TeacherSubjectMapper {
         return s;
     }
 }
+

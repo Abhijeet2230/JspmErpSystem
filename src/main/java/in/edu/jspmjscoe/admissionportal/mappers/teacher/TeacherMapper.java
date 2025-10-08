@@ -193,7 +193,8 @@ public interface TeacherMapper {
                 .teacherName(teacherName)
                 .subjectId(ts.getSubject() != null ? ts.getSubject().getSubjectId() : null)
                 .subjectName(ts.getSubject() != null ? ts.getSubject().getName() : null)
-                .build(); // ✅ removed roleInSubject (not in entity)
+                .division(ts.getDivision()) // ✅ add division
+                .build();
     }
 
     private static String buildFullName(Teacher teacher) {

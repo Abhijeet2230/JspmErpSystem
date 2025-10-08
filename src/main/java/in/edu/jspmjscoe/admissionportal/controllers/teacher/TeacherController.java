@@ -1,8 +1,12 @@
 package in.edu.jspmjscoe.admissionportal.controllers.teacher;
 
+import in.edu.jspmjscoe.admissionportal.dtos.security.ChangePasswordRequest;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.HeadLeaveDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.LeaveDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.TeacherDTO;
+import in.edu.jspmjscoe.admissionportal.exception.TeacherNotFoundException;
+import in.edu.jspmjscoe.admissionportal.exception.UserNotFoundException;
+import in.edu.jspmjscoe.admissionportal.mappers.teacher.TeacherMapper;
 import in.edu.jspmjscoe.admissionportal.model.security.User;
 import in.edu.jspmjscoe.admissionportal.model.teacher.Teacher;
 import in.edu.jspmjscoe.admissionportal.repositories.security.UserRepository;
@@ -23,7 +27,26 @@ public class TeacherController {
     private final TeacherRepository teacherRepository;
     private final UserRepository userRepository;
 
-    // ✅ Get the currently logged-in student's details
+    // ------------ Change Teacher Password ------------//
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePassword(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestBody ChangePasswordRequest request) {
+
+        if (userDetails == null) {
+            return ResponseEntity.status(401).body("Unauthorized");
+        }
+
+        try {
+            teacherService.changePassword(userDetails.getUsername(), request);
+            return ResponseEntity.ok("Password changed successfully");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(500).body("Could not change password");
+        }
+    }
+    // ✅ Get the currently logged-in teacher's details
     @GetMapping("/profile")
     public ResponseEntity<?> getCurrentTeacher(@AuthenticationPrincipal UserDetails userDetails) {
         if (userDetails == null) {
@@ -32,14 +55,18 @@ public class TeacherController {
 
         // 1. Find User from username/email
         User user = userRepository.findByUserName(userDetails.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException(userDetails.getUsername()));
 
-        // 2. Find Student linked with that User
+        // 2. Find teacher linked with that User
         Teacher teacher = teacherRepository.findByUser(user)
-                .orElseThrow(() -> new RuntimeException("Teacher profile not found"));
+                .orElseThrow(() -> new TeacherNotFoundException("User ID: " + user.getUserId()));
 
-        return ResponseEntity.ok(teacher);
+        // 3. Map to DTO (department name is already included in mapper)
+        TeacherDTO teacherDTO = TeacherMapper.toDTO(teacher);
+
+        return ResponseEntity.ok(teacherDTO);
     }
+
 
     // Get teacher by id
     @GetMapping("/{id}")
@@ -58,6 +85,5 @@ public class TeacherController {
     public ResponseEntity<HeadLeaveDTO> applyHeadLeave(@RequestBody HeadLeaveDTO headLeaveDTO) {
         return ResponseEntity.ok(teacherService.applyHeadLeave(headLeaveDTO));
     }
-
 
 }

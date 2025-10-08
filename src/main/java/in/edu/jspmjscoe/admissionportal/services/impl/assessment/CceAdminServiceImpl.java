@@ -59,7 +59,8 @@ public class CceAdminServiceImpl implements CceAdminService {
     public List<StudentCCEDTO> getStudentsByDivision(String division) {
         List<StudentAcademicYear> studentYears = studentAcademicYearRepository.findByDivisionAndIsActiveTrue(division);
         return studentYears.stream()
-                .map(studentCCEMapper::toDto) // map StudentAcademicYear -> DTO
+                .map(studentCCEMapper::toDto)
+                .sorted(Comparator.comparingInt(s -> Integer.parseInt(String.valueOf(s.getRollNo()))))
                 .toList();
     }
 
@@ -158,6 +159,9 @@ public class CceAdminServiceImpl implements CceAdminService {
         examRepository.save(exam);
         return studentExamMapper.toDto(exam);
     }
+
+    // ---------- Attendance ----------
+
 
     // ---------- Bulk Updates ----------
     @Override

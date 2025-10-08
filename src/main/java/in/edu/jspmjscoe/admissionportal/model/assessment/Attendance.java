@@ -13,8 +13,8 @@ import lombok.*;
 @Builder
 @Entity
 @Table(
-    name = "attendance",
-    uniqueConstraints = @UniqueConstraint(columnNames = {"student_id", "subject_id"})
+        name = "attendance",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"student_id", "subject_id"})
 )
 public class Attendance {
 
