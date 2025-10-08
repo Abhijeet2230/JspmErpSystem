@@ -2,6 +2,7 @@ package in.edu.jspmjscoe.admissionportal.services.impl.assessment;
 
 import in.edu.jspmjscoe.admissionportal.dtos.assessment.*;
 import in.edu.jspmjscoe.admissionportal.dtos.subject.SubjectDTO;
+import in.edu.jspmjscoe.admissionportal.dtos.teacher.attendance.AdminStudentSubjectAttendanceDTO;
 import in.edu.jspmjscoe.admissionportal.exception.ResourceNotFoundException;
 import in.edu.jspmjscoe.admissionportal.exception.cce.ExamNotFoundException;
 import in.edu.jspmjscoe.admissionportal.exception.cce.UnitAssessmentNotFoundException;
@@ -12,12 +13,15 @@ import in.edu.jspmjscoe.admissionportal.model.assessment.StudentUnitAssessment;
 import in.edu.jspmjscoe.admissionportal.model.security.User;
 import in.edu.jspmjscoe.admissionportal.model.student.Student;
 import in.edu.jspmjscoe.admissionportal.model.student.StudentAcademicYear;
+import in.edu.jspmjscoe.admissionportal.model.subject.Subject;
+import in.edu.jspmjscoe.admissionportal.model.teacher.attendance.AttendanceSession;
 import in.edu.jspmjscoe.admissionportal.repositories.assessment.StudentExamRepository;
 import in.edu.jspmjscoe.admissionportal.repositories.assessment.StudentUnitAssessmentRepository;
 import in.edu.jspmjscoe.admissionportal.repositories.security.UserRepository;
 import in.edu.jspmjscoe.admissionportal.repositories.student.StudentAcademicYearRepository;
 import in.edu.jspmjscoe.admissionportal.repositories.student.StudentRepository;
 import in.edu.jspmjscoe.admissionportal.repositories.subject.SubjectRepository;
+import in.edu.jspmjscoe.admissionportal.repositories.teacher.attendance.AttendanceSessionRepository;
 import in.edu.jspmjscoe.admissionportal.services.assessment.CceAdminService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -44,6 +48,7 @@ public class CceAdminServiceImpl implements CceAdminService {
     private final UnitMarksMapper unitMarksMapper;
     private final StudentWithUnitsMapper studentWithUnitsMapper;
     private final SubjectMapper subjectMapper;
+    private final AttendanceSessionRepository attendanceSessionRepository;
 
     // ---------- Helper ----------
     private String getDivisionGroup(String division) {
@@ -242,5 +247,82 @@ public class CceAdminServiceImpl implements CceAdminService {
         // 4. Reuse existing division → subjects logic
         return getSubjectsForDivision(division);
     }
+
+    // ---------------------- Student Attendance ----------------//
+    @Override
+    public List<AdminStudentOverallSubjectAttendanceDTO> getOverallAttendanceForDivisionAndSubject(String division, Long subjectId) {
+
+        Subject subject = subjectRepository.findById(subjectId)
+                .orElseThrow(() -> new RuntimeException("Subject not found"));
+
+        // ✅ Get all sessions for the given subject and division
+        List<AttendanceSession> sessions = attendanceSessionRepository.findAll().stream()
+                .filter(s -> s.getSubject().getSubjectId().equals(subjectId)
+                        && s.getDivision().equalsIgnoreCase(division))
+                .toList();
+
+        if (sessions.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        // ✅ Collect all unique students who attended any session
+        Map<Long, Student> studentMap = new LinkedHashMap<>();
+        sessions.forEach(s -> s.getStudentAttendances().forEach(sa ->
+                studentMap.putIfAbsent(sa.getStudent().getStudentId(), sa.getStudent())
+        ));
+
+        // ✅ For each student, calculate attendance percentage
+        List<AdminStudentOverallSubjectAttendanceDTO> result = new ArrayList<>();
+
+        for (Student student : studentMap.values()) {
+
+            int totalSessions = sessions.size();
+            int presentCount = (int) sessions.stream()
+                    .map(session ->
+                            session.getStudentAttendances().stream()
+                                    .filter(sa -> sa.getStudent().getStudentId().equals(student.getStudentId()))
+                                    .findFirst()
+                                    .map(sa -> sa.getStatus().equalsIgnoreCase("present") ? 1 : 0)
+                                    .orElse(0))
+                    .reduce(0, Integer::sum);
+
+            double percentage = totalSessions == 0 ? 0.0 : (presentCount * 100.0) / totalSessions;
+            percentage = Math.round(percentage * 100.0) / 100.0;
+
+            // ✅ Build DTO
+            AdminStudentOverallSubjectAttendanceDTO dto = new AdminStudentOverallSubjectAttendanceDTO();
+            dto.setStudentId(student.getStudentId());
+            dto.setStudentName(student.getCandidateName());
+            dto.setDivision(division);
+
+            // Roll number
+            String rollNo = student.getStudentAcademicYears().stream()
+                    .filter(ay -> ay.getIsActive() && ay.getDivision().equalsIgnoreCase(division))
+                    .findFirst()
+                    .map(ay -> String.valueOf(ay.getRollNo()))
+                    .orElse(null);
+            dto.setRollNo(rollNo);
+
+            // ✅ Add subject name and overall percentage
+            dto.setSubjectName(subject.getName());
+            dto.setPercentage(percentage);
+
+            result.add(dto);
+        }
+
+        // ✅ Sort by roll number (optional)
+        result.sort((a, b) -> {
+            if (a.getRollNo() == null || b.getRollNo() == null)
+                return a.getStudentName().compareToIgnoreCase(b.getStudentName());
+            try {
+                return Integer.valueOf(a.getRollNo()).compareTo(Integer.valueOf(b.getRollNo()));
+            } catch (NumberFormatException e) {
+                return a.getRollNo().compareToIgnoreCase(b.getRollNo());
+            }
+        });
+
+        return result;
+    }
+
 
 }
