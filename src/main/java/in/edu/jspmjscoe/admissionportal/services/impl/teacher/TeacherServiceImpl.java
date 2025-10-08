@@ -139,7 +139,7 @@ public class TeacherServiceImpl implements TeacherService {
         Teacher teacher = TeacherMapper.toEntity(teacherDTO, user, department);
 
         // 4️⃣ Set default status
-        teacher.setStatus(Status.ACCEPTED);
+        teacher.setStatus(Status.PENDING);
 
         // 6️⃣ Save teacher with teacherSubjects
         Teacher savedTeacher = teacherRepository.save(teacher);

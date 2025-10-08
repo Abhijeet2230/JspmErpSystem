@@ -5,6 +5,7 @@ import in.edu.jspmjscoe.admissionportal.exception.excel.ExcelImportException;
 import in.edu.jspmjscoe.admissionportal.helper.TeacherExcelHelper;
 import in.edu.jspmjscoe.admissionportal.model.security.AppRole;
 import in.edu.jspmjscoe.admissionportal.model.security.Role;
+import in.edu.jspmjscoe.admissionportal.model.security.Status;
 import in.edu.jspmjscoe.admissionportal.model.security.User;
 import in.edu.jspmjscoe.admissionportal.model.subject.Department;
 import in.edu.jspmjscoe.admissionportal.model.teacher.Teacher;
@@ -86,39 +87,13 @@ public class TeacherExcelImportServiceImpl implements TeacherExcelImportService 
                     continue;
                 }
 
-                // Create User
-                User user = new User();
-                String username = dto.getEmployeeId() != null && !dto.getEmployeeId().isBlank()
-                        ? dto.getEmployeeId()
-                        : (dto.getOfficialEmail() != null ? dto.getOfficialEmail() : dto.getPersonalEmail());
-                if (username == null) username = "tuser_" + System.currentTimeMillis();
-
-                user.setUserName(username);
-                String rawPassword = dto.getDateOfBirth() != null ? dto.getDateOfBirth() : "changeme";
-                user.setPassword(passwordEncoder.encode(rawPassword));
-                user.setRole(teacherRole);
-                user.setEnabled(true);
-                user.setFirstLogin(true);
-
-                // SAVE USER FIRST
-                userRepository.saveAndFlush(user);
-
-                // Map Teacher entity
-                Teacher teacher = new Teacher();
-                teacher.setFirstName(dto.getFirstName());
-                teacher.setMiddleName(dto.getMiddleName());
-                teacher.setLastName(dto.getLastName());
-                teacher.setPrefix(dto.getPrefix());
-                teacher.setGender(dto.getGender());
-                // Convert Date of Birth to yyyy-MM-dd
-                // Convert Date of Birth to yyyy-MM-dd
-                // Convert Date of Birth to yyyy-MM-dd
+                // --- Convert and Normalize Date of Birth ---
                 String dobStr = dto.getDateOfBirth();
                 String formattedDob = null;
                 if (dobStr != null && !dobStr.isBlank()) {
                     try {
                         String cleanedDob = dobStr.trim()
-                                .replace("\"", "") // remove all quotes
+                                .replace("\"", "")
                                 .replace("Sept", "Sep"); // normalize Excel month
 
                         // Excel gives dd-MMM-yyyy (e.g., 24-Jan-2025)
@@ -134,8 +109,33 @@ public class TeacherExcelImportServiceImpl implements TeacherExcelImportService 
                         formattedDob = dobStr.trim(); // fallback
                     }
                 }
-                teacher.setDateOfBirth(formattedDob);
 
+                // --- Create User ---
+                User user = new User();
+                String username = dto.getEmployeeId() != null && !dto.getEmployeeId().isBlank()
+                        ? dto.getEmployeeId()
+                        : (dto.getOfficialEmail() != null ? dto.getOfficialEmail() : dto.getPersonalEmail());
+                if (username == null) username = "tuser_" + System.currentTimeMillis();
+
+                // ✅ Use formatted DOB as password if available
+                String rawPassword = (formattedDob != null && !formattedDob.isBlank()) ? formattedDob : "changeme";
+                user.setUserName(username);
+                user.setPassword(passwordEncoder.encode(rawPassword));
+                user.setRole(teacherRole);
+                user.setEnabled(true);
+                user.setFirstLogin(true);
+
+                // SAVE USER FIRST
+                userRepository.saveAndFlush(user);
+
+                // --- Map Teacher entity ---
+                Teacher teacher = new Teacher();
+                teacher.setFirstName(dto.getFirstName());
+                teacher.setMiddleName(dto.getMiddleName());
+                teacher.setLastName(dto.getLastName());
+                teacher.setPrefix(dto.getPrefix());
+                teacher.setGender(dto.getGender());
+                teacher.setDateOfBirth(formattedDob);
 
                 // Clean/Truncate phone
                 String phone = dto.getPhone();
@@ -147,7 +147,6 @@ public class TeacherExcelImportServiceImpl implements TeacherExcelImportService 
                 }
                 teacher.setPhone(phone);
                 teacher.setPersonalEmail(dto.getPersonalEmail());
-
                 teacher.setOfficialEmail(dto.getOfficialEmail());
                 teacher.setDesignation(dto.getDesignation());
                 teacher.setEmployeeId(dto.getEmployeeId());
@@ -155,18 +154,15 @@ public class TeacherExcelImportServiceImpl implements TeacherExcelImportService 
                 teacher.setVidwaanId(dto.getVidwaanId());
                 teacher.setOrchidId(dto.getOrchidId());
                 teacher.setGoogleScholarId(dto.getGoogleScholarId());
-
                 teacher.setHighestDegree(dto.getHighestDegree());
                 teacher.setPhdYear(dto.getPhdYear());
                 teacher.setSpecialization(dto.getSpecialization());
                 teacher.setDegreeUniversity(dto.getDegreeUniversity());
-
                 teacher.setPreviousInstitutions(dto.getPreviousInstitutions());
                 teacher.setYearsExperience(dto.getYearsExperience());
                 teacher.setSubjectsTaught(dto.getSubjectsTaught());
-
                 teacher.setDepartment(department);
-
+                teacher.setStatus(Status.ACCEPTED);
                 // link user <-> teacher
                 teacher.setUser(user);
                 try {

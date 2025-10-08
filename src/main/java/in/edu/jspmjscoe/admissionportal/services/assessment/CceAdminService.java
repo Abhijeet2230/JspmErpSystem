@@ -2,6 +2,7 @@ package in.edu.jspmjscoe.admissionportal.services.assessment;
 
 import in.edu.jspmjscoe.admissionportal.dtos.assessment.*;
 import in.edu.jspmjscoe.admissionportal.dtos.subject.SubjectDTO;
+import in.edu.jspmjscoe.admissionportal.dtos.teacher.attendance.AdminStudentSubjectAttendanceDTO;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.List;
@@ -30,4 +31,5 @@ public interface CceAdminService {
 
     List<StudentExamDTO> updateExamMarksBulk(List<ExamUpdateRequestDTO> requests);
     List<SubjectDTO> getSubjectsForLoggedInStudent(UserDetails userDetails);
+    List<AdminStudentOverallSubjectAttendanceDTO> getOverallAttendanceForDivisionAndSubject(String division, Long subjectId);
 }

@@ -9,8 +9,13 @@ import in.edu.jspmjscoe.admissionportal.dtos.teacher.LeaveDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.TeacherDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.TeacherSubjectDTO;
 import in.edu.jspmjscoe.admissionportal.mappers.teacher.staffrecord.StaffMonthlyReportMapper;
+import in.edu.jspmjscoe.admissionportal.model.security.AppRole;
+import in.edu.jspmjscoe.admissionportal.model.security.Role;
+import in.edu.jspmjscoe.admissionportal.model.security.User;
 import in.edu.jspmjscoe.admissionportal.model.teacher.staffrecord.StaffMonthlyReport;
 import in.edu.jspmjscoe.admissionportal.model.security.Status;
+import in.edu.jspmjscoe.admissionportal.repositories.security.RoleRepository;
+import in.edu.jspmjscoe.admissionportal.repositories.security.UserRepository;
 import in.edu.jspmjscoe.admissionportal.repositories.teacher.HeadLeaveRepository;
 import in.edu.jspmjscoe.admissionportal.repositories.teacher.LeaveRepository;
 import in.edu.jspmjscoe.admissionportal.repositories.teacher.TeacherRepository;
@@ -23,11 +28,14 @@ import in.edu.jspmjscoe.admissionportal.services.student.StudentService;
 import in.edu.jspmjscoe.admissionportal.services.security.UserService;
 import in.edu.jspmjscoe.admissionportal.services.teacher.staffrecord.StaffMonthlyReportService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
+import java.util.Map;
 
 
 @RestController
@@ -48,6 +56,9 @@ public class AdminController {
     private final TeacherExcelImportService teacherExcelImportService;
     private final StaffMonthlyReportService staffMonthlyReportService;
     private final StaffMonthlyReportMapper staffMonthlyReportMapper;
+    private final RoleRepository roleRepository;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     // ------------------- User Endpoints -------------------
 
@@ -192,6 +203,51 @@ public class AdminController {
                     .body("Failed to import teachers: " + e.getMessage());
         }
     }
+
+    @PatchMapping("/reset-teacher-passwords")
+    public ResponseEntity<?> resetTeacherPasswords() {
+        try {
+            // Step 1: Fetch role ROLE_TEACHER
+            Role teacherRole = roleRepository.findByRoleName(AppRole.ROLE_TEACHER)
+                    .orElseThrow(() -> new RuntimeException("ROLE_TEACHER not found"));
+
+            // Step 2: Fetch all users having teacher role
+            List<User> teacherUsers = userRepository.findByRole(teacherRole);
+
+            if (teacherUsers.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of(
+                                "message", "No users found with role TEACHER"
+                        ));
+            }
+
+            // Step 3: Encode the fixed date "1990-10-10"
+            String encodedPassword = passwordEncoder.encode("1990-10-10");
+
+            // Step 4: Update password for all teacher users
+            teacherUsers.forEach(user -> {
+                user.setPassword(encodedPassword);
+                user.setFirstLogin(true); // optionally force password change at next login
+            });
+
+            userRepository.saveAll(teacherUsers);
+
+            // Step 5: Return response
+            return ResponseEntity.ok(Map.of(
+                    "status", "success",
+                    "updatedCount", teacherUsers.size(),
+                    "message", "Passwords reset successfully for all teacher users."
+            ));
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of(
+                            "status", "error",
+                            "message", e.getMessage()
+                    ));
+        }
+    }
+
 
 
 }

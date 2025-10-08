@@ -2,6 +2,7 @@ package in.edu.jspmjscoe.admissionportal.controllers.admin.cce;
 
 import in.edu.jspmjscoe.admissionportal.dtos.assessment.*;
 import in.edu.jspmjscoe.admissionportal.dtos.subject.SubjectDTO;
+import in.edu.jspmjscoe.admissionportal.dtos.teacher.attendance.AdminStudentSubjectAttendanceDTO;
 import in.edu.jspmjscoe.admissionportal.services.assessment.CceAdminService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -96,4 +97,18 @@ public class CceAdminController {
         List<StudentExamDTO> updatedExams = cceAdminService.updateExamMarksBulk(requests);
         return ResponseEntity.ok(updatedExams);
     }
+
+    // ----------------- Attendance ---------------------
+    @GetMapping("/divisions/{division}/subjects/{subjectId}/attendance")
+    public ResponseEntity<List<AdminStudentOverallSubjectAttendanceDTO>> getOverallAttendanceForSubject(
+            @PathVariable String division,
+            @PathVariable Long subjectId) {
+
+        List<AdminStudentOverallSubjectAttendanceDTO> data =
+                cceAdminService.getOverallAttendanceForDivisionAndSubject(division, subjectId);
+
+        return ResponseEntity.ok(data);
+    }
+
+
 }
