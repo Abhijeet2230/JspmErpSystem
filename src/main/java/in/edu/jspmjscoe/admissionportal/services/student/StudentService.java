@@ -3,6 +3,7 @@ package in.edu.jspmjscoe.admissionportal.services.student;
 import in.edu.jspmjscoe.admissionportal.dtos.security.ChangePasswordRequest;
 import in.edu.jspmjscoe.admissionportal.dtos.student.StudentDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.student.StudentProfileUpdateDTO;
+import in.edu.jspmjscoe.admissionportal.dtos.teacher.attendance.StudentOverallSubjectAttendanceDTO;
 import in.edu.jspmjscoe.admissionportal.model.security.User;
 import in.edu.jspmjscoe.admissionportal.model.student.Student;
 
@@ -15,4 +16,7 @@ public interface StudentService {
     void changePassword(String username, ChangePasswordRequest request);
 
     Student updateProfile(User user, StudentProfileUpdateDTO dto);
+
+    // attendance
+    List<StudentOverallSubjectAttendanceDTO> getOverallAttendanceForStudent(String username);
 }

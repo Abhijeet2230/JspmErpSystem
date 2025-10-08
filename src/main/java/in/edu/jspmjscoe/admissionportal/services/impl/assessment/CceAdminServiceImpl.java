@@ -2,7 +2,7 @@ package in.edu.jspmjscoe.admissionportal.services.impl.assessment;
 
 import in.edu.jspmjscoe.admissionportal.dtos.assessment.*;
 import in.edu.jspmjscoe.admissionportal.dtos.subject.SubjectDTO;
-import in.edu.jspmjscoe.admissionportal.dtos.teacher.attendance.AdminStudentSubjectAttendanceDTO;
+import in.edu.jspmjscoe.admissionportal.dtos.teacher.attendance.StudentOverallSubjectAttendanceDTO;
 import in.edu.jspmjscoe.admissionportal.exception.ResourceNotFoundException;
 import in.edu.jspmjscoe.admissionportal.exception.cce.ExamNotFoundException;
 import in.edu.jspmjscoe.admissionportal.exception.cce.UnitAssessmentNotFoundException;
@@ -248,7 +248,7 @@ public class CceAdminServiceImpl implements CceAdminService {
         return getSubjectsForDivision(division);
     }
 
-    // ---------------------- Student Attendance ----------------//
+    // ---------------------- Student Attendance for Cce----------------//
     @Override
     public List<AdminStudentOverallSubjectAttendanceDTO> getOverallAttendanceForDivisionAndSubject(String division, Long subjectId) {
 
@@ -323,6 +323,7 @@ public class CceAdminServiceImpl implements CceAdminService {
 
         return result;
     }
+
 
 
 }
