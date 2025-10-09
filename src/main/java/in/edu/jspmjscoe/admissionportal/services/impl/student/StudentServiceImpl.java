@@ -15,16 +15,15 @@ import in.edu.jspmjscoe.admissionportal.model.subject.Subject;
 import in.edu.jspmjscoe.admissionportal.model.teacher.attendance.AttendanceSession;
 import in.edu.jspmjscoe.admissionportal.repositories.student.StudentRepository;
 import in.edu.jspmjscoe.admissionportal.repositories.security.UserRepository;
-import in.edu.jspmjscoe.admissionportal.services.impl.minio.MinioStorageService;
 import in.edu.jspmjscoe.admissionportal.repositories.teacher.attendance.AttendanceSessionRepository;
-import in.edu.jspmjscoe.admissionportal.services.impl.achievements.MinioStorageService;
+import in.edu.jspmjscoe.admissionportal.services.impl.minio.MinioStorageService;
 import in.edu.jspmjscoe.admissionportal.services.student.StudentService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,6 +34,7 @@ public class StudentServiceImpl implements StudentService {
     private final StudentMapper studentMapper;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AttendanceSessionRepository  attendanceSessionRepository;
     private final MinioStorageService minioStorageService;
 
 

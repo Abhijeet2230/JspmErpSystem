@@ -54,10 +54,10 @@ public class SecurityConfig {
                 .requestMatchers("/api/admin/cce/**").hasAnyRole("ADMIN","TEACHER")
                 .requestMatchers("/api/admin/training-placement/**").hasAnyRole("ADMIN","TEACHER")
                 .requestMatchers("/api/admin/achievements/**").hasAnyRole("ADMIN","TEACHER")
-                .requestMatchers("/api/admin/**","/actuator/**").hasRole("ADMIN")
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/student/**").hasRole("STUDENT")
                 .requestMatchers("/api/teacher/**").hasRole("TEACHER")
-                .requestMatchers("/api/files/**").permitAll()
+                .requestMatchers("/api/files/**","/actuator/**").permitAll()
                 .requestMatchers(
                         "/api/auth/public/**",
                         "/api/csrf-token",

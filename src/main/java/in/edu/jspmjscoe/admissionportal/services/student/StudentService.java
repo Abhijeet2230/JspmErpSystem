@@ -15,8 +15,6 @@ public interface StudentService {
     List<StudentDTO> getAllStudents();
     void changePassword(String username, ChangePasswordRequest request);
 
-    Student updateProfile(User user, StudentProfileUpdateDTO dto);
-
     // attendance
     List<StudentOverallSubjectAttendanceDTO> getOverallAttendanceForStudent(String username);
 }
