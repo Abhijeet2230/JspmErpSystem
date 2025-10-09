@@ -23,7 +23,7 @@ import java.util.UUID;
 public class ResumeServiceImpl implements ResumeService {
 
     private final FileStorageService fileStorageService;
-    private final StudentInternshipProfileService studentInternshipProfileService;
+    private final StudentInternshipProfileService studentProfileService;
     
     @Value("${app.resume.bucket-name:student-resumes}")
     private String resumeBucketName;
@@ -66,7 +66,7 @@ public class ResumeServiceImpl implements ResumeService {
         
         // Update student profile with resume path
         profile.setResumePath(fileName);
-        studentInternshipProfileService.updateProfile(profile.getProfileId(), profile);
+        studentProfileService.updateProfile(profile.getProfileId(), profile);
         
         log.info("Resume uploaded successfully for student ID: {}, file: {}", studentId, fileName);
         return resumeUrl;
@@ -76,7 +76,7 @@ public class ResumeServiceImpl implements ResumeService {
     public InputStream downloadResume(Long studentId) {
         log.info("Downloading resume for student ID: {}", studentId);
         
-        StudentProfileDTO profile = studentInternshipProfileService.getProfileByStudentId(studentId)
+        StudentProfileDTO profile = studentProfileService.getProfileByStudentId(studentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Student profile not found for ID: " + studentId));
         
         if (profile.getResumePath() == null || profile.getResumePath().isEmpty()) {
@@ -90,7 +90,7 @@ public class ResumeServiceImpl implements ResumeService {
     public void deleteResume(Long studentId) {
         log.info("Deleting resume for student ID: {}", studentId);
         
-        StudentProfileDTO profile = studentInternshipProfileService.getProfileByStudentId(studentId)
+        StudentProfileDTO profile = studentProfileService.getProfileByStudentId(studentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Student profile not found for ID: " + studentId));
         
         if (profile.getResumePath() != null && !profile.getResumePath().isEmpty()) {
@@ -98,7 +98,7 @@ public class ResumeServiceImpl implements ResumeService {
             
             // Update profile to remove resume path
             profile.setResumePath(null);
-            studentInternshipProfileService.updateProfile(profile.getProfileId(), profile);
+            studentProfileService.updateProfile(profile.getProfileId(), profile);
             
             log.info("Resume deleted successfully for student ID: {}", studentId);
         }
@@ -106,14 +106,14 @@ public class ResumeServiceImpl implements ResumeService {
 
     @Override
     public boolean hasResume(Long studentId) {
-        return studentInternshipProfileService.getProfileByStudentId(studentId)
+        return studentProfileService.getProfileByStudentId(studentId)
                 .map(profile -> profile.getResumePath() != null && !profile.getResumePath().isEmpty())
                 .orElse(false);
     }
 
     @Override
     public String getResumeUrl(Long studentId) {
-        StudentProfileDTO profile = studentInternshipProfileService.getProfileByStudentId(studentId)
+        StudentProfileDTO profile = studentProfileService.getProfileByStudentId(studentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Student profile not found for ID: " + studentId));
         
         if (profile.getResumePath() == null || profile.getResumePath().isEmpty()) {
@@ -131,7 +131,7 @@ public class ResumeServiceImpl implements ResumeService {
 
     @Override
     public ResumeFileInfo getResumeFileInfo(Long studentId) {
-        StudentProfileDTO profile = studentInternshipProfileService.getProfileByStudentId(studentId)
+        StudentProfileDTO profile = studentProfileService.getProfileByStudentId(studentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Student profile not found for ID: " + studentId));
         
         if (profile.getResumePath() == null || profile.getResumePath().isEmpty()) {
@@ -153,7 +153,7 @@ public class ResumeServiceImpl implements ResumeService {
     }
 
     private StudentProfileDTO getOrCreateStudentProfile(Long studentId) {
-        return studentInternshipProfileService.getProfileByStudentId(studentId)
+        return studentProfileService.getProfileByStudentId(studentId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                     "Student profile not found for ID: " + studentId + ". Please create a profile first."));
     }

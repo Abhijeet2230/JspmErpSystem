@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -40,7 +41,7 @@ public class AdminInternshipController {
     private final GuestLectureService guestLectureService;
     private final TrainingSkillWorkshopService trainingSkillWorkshopService;
     private final IndustrialVisitService industrialVisitService;
-    private final StudentInternshipProfileService studentInternshipProfileService;
+    private final StudentInternshipProfileService studentProfileService;
     private final ResumeService resumeService;
 
     // ==================== COMPANY MANAGEMENT ====================
@@ -428,26 +429,26 @@ public class AdminInternshipController {
     
     @GetMapping("/student-profiles")
     public ResponseEntity<List<StudentProfileDTO>> getAllStudentProfiles() {
-        List<StudentProfileDTO> profiles = studentInternshipProfileService.getAllProfiles();
+        List<StudentProfileDTO> profiles = studentProfileService.getAllProfiles();
         return ResponseEntity.ok(profiles);
     }
 
     @GetMapping("/student-profiles/{id}")
     public ResponseEntity<StudentProfileDTO> getStudentProfileById(@PathVariable Long id) {
-        return studentInternshipProfileService.getProfileById(id)
+        return studentProfileService.getProfileById(id)
                 .map(profile -> ResponseEntity.ok(profile))
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PutMapping("/student-profiles/{id}")
     public ResponseEntity<StudentProfileDTO> updateStudentProfile(@PathVariable Long id, @RequestBody StudentProfileDTO profileDTO) {
-        StudentProfileDTO updatedProfile = studentInternshipProfileService.updateProfile(id, profileDTO);
+        StudentProfileDTO updatedProfile = studentProfileService.updateProfile(id, profileDTO);
         return ResponseEntity.ok(updatedProfile);
     }
 
     @DeleteMapping("/student-profiles/{id}")
     public ResponseEntity<Void> deleteStudentProfile(@PathVariable Long id) {
-        studentInternshipProfileService.deleteProfile(id);
+        studentProfileService.deleteProfile(id);
         return ResponseEntity.noContent().build();
     }
 
@@ -497,7 +498,7 @@ public class AdminInternshipController {
 
     @GetMapping("/student-profiles/resumes/summary")
     public ResponseEntity<?> getResumesSummary() {
-        List<StudentProfileDTO> allProfiles = studentInternshipProfileService.getAllProfiles();
+        List<StudentProfileDTO> allProfiles = studentProfileService.getAllProfiles();
         
         long totalStudents = allProfiles.size();
         long studentsWithResume = allProfiles.stream()

@@ -49,7 +49,7 @@ public class StudentInternshipController {
     private final GuestLectureService guestLectureService;
     private final TrainingSkillWorkshopService trainingSkillWorkshopService;
     private final IndustrialVisitService industrialVisitService;
-    private final StudentInternshipProfileService studentInternshipProfileService;
+    private final StudentInternshipProfileService studentProfileService;
     private final ResumeService resumeService;
     private final ApplicationFormService applicationFormService;
     
@@ -592,7 +592,7 @@ public class StudentInternshipController {
     public ResponseEntity<StudentProfileDTO> getMyProfile(@AuthenticationPrincipal UserDetails userDetails) {
         Student student = getCurrentStudent(userDetails);
         
-        return studentInternshipProfileService.getProfileByStudentId(student.getStudentId())
+        return studentProfileService.getProfileByStudentId(student.getStudentId())
                 .map(profile -> ResponseEntity.ok(profile))
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -606,11 +606,11 @@ public class StudentInternshipController {
         profileDTO.setStudentId(student.getStudentId());
         
         // Check if profile already exists
-        if (studentInternshipProfileService.getProfileByStudentId(student.getStudentId()).isPresent()) {
+        if (studentProfileService.getProfileByStudentId(student.getStudentId()).isPresent()) {
             return ResponseEntity.badRequest().build();
         }
         
-        StudentProfileDTO createdProfile = studentInternshipProfileService.createProfile(profileDTO);
+        StudentProfileDTO createdProfile = studentProfileService.createProfile(profileDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdProfile);
     }
 
@@ -622,13 +622,13 @@ public class StudentInternshipController {
         Student student = getCurrentStudent(userDetails);
         
         // Find existing profile
-        StudentProfileDTO existingProfile = studentInternshipProfileService.getProfileByStudentId(student.getStudentId())
+        StudentProfileDTO existingProfile = studentProfileService.getProfileByStudentId(student.getStudentId())
                 .orElseThrow(() -> new ResourceNotFoundException("Student profile not found"));
         
         // Ensure the student ID matches
         profileDTO.setStudentId(student.getStudentId());
         
-        StudentProfileDTO updatedProfile = studentInternshipProfileService.updateProfile(existingProfile.getProfileId(), profileDTO);
+        StudentProfileDTO updatedProfile = studentProfileService.updateProfile(existingProfile.getProfileId(), profileDTO);
         return ResponseEntity.ok(updatedProfile);
     }
 

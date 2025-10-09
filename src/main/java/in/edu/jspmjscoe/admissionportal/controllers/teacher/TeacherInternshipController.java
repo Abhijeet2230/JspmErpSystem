@@ -37,7 +37,7 @@ public class TeacherInternshipController {
     private final GuestLectureService guestLectureService;
     private final TrainingSkillWorkshopService trainingSkillWorkshopService;
     private final IndustrialVisitService industrialVisitService;
-    private final StudentInternshipProfileService studentInternshipProfileService;
+    private final StudentInternshipProfileService studentProfileService;
     private final ResumeService resumeService;
 
     // ==================== COMPANY VIEWING ====================
@@ -368,20 +368,20 @@ public class TeacherInternshipController {
     
     @GetMapping("/student-profiles")
     public ResponseEntity<List<StudentProfileDTO>> getAllStudentProfiles() {
-        List<StudentProfileDTO> profiles = studentInternshipProfileService.getAllProfiles();
+        List<StudentProfileDTO> profiles = studentProfileService.getAllProfiles();
         return ResponseEntity.ok(profiles);
     }
 
     @GetMapping("/student-profiles/{id}")
     public ResponseEntity<StudentProfileDTO> getStudentProfileById(@PathVariable Long id) {
-        return studentInternshipProfileService.getProfileById(id)
+        return studentProfileService.getProfileById(id)
                 .map(profile -> ResponseEntity.ok(profile))
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/student-profiles/student/{studentId}")
     public ResponseEntity<StudentProfileDTO> getStudentProfileByStudentId(@PathVariable Long studentId) {
-        return studentInternshipProfileService.getProfileByStudentId(studentId)
+        return studentProfileService.getProfileByStudentId(studentId)
                 .map(profile -> ResponseEntity.ok(profile))
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -413,7 +413,7 @@ public class TeacherInternshipController {
 
     @GetMapping("/student-profiles/resumes/summary")
     public ResponseEntity<?> getResumesSummary() {
-        List<StudentProfileDTO> allProfiles = studentInternshipProfileService.getAllProfiles();
+        List<StudentProfileDTO> allProfiles = studentProfileService.getAllProfiles();
         
         long totalStudents = allProfiles.size();
         long studentsWithResume = allProfiles.stream()
