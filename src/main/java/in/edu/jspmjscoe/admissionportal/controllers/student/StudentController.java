@@ -6,6 +6,7 @@ import in.edu.jspmjscoe.admissionportal.dtos.security.ChangePasswordRequest;
 import in.edu.jspmjscoe.admissionportal.dtos.student.StudentProfileResponseDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.student.StudentProfileUpdateDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.subject.SubjectDTO;
+import in.edu.jspmjscoe.admissionportal.dtos.teacher.attendance.StudentOverallSubjectAttendanceDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.trainingplacement.StudentPlacementDTO;
 import in.edu.jspmjscoe.admissionportal.exception.ResourceNotFoundException;
 import in.edu.jspmjscoe.admissionportal.exception.security.UnauthorizedException;
@@ -143,5 +144,19 @@ public class StudentController {
         return ResponseEntity.ok(subjects);
     }
 
+    // ---------------- Student Attendance ----------------------//
+    @GetMapping("/attendance-overall")
+    public ResponseEntity<List<StudentOverallSubjectAttendanceDTO>> getOverallAttendanceForLoggedInStudent(
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        if (userDetails == null) {
+            throw new UnauthorizedException("Unauthorized: Login required");
+        }
+
+        List<StudentOverallSubjectAttendanceDTO> data =
+                studentService.getOverallAttendanceForStudent(userDetails.getUsername());
+
+        return ResponseEntity.ok(data);
+    }
 
 }

@@ -3,6 +3,7 @@ package in.edu.jspmjscoe.admissionportal.controllers.admin.cce;
 import in.edu.jspmjscoe.admissionportal.dtos.assessment.*;
 import in.edu.jspmjscoe.admissionportal.dtos.subject.SubjectDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.attendance.AdminStudentSubjectAttendanceDTO;
+import in.edu.jspmjscoe.admissionportal.dtos.teacher.attendance.StudentOverallSubjectAttendanceDTO;
 import in.edu.jspmjscoe.admissionportal.services.assessment.CceAdminService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -109,6 +110,5 @@ public class CceAdminController {
 
         return ResponseEntity.ok(data);
     }
-
 
 }
