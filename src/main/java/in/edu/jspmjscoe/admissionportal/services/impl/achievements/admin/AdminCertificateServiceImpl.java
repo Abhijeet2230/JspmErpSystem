@@ -80,7 +80,7 @@ public class AdminCertificateServiceImpl implements AdminCertificateService {
 
         // only consider certificates with assigned marks > 0
         List<Certificate> gradedCertificates = allCertificates.stream()
-                .filter(c -> c.getMarks() != null && c.getMarks() > 0.0)
+                .filter(c -> c.getMarks() != null)
                 .toList();
 
         if (gradedCertificates.isEmpty()) {

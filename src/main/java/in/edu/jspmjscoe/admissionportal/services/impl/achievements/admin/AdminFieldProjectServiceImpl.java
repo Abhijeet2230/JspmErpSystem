@@ -106,13 +106,11 @@ public class AdminFieldProjectServiceImpl implements AdminFieldProjectService {
         }
 
         double totalObtained = allFieldProjects.stream()
-                .filter(fp -> fp.getMarks() != null && fp.getMarks() > 0)
+                .filter(fp -> fp.getMarks() != null)
                 .mapToDouble(FieldProject::getMarks)
                 .sum();
 
-        double totalPossible = allFieldProjects.size() * MAX_MARK_PER_UNIT;
-
-        double convertedScore = (totalObtained / totalPossible) * 10.0;
+        double convertedScore = (totalObtained / 250.0) * 10.0;
         double convertedScoreRounded = Math.round(convertedScore * 100.0) / 100.0;
 
         TrainingPlacementRecord tpr = trainingPlacementRecordRepository

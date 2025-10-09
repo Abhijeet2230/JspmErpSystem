@@ -20,7 +20,7 @@ import java.util.List;
 public class ApplicationFormServiceImpl implements ApplicationFormService {
 
     private final StudentRepository studentRepository;
-    private final StudentProfileService studentProfileService;
+    private final StudentInternshipProfileService studentInternshipProfileService;
     private final InternshipPostingService internshipPostingService;
     private final PlacementService placementService;
     private final InternshipApplicationService internshipApplicationService;
@@ -37,7 +37,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                 .orElseThrow(() -> new ResourceNotFoundException("Student not found with ID: " + studentId));
         
         // Get student profile
-        StudentProfileDTO profile = studentProfileService.getProfileByStudentId(studentId)
+        StudentProfileDTO profile = studentInternshipProfileService.getProfileByStudentId(studentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Student profile not found for ID: " + studentId));
         
         // Check if internship exists
@@ -104,7 +104,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                 .orElseThrow(() -> new ResourceNotFoundException("Student not found with ID: " + studentId));
         
         // Get student profile
-        StudentProfileDTO profile = studentProfileService.getProfileByStudentId(studentId)
+        StudentProfileDTO profile = studentInternshipProfileService.getProfileByStudentId(studentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Student profile not found for ID: " + studentId));
         
         // Check if placement exists
@@ -199,7 +199,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
         List<String> missingFields = new ArrayList<>();
         
         try {
-            StudentProfileDTO profile = studentProfileService.getProfileByStudentId(studentId)
+            StudentProfileDTO profile = studentInternshipProfileService.getProfileByStudentId(studentId)
                     .orElse(null);
             
             if (profile == null) {

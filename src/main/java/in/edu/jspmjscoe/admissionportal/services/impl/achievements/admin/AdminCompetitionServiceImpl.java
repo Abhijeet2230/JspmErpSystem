@@ -77,7 +77,7 @@ public class AdminCompetitionServiceImpl implements AdminCompetitionService {
 
         // ⚡ Only consider competitions with marks > 0
         List<Competition> gradedCompetitions = allCompetitions.stream()
-                .filter(c -> c.getMarks() != null && c.getMarks() > 0)
+                .filter(c -> c.getMarks() != null)
                 .toList();
 
         double totalObtained = gradedCompetitions.stream()

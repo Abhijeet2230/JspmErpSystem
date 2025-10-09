@@ -66,17 +66,31 @@ public class MinioStorageService {
     }
 
     // -------------------- Shared Helpers --------------------
+
+    /**
+     * Uploads file to MinIO and automatically handles duplicate file names
+     * by generating a unique object key.
+     */
     private String uploadFileToMinio(MinioClient client, String bucket, MultipartFile file, String objectKey) {
-        try (InputStream is = file.getInputStream()) {
-            client.putObject(
-                    PutObjectArgs.builder()
-                            .bucket(bucket)
-                            .object(objectKey)
-                            .stream(is, file.getSize(), -1)
-                            .contentType(file.getContentType())
-                            .build()
-            );
+        try {
+            // ✅ Step 1: Generate unique object key if duplicate exists
+            objectKey = generateUniqueObjectKey(client, bucket, objectKey);
+
+            // ✅ Step 2: Upload the file
+            try (InputStream is = file.getInputStream()) {
+                client.putObject(
+                        PutObjectArgs.builder()
+                                .bucket(bucket)
+                                .object(objectKey)
+                                .stream(is, file.getSize(), -1)
+                                .contentType(file.getContentType())
+                                .build()
+                );
+            }
+
+            // ✅ Step 3: Return the final object key
             return objectKey;
+
         } catch (Exception e) {
             throw new AchievementFileAccessException(
                     "Failed to upload file to MinIO: " + file.getOriginalFilename(), e
@@ -84,6 +98,9 @@ public class MinioStorageService {
         }
     }
 
+    /**
+     * Generate presigned URL for download
+     */
     private String generatePresignedUrl(MinioClient client, String bucket, String objectKey) {
         try {
             return client.getPresignedObjectUrl(
@@ -102,6 +119,7 @@ public class MinioStorageService {
     }
 
     // -------------------- Object Key Utilities --------------------
+
     public String generateObjectKey(String type, Long entityId, String filename) {
         // Preserves friend's structured format for students
         return type + "/student_" + entityId + "/" + filename;
@@ -116,5 +134,52 @@ public class MinioStorageService {
     public String uploadStudentProfilePic(MultipartFile file, Long studentId) {
         String objectKey = "student-profiles/student_" + studentId + "/" + file.getOriginalFilename();
         return uploadFile(file, objectKey);
+    }
+
+    /**
+     * Check if object already exists in the bucket
+     */
+    private boolean objectExists(MinioClient client, String bucket, String objectKey) {
+        try {
+            client.statObject(
+                    io.minio.StatObjectArgs.builder()
+                            .bucket(bucket)
+                            .object(objectKey)
+                            .build()
+            );
+            return true;
+        } catch (io.minio.errors.ErrorResponseException e) {
+            if ("NoSuchKey".equals(e.errorResponse().code())) {
+                return false; // object does not exist
+            }
+            return true; // treat other errors as exists
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * Generate a unique object key if the file already exists
+     * e.g., "file.jpg" -> "file_1.jpg", "file_2.jpg", etc.
+     */
+    private String generateUniqueObjectKey(MinioClient client, String bucket, String objectKey) {
+        String baseName = objectKey;
+        String extension = "";
+        int dotIndex = objectKey.lastIndexOf('.');
+
+        if (dotIndex > 0) {
+            baseName = objectKey.substring(0, dotIndex);
+            extension = objectKey.substring(dotIndex);
+        }
+
+        int counter = 1;
+        String newObjectKey = objectKey;
+
+        while (objectExists(client, bucket, newObjectKey)) {
+            newObjectKey = baseName + "_" + counter + extension;
+            counter++;
+        }
+
+        return newObjectKey;
     }
 }

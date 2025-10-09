@@ -58,8 +58,8 @@ public class AchievementsServiceImpl implements AchievementsService {
                 academicYear.getStudentAcademicYearId(),
                 file.getOriginalFilename()
         );
-        minioStorageService.uploadFile(file, objectKey);
-        dto.setMinioObjectKey(objectKey);
+        String storedKey = minioStorageService.uploadFile(file, objectKey);
+        dto.setMinioObjectKey(storedKey);
 
         return certificateService.saveCertificate(dto, academicYear);
     }
@@ -74,8 +74,8 @@ public class AchievementsServiceImpl implements AchievementsService {
                 academicYear.getStudentAcademicYearId(),
                 file.getOriginalFilename()
         );
-        minioStorageService.uploadFile(file, objectKey);
-        dto.setMinioObjectKey(objectKey);
+        String storedKey  = minioStorageService.uploadFile(file, objectKey);
+        dto.setMinioObjectKey(storedKey);
 
         return internshipService.saveInternship(dto, academicYear);
     }
@@ -90,8 +90,8 @@ public class AchievementsServiceImpl implements AchievementsService {
                 academicYear.getStudentAcademicYearId(),
                 file.getOriginalFilename()
         );
-        minioStorageService.uploadFile(file, objectKey);
-        dto.setMinioObjectKey(objectKey);
+        String storedKey  = minioStorageService.uploadFile(file, objectKey);
+        dto.setMinioObjectKey(storedKey);
 
         return competitionService.saveCompetition(dto, academicYear);
     }
@@ -112,11 +112,11 @@ public class AchievementsServiceImpl implements AchievementsService {
                 pdf.getOriginalFilename()
         );
 
-        minioStorageService.uploadFile(video, videoKey);
-        minioStorageService.uploadFile(pdf, pdfKey);
+        String storedKeyVideo = minioStorageService.uploadFile(video, videoKey);
+        String storedKeyPdf  = minioStorageService.uploadFile(pdf, pdfKey);
 
-        dto.setVideoMinioKey(videoKey);
-        dto.setPdfMinioKey(pdfKey);
+        dto.setVideoMinioKey(storedKeyVideo);
+        dto.setPdfMinioKey(storedKeyPdf);
 
         return miniProjectService.saveMiniProject(dto, academicYear);
     }
@@ -137,11 +137,11 @@ public class AchievementsServiceImpl implements AchievementsService {
                 pdf.getOriginalFilename()
         );
 
-        minioStorageService.uploadFile(video, videoKey);
-        minioStorageService.uploadFile(pdf, pdfKey);
+        String storedKeyVideo = minioStorageService.uploadFile(video, videoKey);
+        String storedKeyPdf  = minioStorageService.uploadFile(pdf, pdfKey);
 
-        dto.setVideoMinioKey(videoKey);
-        dto.setPdfMinioKey(pdfKey);
+        dto.setVideoMinioKey(storedKeyVideo);
+        dto.setPdfMinioKey(storedKeyPdf);
 
         return fieldProjectService.saveFieldProject(dto, academicYear);
     }

@@ -2,10 +2,10 @@ package in.edu.jspmjscoe.admissionportal.services.impl.internship;
 
 import in.edu.jspmjscoe.admissionportal.dtos.internship.StudentProfileDTO;
 import in.edu.jspmjscoe.admissionportal.exception.ResourceNotFoundException;
-import in.edu.jspmjscoe.admissionportal.mappers.internship.StudentProfileMapper;
+import in.edu.jspmjscoe.admissionportal.mappers.internship.StudentInternshipProfileMapper;
 import in.edu.jspmjscoe.admissionportal.model.internship.StudentProfile;
 import in.edu.jspmjscoe.admissionportal.repositories.internship.StudentProfileRepository;
-import in.edu.jspmjscoe.admissionportal.services.internship.StudentProfileService;
+import in.edu.jspmjscoe.admissionportal.services.internship.StudentInternshipProfileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,10 +17,10 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class StudentProfileServiceImpl implements StudentProfileService {
+public class StudentInternshipProfileServiceImpl implements StudentInternshipProfileService {
 
     private final StudentProfileRepository profileRepository;
-    private final StudentProfileMapper profileMapper;
+    private final StudentInternshipProfileMapper profileMapper;
 
     @Override
     public StudentProfileDTO createProfile(StudentProfileDTO profileDTO) {

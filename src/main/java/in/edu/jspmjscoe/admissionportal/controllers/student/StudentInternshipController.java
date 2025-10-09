@@ -4,7 +4,6 @@ import in.edu.jspmjscoe.admissionportal.dtos.internship.*;
 import in.edu.jspmjscoe.admissionportal.exception.ResourceNotFoundException;
 import in.edu.jspmjscoe.admissionportal.exception.security.UnauthorizedException;
 import in.edu.jspmjscoe.admissionportal.model.internship.ApplicationStatus;
-import in.edu.jspmjscoe.admissionportal.model.internship.PostingStatus;
 import in.edu.jspmjscoe.admissionportal.model.security.User;
 import in.edu.jspmjscoe.admissionportal.model.student.Student;
 import in.edu.jspmjscoe.admissionportal.repositories.security.UserRepository;
@@ -14,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -51,7 +49,7 @@ public class StudentInternshipController {
     private final GuestLectureService guestLectureService;
     private final TrainingSkillWorkshopService trainingSkillWorkshopService;
     private final IndustrialVisitService industrialVisitService;
-    private final StudentProfileService studentProfileService;
+    private final StudentInternshipProfileService studentInternshipProfileService;
     private final ResumeService resumeService;
     private final ApplicationFormService applicationFormService;
     
@@ -594,7 +592,7 @@ public class StudentInternshipController {
     public ResponseEntity<StudentProfileDTO> getMyProfile(@AuthenticationPrincipal UserDetails userDetails) {
         Student student = getCurrentStudent(userDetails);
         
-        return studentProfileService.getProfileByStudentId(student.getStudentId())
+        return studentInternshipProfileService.getProfileByStudentId(student.getStudentId())
                 .map(profile -> ResponseEntity.ok(profile))
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -608,11 +606,11 @@ public class StudentInternshipController {
         profileDTO.setStudentId(student.getStudentId());
         
         // Check if profile already exists
-        if (studentProfileService.getProfileByStudentId(student.getStudentId()).isPresent()) {
+        if (studentInternshipProfileService.getProfileByStudentId(student.getStudentId()).isPresent()) {
             return ResponseEntity.badRequest().build();
         }
         
-        StudentProfileDTO createdProfile = studentProfileService.createProfile(profileDTO);
+        StudentProfileDTO createdProfile = studentInternshipProfileService.createProfile(profileDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdProfile);
     }
 
@@ -624,13 +622,13 @@ public class StudentInternshipController {
         Student student = getCurrentStudent(userDetails);
         
         // Find existing profile
-        StudentProfileDTO existingProfile = studentProfileService.getProfileByStudentId(student.getStudentId())
+        StudentProfileDTO existingProfile = studentInternshipProfileService.getProfileByStudentId(student.getStudentId())
                 .orElseThrow(() -> new ResourceNotFoundException("Student profile not found"));
         
         // Ensure the student ID matches
         profileDTO.setStudentId(student.getStudentId());
         
-        StudentProfileDTO updatedProfile = studentProfileService.updateProfile(existingProfile.getProfileId(), profileDTO);
+        StudentProfileDTO updatedProfile = studentInternshipProfileService.updateProfile(existingProfile.getProfileId(), profileDTO);
         return ResponseEntity.ok(updatedProfile);
     }
 

@@ -4,7 +4,7 @@ import in.edu.jspmjscoe.admissionportal.dtos.internship.StudentProfileDTO;
 import java.util.List;
 import java.util.Optional;
 
-public interface StudentProfileService {
+public interface StudentInternshipProfileService {
     
     StudentProfileDTO createProfile(StudentProfileDTO profileDTO);
     

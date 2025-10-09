@@ -5,8 +5,6 @@ import in.edu.jspmjscoe.admissionportal.exception.ResourceNotFoundException;
 import in.edu.jspmjscoe.admissionportal.model.internship.PostingStatus;
 import in.edu.jspmjscoe.admissionportal.services.internship.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -39,7 +37,7 @@ public class TeacherInternshipController {
     private final GuestLectureService guestLectureService;
     private final TrainingSkillWorkshopService trainingSkillWorkshopService;
     private final IndustrialVisitService industrialVisitService;
-    private final StudentProfileService studentProfileService;
+    private final StudentInternshipProfileService studentInternshipProfileService;
     private final ResumeService resumeService;
 
     // ==================== COMPANY VIEWING ====================
@@ -370,20 +368,20 @@ public class TeacherInternshipController {
     
     @GetMapping("/student-profiles")
     public ResponseEntity<List<StudentProfileDTO>> getAllStudentProfiles() {
-        List<StudentProfileDTO> profiles = studentProfileService.getAllProfiles();
+        List<StudentProfileDTO> profiles = studentInternshipProfileService.getAllProfiles();
         return ResponseEntity.ok(profiles);
     }
 
     @GetMapping("/student-profiles/{id}")
     public ResponseEntity<StudentProfileDTO> getStudentProfileById(@PathVariable Long id) {
-        return studentProfileService.getProfileById(id)
+        return studentInternshipProfileService.getProfileById(id)
                 .map(profile -> ResponseEntity.ok(profile))
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/student-profiles/student/{studentId}")
     public ResponseEntity<StudentProfileDTO> getStudentProfileByStudentId(@PathVariable Long studentId) {
-        return studentProfileService.getProfileByStudentId(studentId)
+        return studentInternshipProfileService.getProfileByStudentId(studentId)
                 .map(profile -> ResponseEntity.ok(profile))
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -415,7 +413,7 @@ public class TeacherInternshipController {
 
     @GetMapping("/student-profiles/resumes/summary")
     public ResponseEntity<?> getResumesSummary() {
-        List<StudentProfileDTO> allProfiles = studentProfileService.getAllProfiles();
+        List<StudentProfileDTO> allProfiles = studentInternshipProfileService.getAllProfiles();
         
         long totalStudents = allProfiles.size();
         long studentsWithResume = allProfiles.stream()
