@@ -4,7 +4,8 @@ import in.edu.jspmjscoe.admissionportal.dtos.security.ChangePasswordRequest;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.HeadLeaveDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.LeaveDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.TeacherDTO;
-import in.edu.jspmjscoe.admissionportal.dtos.teacher.TeacherSubjectDTO;
+import in.edu.jspmjscoe.admissionportal.dtos.teacher.subject.AssignSubjectRequestDTO;
+import in.edu.jspmjscoe.admissionportal.dtos.teacher.subject.TeacherSubjectDTO;
 import in.edu.jspmjscoe.admissionportal.exception.*;
 import in.edu.jspmjscoe.admissionportal.exception.security.InvalidCredentialsException;
 import in.edu.jspmjscoe.admissionportal.mappers.teacher.HeadLeaveMapper;
@@ -34,16 +35,20 @@ import in.edu.jspmjscoe.admissionportal.security.services.CurrentUserService;
 import in.edu.jspmjscoe.admissionportal.services.impl.achievements.MinioStorageService;
 import in.edu.jspmjscoe.admissionportal.services.teacher.TeacherService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -204,47 +209,46 @@ public class TeacherServiceImpl implements TeacherService {
     // --------------------- Assign Teacher ---------------------
 
     @Override
-    public TeacherSubjectDTO assignSubjectToTeacherByName(String teacherName, String subjectName, String division) {
-        // 1️⃣ Resolve teacher by full name
-        String[] nameParts = teacherName.trim().split("\\s+", 2);
-        String firstName = nameParts[0];
-        String lastName = nameParts.length > 1 ? nameParts[1] : "";
+    @Transactional
+    public List<TeacherSubjectDTO> assignSubjectsToTeacher(Long teacherId, Long subjectId, List<String> divisions) {
 
-        Teacher teacher = teacherRepository.findByFirstNameAndLastName(firstName, lastName)
-                .orElseThrow(() -> new TeacherNotFoundException("Teacher not found with name: " + teacherName));
+        Teacher teacher = teacherRepository.findById(teacherId)
+                .orElseThrow(() -> new RuntimeException("Teacher Not Found"));
 
-        // 2️⃣ Resolve subject by name
-        Subject subject = subjectRepository.findByNameIgnoreCase(subjectName)
-                .orElseThrow(() -> new SubjectNotFoundException("Subject not found with name: " + subjectName));
+        Subject subject = subjectRepository.findById(subjectId)
+                .orElseThrow(() -> new RuntimeException("Subject Not Found"));
 
-        // 3️⃣ Check for duplicate assignment
-        boolean alreadyAssigned = teacher.getTeacherSubjects().stream()
-                .anyMatch(ts -> ts.getSubject().getSubjectId().equals(subject.getSubjectId())
-                        && ts.getDivision().equalsIgnoreCase(division));
-        if (alreadyAssigned) {
-            throw new IllegalStateException("Teacher already assigned to this subject in division " + division);
+        List<TeacherSubjectDTO> savedAssignments = new ArrayList<>();
+
+        for (String division : divisions) {
+            boolean exists = teacherSubjectRepository.existsByTeacherAndSubjectAndDivision(
+                    teacher, subject, division
+            );
+            if (!exists) {
+                TeacherSubject ts = TeacherSubject.builder()
+                        .teacher(teacher)
+                        .subject(subject)
+                        .division(division)
+                        .build();
+
+                TeacherSubject saved = teacherSubjectRepository.save(ts);
+
+                savedAssignments.add(
+                        TeacherSubjectDTO.builder()
+                                .teacherSubjectId(saved.getTeacherSubjectId())
+                                .teacherId(teacher.getTeacherId())
+                                .teacherName(teacher.getFirstName() + " " + teacher.getLastName())
+                                .subjectId(subject.getSubjectId())
+                                .subjectName(subject.getName())
+                                .division(division)
+                                .build()
+                );
+            }
         }
-
-        // 4️⃣ Create TeacherSubject and save
-        TeacherSubject ts = TeacherSubject.builder()
-                .teacher(teacher)
-                .subject(subject)
-                .division(division)
-                .build();
-
-        teacher.addTeacherSubject(ts);
-        teacherSubjectRepository.save(ts); // saves and populates teacherSubjectId
-
-        // 5️⃣ Return DTO
-        return TeacherSubjectDTO.builder()
-                .teacherSubjectId(ts.getTeacherSubjectId())
-                .teacherId(teacher.getTeacherId())
-                .teacherName(teacher.getFirstName() + " " + teacher.getLastName())
-                .subjectId(subject.getSubjectId())
-                .subjectName(subject.getName())
-                .division(division)
-                .build();
+        return savedAssignments;
     }
+
+
     // --------------------- TEACHER LEAVES ---------------------
     @Override
     public LeaveDTO applyLeave(LeaveDTO leaveDTO) {

@@ -1,4 +1,4 @@
-package in.edu.jspmjscoe.admissionportal.dtos.teacher;
+package in.edu.jspmjscoe.admissionportal.dtos.teacher.subject;
 
 import lombok.*;
 
