@@ -71,14 +71,15 @@ public class AdminTeacherController {
         return ResponseEntity.ok(sessions);
     }
 
-    @GetMapping("/monthly/subject-wise")
-    public ResponseEntity<List<AdminStudentSubjectAttendanceDTO>> getMonthlySubjectWise(
+    @GetMapping("/subject-wise-attendance")
+    public ResponseEntity<List<AdminStudentSubjectAttendanceDTO>> getSubjectWiseAttendance(
             @RequestParam String division,
-            @RequestParam int year,
-            @RequestParam int month) {
+            @RequestParam int year) {
 
-        List<AdminStudentSubjectAttendanceDTO> data = attendanceService.getMonthlySubjectWiseAttendanceForAdmin(division, year, month);
+        List<AdminStudentSubjectAttendanceDTO> data =
+                attendanceService.getSubjectWiseAttendanceForAdmin(division, year);
         return ResponseEntity.ok(data);
     }
+
 
 }

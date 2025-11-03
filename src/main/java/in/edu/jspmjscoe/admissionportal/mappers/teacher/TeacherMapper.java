@@ -2,7 +2,7 @@ package in.edu.jspmjscoe.admissionportal.mappers.teacher;
 
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.TeacherAddressDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.TeacherDTO;
-import in.edu.jspmjscoe.admissionportal.dtos.teacher.TeacherSubjectDTO;
+import in.edu.jspmjscoe.admissionportal.dtos.teacher.subject.TeacherSubjectDTO;
 import in.edu.jspmjscoe.admissionportal.model.security.User;
 import in.edu.jspmjscoe.admissionportal.model.subject.Department;
 import in.edu.jspmjscoe.admissionportal.model.subject.Subject;

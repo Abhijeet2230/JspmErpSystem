@@ -1,5 +1,6 @@
 package in.edu.jspmjscoe.admissionportal.dtos.teacher;
 
+import in.edu.jspmjscoe.admissionportal.dtos.teacher.subject.TeacherSubjectDTO;
 import in.edu.jspmjscoe.admissionportal.model.security.Status;
 import lombok.*;
 

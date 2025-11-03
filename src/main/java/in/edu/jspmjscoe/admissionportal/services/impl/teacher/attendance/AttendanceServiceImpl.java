@@ -95,6 +95,14 @@ public class AttendanceServiceImpl implements AttendanceService {
                 .endTime(dto.getEndTime())
                 .build();
 
+        // ✅ Check for duplicate (same teacher, subject, date, division, and time)
+        boolean exists = attendanceSessionRepository.existsDuplicateSession(
+                teacher, subject, dto.getDate(), dto.getDivision(), dto.getStartTime(), dto.getEndTime());
+
+        if (exists) {
+            throw new RuntimeException("Attendance session already exists for this date and time slot.");
+        }
+
         if (dto.getStudentAttendances() != null) {
             dto.getStudentAttendances().forEach(s -> {
                 Student student = studentRepository.findById(s.getStudentId())
@@ -111,6 +119,7 @@ public class AttendanceServiceImpl implements AttendanceService {
         return attendanceMapper.toSessionDto(session);
     }
 
+
     @Override
     public List<AttendanceSessionDTO> getAttendanceSessionsByFilter(String subjectName, String division, LocalDate date) {
         List<AttendanceSession> sessions = attendanceSessionRepository
@@ -122,49 +131,67 @@ public class AttendanceServiceImpl implements AttendanceService {
     }
 
     @Override
-    public List<StudentMonthlyAttendanceDTO> getMonthlyAttendance(String subjectName, String division, int year, int month) {
+    public List<StudentMonthlyAttendanceDTO> getSubjectAttendance(String subjectName, String division, int year) {
 
         Teacher teacher = currentUserService.getCurrentTeacher();
 
         Subject subject = subjectRepository.findByNameIgnoreCase(subjectName)
                 .orElseThrow(() -> new RuntimeException("Subject not found"));
 
-        // Get all sessions for that subject, division, and month
+        // ✅ Get all sessions for that subject, division, and year (no month filter)
         List<AttendanceSession> sessions = attendanceSessionRepository.findAll().stream()
                 .filter(s -> s.getSubject().getName().equalsIgnoreCase(subjectName)
                         && s.getDivision().equalsIgnoreCase(division)
-                        && s.getDate().getYear() == year
-                        && s.getDate().getMonthValue() == month)
+                        && s.getDate().getYear() == year)
                 .toList();
 
         if (sessions.isEmpty()) {
             throw new RuntimeException("No attendance found for given filters");
         }
 
-        // Get all students involved in those sessions
+        // ✅ Get all students from first session
         List<Student> allStudents = sessions.get(0).getStudentAttendances().stream()
                 .map(AttendanceStudent::getStudent)
                 .toList();
 
         return allStudents.stream().map(student -> {
 
-            // ✅ Avoid duplicate key issue (use LinkedHashMap and merge)
-            Map<String, Integer> attendanceMap = new java.util.LinkedHashMap<>();
+            // ✅ Map of date -> number of times present on that day
+            Map<String, Integer> attendanceMap = new LinkedHashMap<>();
+
             sessions.forEach(s -> {
                 s.getStudentAttendances().stream()
                         .filter(sa -> sa.getStudent().getStudentId().equals(student.getStudentId()))
                         .findFirst()
-                        .ifPresent(sa -> attendanceMap.put(
-                                s.getDate().toString(),
-                                sa.getStatus().equalsIgnoreCase("present") ? 1 : 0
-                        ));
+                        .ifPresent(sa -> {
+                            String dateKey = s.getDate().toString();
+                            int currentCount = attendanceMap.getOrDefault(dateKey, 0);
+
+                            // If student is present, increment count
+                            if (sa.getStatus().equalsIgnoreCase("present")) {
+                                attendanceMap.put(dateKey, currentCount + 1);
+                            } else {
+                                // If absent, ensure date exists with 0 (only if not already present)
+                                attendanceMap.putIfAbsent(dateKey, currentCount);
+                            }
+                        });
             });
 
-            int totalDays = attendanceMap.size();
-            int presentDays = (int) attendanceMap.values().stream().filter(v -> v == 1).count();
-            double percentage = totalDays == 0 ? 0.0 : roundToTwoDecimals((presentDays * 100.0) / totalDays);
+            // ✅ Calculate totals
+            int totalSessions = sessions.size(); // total number of lectures conducted
+            int totalUniqueDates = attendanceMap.size(); // unique days with attendance recorded
+            int presentSessions = attendanceMap.values().stream().mapToInt(Integer::intValue).sum();
 
-            // ✅ Fetch rollNo from active academic year for that semester/division
+            // ✅ Count number of days where student was present at least once
+            int presentDays = (int) attendanceMap.values().stream()
+                    .filter(v -> v > 0)
+                    .count();
+
+            // ✅ Attendance percentage (based on sessions)
+            double percentage = totalSessions == 0 ? 0.0 :
+                    roundToTwoDecimals((presentSessions * 100.0) / totalSessions);
+
+            // ✅ Fetch rollNo from active academic year for that division
             String rollNo = student.getStudentAcademicYears().stream()
                     .filter(ay -> ay.getIsActive() && ay.getDivision().equalsIgnoreCase(division))
                     .findFirst()
@@ -178,48 +205,50 @@ public class AttendanceServiceImpl implements AttendanceService {
                     .division(division)
                     .subjectName(subject.getName())
                     .attendanceByDate(attendanceMap)
-                    .totalDays(totalDays)
+                    .totalSessions(totalSessions)
+                    .presentSessions(presentSessions)
+                    .totalDays(totalUniqueDates)
                     .presentDays(presentDays)
                     .percentage(percentage)
                     .build();
+
         }).toList();
     }
 
-    @Override
-    public List<AdminStudentSubjectAttendanceDTO> getMonthlySubjectWiseAttendanceForAdmin(String division, int year, int month) {
 
-        // 1. Get all sessions for given division and month/year
+
+    @Override
+    public List<AdminStudentSubjectAttendanceDTO> getSubjectWiseAttendanceForAdmin(String division, int year) {
+
+        // 1️⃣ Get all sessions for given division and year (no month filter now)
         List<AttendanceSession> sessions = attendanceSessionRepository.findAll().stream()
                 .filter(s -> s.getDivision().equalsIgnoreCase(division)
-                        && s.getDate().getYear() == year
-                        && s.getDate().getMonthValue() == month)
+                        && s.getDate().getYear() == year)
                 .toList();
 
         if (sessions.isEmpty()) {
             // return empty list rather than throwing; admin UI can show "no data"
-            return java.util.Collections.emptyList();
+            return Collections.emptyList();
         }
 
-        // 2. Collect all subject names (preserve insertion order if you like)
-        LinkedHashSet<String> subjectNames = new java.util.LinkedHashSet<>();
+        // 2️⃣ Collect all subjects taught in that division during the year
+        LinkedHashSet<String> subjectNames = new LinkedHashSet<>();
         sessions.forEach(s -> subjectNames.add(s.getSubject().getName()));
 
-        // 3. Collect all students who appear in sessions (some students may appear only in one subject)
-        Map<Long,Student> studentMap = new LinkedHashMap<>();
-        sessions.forEach(s -> {
-            s.getStudentAttendances().forEach(sa -> {
-                studentMap.putIfAbsent(sa.getStudent().getStudentId(), sa.getStudent());
-            });
-        });
+        // 3️⃣ Collect all students who appear in sessions
+        Map<Long, Student> studentMap = new LinkedHashMap<>();
+        sessions.forEach(s -> s.getStudentAttendances().forEach(sa ->
+                studentMap.putIfAbsent(sa.getStudent().getStudentId(), sa.getStudent()))
+        );
 
-        // 4. Precompute for each subject -> list of sessions (for easier totals)
+        // 4️⃣ Group sessions by subject
         Map<String, List<AttendanceSession>> sessionsBySubject = new HashMap<>();
         for (AttendanceSession s : sessions) {
-            String subName = s.getSubject().getName();
-            sessionsBySubject.computeIfAbsent(subName, k -> new ArrayList<>()).add(s);
+            String subjectName = s.getSubject().getName();
+            sessionsBySubject.computeIfAbsent(subjectName, k -> new ArrayList<>()).add(s);
         }
 
-        // 5. For each student compute per-subject percentage and average
+        // 5️⃣ Compute attendance per student per subject
         List<AdminStudentSubjectAttendanceDTO> result = new ArrayList<>();
 
         for (Student student : studentMap.values()) {
@@ -229,7 +258,7 @@ public class AttendanceServiceImpl implements AttendanceService {
             dto.setStudentName(student.getCandidateName());
             dto.setDivision(division);
 
-            // Get rollNo same way as your other method: active academic year with division
+            // fetch roll number
             String rollNo = student.getStudentAcademicYears().stream()
                     .filter(ay -> ay.getIsActive() && ay.getDivision().equalsIgnoreCase(division))
                     .findFirst()
@@ -237,63 +266,45 @@ public class AttendanceServiceImpl implements AttendanceService {
                     .orElse(null);
             dto.setRollNo(rollNo);
 
-            double sumPercentages = 0.0;
+            double totalPercentageSum = 0.0;
             int subjectCount = 0;
-
-            // use LinkedHashMap to preserve ordering of subjects
             Map<String, Double> subjectPercentages = new LinkedHashMap<>();
 
             for (String subjectName : subjectNames) {
-                List<AttendanceSession> sessionsForSubject = sessionsBySubject.getOrDefault(subjectName, Collections.emptyList());
+                List<AttendanceSession> subjectSessions =
+                        sessionsBySubject.getOrDefault(subjectName, Collections.emptyList());
 
-                // totalDays = number of distinct session dates for that subject in month
-                // (If multiple sessions same date exist for same subject, you might want to consider unique dates;
-                //  here we'll count each session row as one "day" because existing attendance uses a session per class.)
-                int totalDays = sessionsForSubject.size();
-
-                // count present days for this student for this subject
-                int presentDays = 0;
-                for (AttendanceSession session : sessionsForSubject) {
-                    session.getStudentAttendances().stream()
-                            .filter(sa -> sa.getStudent().getStudentId().equals(student.getStudentId()))
-                            .findFirst()
-                            .ifPresent(sa -> {
-                                if (sa.getStatus() != null && sa.getStatus().equalsIgnoreCase("present")) {
-                                    // increment via side-effect closure not ideal — do simple way instead
-                                }
-                            });
-                }
-                // above closure won't increment presentDays due to final requirement; do it plainly:
-                presentDays = (int) sessionsForSubject.stream().map(session ->
-                        session.getStudentAttendances().stream()
+                int totalSessions = subjectSessions.size();
+                int presentSessions = (int) subjectSessions.stream()
+                        .map(session -> session.getStudentAttendances().stream()
                                 .filter(sa -> sa.getStudent().getStudentId().equals(student.getStudentId()))
                                 .findFirst()
                                 .map(sa -> sa.getStatus().equalsIgnoreCase("present") ? 1 : 0)
-                                .orElse(0)
-                ).reduce(0, Integer::sum);
+                                .orElse(0))
+                        .reduce(0, Integer::sum);
 
-                double percentage = totalDays == 0 ? 0.0 : roundToTwoDecimals((presentDays * 100.0) / totalDays);
+                double percentage = totalSessions == 0 ? 0.0 :
+                        roundToTwoDecimals((presentSessions * 100.0) / totalSessions);
 
                 subjectPercentages.put(subjectName, percentage);
-
-                sumPercentages += percentage;
+                totalPercentageSum += percentage;
                 subjectCount++;
             }
 
-            double average = subjectCount == 0 ? 0.0 : roundToTwoDecimals(sumPercentages / subjectCount);
+            double average = subjectCount == 0 ? 0.0 :
+                    roundToTwoDecimals(totalPercentageSum / subjectCount);
             dto.setSubjectPercentages(subjectPercentages);
             dto.setAverage(average);
 
             result.add(dto);
         }
 
-        // Optional: sort by rollNo (if roll numbers numeric) or by student name
+        // 6️⃣ Sort students by rollNo or name
         result.sort((a, b) -> {
-            if (a.getRollNo() == null || b.getRollNo() == null) return a.getStudentName().compareToIgnoreCase(b.getStudentName());
+            if (a.getRollNo() == null || b.getRollNo() == null)
+                return a.getStudentName().compareToIgnoreCase(b.getStudentName());
             try {
-                Integer ra = Integer.valueOf(a.getRollNo());
-                Integer rb = Integer.valueOf(b.getRollNo());
-                return ra.compareTo(rb);
+                return Integer.valueOf(a.getRollNo()).compareTo(Integer.valueOf(b.getRollNo()));
             } catch (NumberFormatException e) {
                 return a.getRollNo().compareToIgnoreCase(b.getRollNo());
             }
@@ -301,6 +312,7 @@ public class AttendanceServiceImpl implements AttendanceService {
 
         return result;
     }
+
 
     private double roundToTwoDecimals(double value) {
         return Math.round(value * 100.0) / 100.0;

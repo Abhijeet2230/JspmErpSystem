@@ -20,8 +20,9 @@ public interface AttendanceService {
             String subjectName,
             String division
     );
-    List<StudentMonthlyAttendanceDTO> getMonthlyAttendance(String subjectName, String division, int year, int month);
+    List<StudentMonthlyAttendanceDTO> getSubjectAttendance(String subjectName, String division, int year);
 
     List<AttendanceSessionDTO> getAttendanceSessionsByFilter(String subjectName, String division, LocalDate date);
-    List<AdminStudentSubjectAttendanceDTO> getMonthlySubjectWiseAttendanceForAdmin(String division, int year, int month);
+
+    List<AdminStudentSubjectAttendanceDTO> getSubjectWiseAttendanceForAdmin(String division, int year);
 }

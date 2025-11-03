@@ -1,21 +1,18 @@
 package in.edu.jspmjscoe.admissionportal.controllers.admin;
 
 import in.edu.jspmjscoe.admissionportal.dtos.assessment.CceInitResult;
-import in.edu.jspmjscoe.admissionportal.dtos.teacher.staffrecord.StaffMonthlyReportDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.student.StudentDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.security.UserDTO;
-import in.edu.jspmjscoe.admissionportal.dtos.teacher.HeadLeaveDTO;
-import in.edu.jspmjscoe.admissionportal.dtos.teacher.LeaveDTO;
 import in.edu.jspmjscoe.admissionportal.dtos.teacher.TeacherDTO;
-import in.edu.jspmjscoe.admissionportal.dtos.teacher.TeacherSubjectDTO;
+import in.edu.jspmjscoe.admissionportal.dtos.teacher.subject.*;
 import in.edu.jspmjscoe.admissionportal.mappers.teacher.staffrecord.StaffMonthlyReportMapper;
 import in.edu.jspmjscoe.admissionportal.model.security.AppRole;
 import in.edu.jspmjscoe.admissionportal.model.security.Role;
 import in.edu.jspmjscoe.admissionportal.model.security.User;
-import in.edu.jspmjscoe.admissionportal.model.teacher.staffrecord.StaffMonthlyReport;
 import in.edu.jspmjscoe.admissionportal.model.security.Status;
 import in.edu.jspmjscoe.admissionportal.repositories.security.RoleRepository;
 import in.edu.jspmjscoe.admissionportal.repositories.security.UserRepository;
+import in.edu.jspmjscoe.admissionportal.repositories.subject.SubjectRepository;
 import in.edu.jspmjscoe.admissionportal.repositories.teacher.HeadLeaveRepository;
 import in.edu.jspmjscoe.admissionportal.repositories.teacher.LeaveRepository;
 import in.edu.jspmjscoe.admissionportal.repositories.teacher.TeacherRepository;
@@ -28,7 +25,6 @@ import in.edu.jspmjscoe.admissionportal.services.student.StudentService;
 import in.edu.jspmjscoe.admissionportal.services.security.UserService;
 import in.edu.jspmjscoe.admissionportal.services.teacher.staffrecord.StaffMonthlyReportService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -59,6 +55,7 @@ public class AdminController {
     private final RoleRepository roleRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final SubjectRepository subjectRepository;
 
     // ------------------- User Endpoints -------------------
 
@@ -113,21 +110,42 @@ public class AdminController {
         return ResponseEntity.ok(teacher);
     }
 
-    @PostMapping("/assign-subject")
-    public ResponseEntity<TeacherSubjectDTO> assignSubjectToTeacher(@RequestBody TeacherSubjectDTO requestDto) {
+    @PostMapping("/assign-subjects")
+    public ResponseEntity<List<TeacherSubjectDTO>> assignSubjectsToTeacher(@RequestBody AssignSubjectRequestDTO requestDto) {
 
-        TeacherSubjectDTO tsDto = teacherService.assignSubjectToTeacherByName(
-                requestDto.getTeacherName(),
-                requestDto.getSubjectName(),
-                requestDto.getDivision()
+        List<TeacherSubjectDTO> result = teacherService.assignSubjectsToTeacher(
+                requestDto.getTeacherId(),
+                requestDto.getSubjectId(),
+                requestDto.getDivisions()
         );
 
-        return ResponseEntity.ok(tsDto);
+        return ResponseEntity.ok(result);
     }
 
+    @GetMapping("/teacher-subject-dropdown")
+    public ResponseEntity<TeacherSubjectListResponseDTO> getTeacherSubjectDropdown() {
 
+        List<TeacherDropdownDTO> teacherList = teacherRepository.findAll().stream()
+                .map(t -> TeacherDropdownDTO.builder()
+                        .teacherId(t.getTeacherId())
+                        .teacherName(t.getFirstName() + " " + t.getLastName())
+                        .build())
+                .toList();
 
+        List<SubjectDropdownDTO> subjectList = subjectRepository.findAll().stream()
+                .map(s -> SubjectDropdownDTO.builder()
+                        .subjectId(s.getSubjectId())
+                        .subjectName(s.getName())
+                        .build())
+                .toList();
 
+        TeacherSubjectListResponseDTO response = TeacherSubjectListResponseDTO.builder()
+                .teachers(teacherList)
+                .subjects(subjectList)
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
     // ------------------- Excel Import Endpoint -------------------
 
     @PostMapping("/import-students")
@@ -247,7 +265,5 @@ public class AdminController {
                     ));
         }
     }
-
-
 
 }
