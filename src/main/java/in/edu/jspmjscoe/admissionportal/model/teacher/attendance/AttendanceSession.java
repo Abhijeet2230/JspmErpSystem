@@ -19,7 +19,14 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "attendance_session")
+@Table(
+        name = "attendance_session",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {
+                        "teacher_id", "subject_id", "division", "date", "start_time", "end_time"
+                })
+        }
+)
 public class AttendanceSession {
 
     @Id

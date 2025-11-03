@@ -34,15 +34,15 @@ public class AttendanceController {
         return ResponseEntity.ok(attendanceService.createAttendanceSession(dto));
     }
 
-    @GetMapping("/monthly")
-    public ResponseEntity<List<StudentMonthlyAttendanceDTO>> getMonthlyAttendance(
+    @GetMapping("/subject-attendance")
+    public ResponseEntity<List<StudentMonthlyAttendanceDTO>> getSubjectAttendance(
             @RequestParam String subjectName,
             @RequestParam String division,
-            @RequestParam int year,
-            @RequestParam int month
+            @RequestParam int year
     ) {
         return ResponseEntity.ok(
-                attendanceService.getMonthlyAttendance(subjectName, division, year, month)
+                attendanceService.getSubjectAttendance(subjectName, division, year)
         );
     }
+
 }

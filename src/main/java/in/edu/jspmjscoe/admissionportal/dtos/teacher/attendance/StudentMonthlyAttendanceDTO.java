@@ -17,7 +17,10 @@ public class StudentMonthlyAttendanceDTO {
     private String subjectName;
 
     private Map<String, Integer> attendanceByDate; // date (String) -> 1 (Present) or 0 (Absent)
-    private Integer totalDays;
-    private Integer presentDays;
+    private int totalSessions;
+    private int presentSessions;
+
+    private int totalDays;
+    private int presentDays;
     private Double percentage;
 }
