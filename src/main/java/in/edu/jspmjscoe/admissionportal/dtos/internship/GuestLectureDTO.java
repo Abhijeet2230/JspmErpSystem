@@ -19,4 +19,6 @@ public class GuestLectureDTO {
     private LocalDate lectureDate;
     private Double durationHours;
     private Boolean certificateProvided;
+    private Long referredByUserId;
+    private String referredByUsername; // for display purposes
 }

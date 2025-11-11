@@ -1,5 +1,6 @@
 package in.edu.jspmjscoe.admissionportal.model.internship;
 
+import in.edu.jspmjscoe.admissionportal.model.security.User;
 import in.edu.jspmjscoe.admissionportal.model.student.Student;
 import jakarta.persistence.*;
 import lombok.*;
@@ -49,6 +50,10 @@ public class ConsultancyProjectWork {
     @Column(name = "status", nullable = false, length = 20)
     @Builder.Default
     private ProjectStatus status = ProjectStatus.PLANNING;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "referred_by_user_id")
+    private User referredBy;
 
     // Many students can work on many projects
     @ManyToMany
