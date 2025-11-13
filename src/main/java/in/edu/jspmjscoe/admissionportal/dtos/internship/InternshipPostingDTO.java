@@ -24,6 +24,8 @@ public class InternshipPostingDTO {
     private BigDecimal stipend;
     private Integer vacancies;
     private PostingStatus status;
+    private Long referredByUserId;
+    private String referredByUsername; // for display purposes
     
     // Effective value methods
     public Integer getEffectiveVacancies(CompanyDTO company) {

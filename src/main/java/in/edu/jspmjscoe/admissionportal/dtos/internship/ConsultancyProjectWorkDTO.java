@@ -22,4 +22,6 @@ public class ConsultancyProjectWorkDTO {
     private LocalDate endDate;
     private Boolean certificateProvided;
     private ProjectStatus status;
+    private Long referredByUserId;
+    private String referredByUsername; // for display purposes
 }

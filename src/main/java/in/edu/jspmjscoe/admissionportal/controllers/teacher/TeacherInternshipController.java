@@ -39,6 +39,7 @@ public class TeacherInternshipController {
     private final IndustrialVisitService industrialVisitService;
     private final StudentInternshipProfileService studentProfileService;
     private final ResumeService resumeService;
+    private final in.edu.jspmjscoe.admissionportal.repositories.security.UserRepository userRepository;
 
     // ==================== COMPANY VIEWING ====================
     
@@ -75,7 +76,15 @@ public class TeacherInternshipController {
     // ==================== INTERNSHIP POSTING MANAGEMENT ====================
     
     @PostMapping("/postings")
-    public ResponseEntity<InternshipPostingDTO> createInternshipPosting(@RequestBody InternshipPostingDTO postingDTO) {
+    public ResponseEntity<InternshipPostingDTO> createInternshipPosting(
+            @RequestBody InternshipPostingDTO postingDTO,
+            org.springframework.security.core.Authentication authentication) {
+        // Automatically set the referredBy to the logged-in teacher
+        String username = authentication.getName();
+        var user = userRepository.findByUserName(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        postingDTO.setReferredByUserId(user.getUserId());
+        
         InternshipPostingDTO createdPosting = internshipPostingService.createPosting(postingDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdPosting);
     }
@@ -132,7 +141,15 @@ public class TeacherInternshipController {
     // ==================== PLACEMENT MANAGEMENT ====================
     
     @PostMapping("/placements")
-    public ResponseEntity<PlacementDTO> createPlacement(@RequestBody PlacementDTO placementDTO) {
+    public ResponseEntity<PlacementDTO> createPlacement(
+            @RequestBody PlacementDTO placementDTO,
+            org.springframework.security.core.Authentication authentication) {
+        // Automatically set the referredBy to the logged-in teacher
+        String username = authentication.getName();
+        var user = userRepository.findByUserName(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        placementDTO.setReferredByUserId(user.getUserId());
+        
         PlacementDTO createdPlacement = placementService.createPlacement(placementDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdPlacement);
     }
@@ -226,7 +243,21 @@ public class TeacherInternshipController {
         return ResponseEntity.ok(applications);
     }
 
-    // ==================== CONSULTANCY PROJECT VIEWING ====================
+    // ==================== CONSULTANCY PROJECT MANAGEMENT ====================
+    
+    @PostMapping("/consultancy-projects")
+    public ResponseEntity<ConsultancyProjectWorkDTO> createConsultancyProject(
+            @RequestBody ConsultancyProjectWorkDTO projectDTO,
+            org.springframework.security.core.Authentication authentication) {
+        // Automatically set the referredBy to the logged-in teacher
+        String username = authentication.getName();
+        var user = userRepository.findByUserName(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        projectDTO.setReferredByUserId(user.getUserId());
+        
+        ConsultancyProjectWorkDTO createdProject = consultancyProjectService.createProject(projectDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdProject);
+    }
     
     @GetMapping("/consultancy-projects")
     public ResponseEntity<List<ConsultancyProjectWorkDTO>> getAllConsultancyProjects() {
@@ -250,7 +281,15 @@ public class TeacherInternshipController {
     // ==================== GUEST LECTURE MANAGEMENT ====================
     
     @PostMapping("/guest-lectures")
-    public ResponseEntity<GuestLectureDTO> createGuestLecture(@RequestBody GuestLectureDTO guestLectureDTO) {
+    public ResponseEntity<GuestLectureDTO> createGuestLecture(
+            @RequestBody GuestLectureDTO guestLectureDTO,
+            org.springframework.security.core.Authentication authentication) {
+        // Automatically set the referredBy to the logged-in teacher
+        String username = authentication.getName();
+        var user = userRepository.findByUserName(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        guestLectureDTO.setReferredByUserId(user.getUserId());
+        
         GuestLectureDTO createdLecture = guestLectureService.createGuestLecture(guestLectureDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdLecture);
     }
@@ -291,7 +330,15 @@ public class TeacherInternshipController {
     // ==================== TRAINING WORKSHOP MANAGEMENT ====================
     
     @PostMapping("/training-workshops")
-    public ResponseEntity<TrainingSkillWorkshopDTO> createTrainingWorkshop(@RequestBody TrainingSkillWorkshopDTO workshopDTO) {
+    public ResponseEntity<TrainingSkillWorkshopDTO> createTrainingWorkshop(
+            @RequestBody TrainingSkillWorkshopDTO workshopDTO,
+            org.springframework.security.core.Authentication authentication) {
+        // Automatically set the referredBy to the logged-in teacher
+        String username = authentication.getName();
+        var user = userRepository.findByUserName(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        workshopDTO.setReferredByUserId(user.getUserId());
+        
         TrainingSkillWorkshopDTO createdWorkshop = trainingSkillWorkshopService.createWorkshop(workshopDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdWorkshop);
     }
@@ -329,7 +376,15 @@ public class TeacherInternshipController {
     // ==================== INDUSTRIAL VISIT MANAGEMENT ====================
     
     @PostMapping("/industrial-visits")
-    public ResponseEntity<IndustrialVisitDTO> createIndustrialVisit(@RequestBody IndustrialVisitDTO industrialVisitDTO) {
+    public ResponseEntity<IndustrialVisitDTO> createIndustrialVisit(
+            @RequestBody IndustrialVisitDTO industrialVisitDTO,
+            org.springframework.security.core.Authentication authentication) {
+        // Automatically set the referredBy to the logged-in teacher
+        String username = authentication.getName();
+        var user = userRepository.findByUserName(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        industrialVisitDTO.setReferredByUserId(user.getUserId());
+        
         IndustrialVisitDTO createdVisit = industrialVisitService.createIndustrialVisit(industrialVisitDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdVisit);
     }

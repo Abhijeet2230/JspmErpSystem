@@ -1,5 +1,6 @@
 package in.edu.jspmjscoe.admissionportal.model.internship;
 
+import in.edu.jspmjscoe.admissionportal.model.security.User;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -50,6 +51,10 @@ public class InternshipPosting {
     @Column(name = "status", nullable = false, length = 20)
     @Builder.Default
     private PostingStatus status = PostingStatus.DRAFT;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "referred_by_user_id")
+    private User referredBy;
 
     // Bidirectional relationship to applications
     @OneToMany(mappedBy = "internship", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

@@ -13,6 +13,8 @@ public interface TrainingSkillWorkshopRepository extends JpaRepository<TrainingS
     List<TrainingSkillWorkshop> findByOrganizationContainingIgnoreCase(String organization);
 
     List<TrainingSkillWorkshop> findByWorkshopDate(LocalDate workshopDate);
+    
+    List<TrainingSkillWorkshop> findByReferredBy_UserId(Long userId);
 }
 
 

@@ -25,6 +25,8 @@ public class PlacementDTO {
     private String bondRequired;
     private Integer vacancies;
     private PostingStatus status;
+    private Long referredByUserId;
+    private String referredByUsername; // for display purposes
     
     // Effective value methods
     public Integer getEffectiveVacancies(CompanyDTO company) {
