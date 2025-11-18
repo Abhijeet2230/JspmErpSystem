@@ -13,7 +13,7 @@ public interface InternshipApplicationService {
     
     Optional<InternshipApplicationDTO> getApplicationById(Long applicationId);
     
-    List<InternshipApplicationDTO> getApplicationsByStudent(Long studentId);
+    List<InternshipApplicationDTO> getApplicationsByStudentProfile(Long profileId);
     
     List<InternshipApplicationDTO> getApplicationsByInternship(Long internshipId);
     
@@ -25,7 +25,7 @@ public interface InternshipApplicationService {
     
     void updateApplicationStatus(Long applicationId, ApplicationStatus status);
     
-    boolean hasStudentAppliedForInternship(Long studentId, Long internshipId);
+    boolean hasProfileAppliedForInternship(Long profileId, Long internshipId);
     
     void withdrawApplication(Long applicationId);
 }

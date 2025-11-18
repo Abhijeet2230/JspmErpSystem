@@ -18,4 +18,6 @@ public class IndustrialVisitDTO {
     private LocalDate visitDate;
     private Double durationHours;
     private Boolean certificateProvided;
+    private Long referredByUserId;
+    private String referredByUsername; // for display purposes
 }

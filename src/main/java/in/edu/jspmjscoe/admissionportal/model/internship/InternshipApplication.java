@@ -10,7 +10,7 @@ import java.time.LocalDate;
 @Entity
 @Table(
     name = "internship_application",
-    uniqueConstraints = @UniqueConstraint(columnNames = {"student_id", "internship_id"})
+    uniqueConstraints = @UniqueConstraint(columnNames = {"student_profile_id", "internship_id"})
 ) //To ensure a student cannot apply to the same internship twice
 @Getter
 @Setter
@@ -27,6 +27,10 @@ public class InternshipApplication {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "student_id", nullable = false)
     private Student student;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "student_profile_id", nullable = false)
+    private StudentProfile studentProfile;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "internship_id", nullable = false)

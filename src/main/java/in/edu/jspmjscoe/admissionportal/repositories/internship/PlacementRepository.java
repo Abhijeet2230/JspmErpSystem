@@ -13,6 +13,8 @@ public interface PlacementRepository extends JpaRepository<Placement, Long> {
     List<Placement> findByStatus(PostingStatus status);
 
     List<Placement> findByJobTitleContainingIgnoreCase(String jobTitle);
+    
+    List<Placement> findByReferredBy_UserId(Long userId);
 }
 
 

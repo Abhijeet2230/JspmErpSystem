@@ -13,6 +13,8 @@ public interface IndustrialVisitRepository extends JpaRepository<IndustrialVisit
     List<IndustrialVisit> findByVisitTitleContainingIgnoreCase(String visitTitle);
 
     List<IndustrialVisit> findByVisitDate(LocalDate visitDate);
+    
+    List<IndustrialVisit> findByReferredBy_UserId(Long userId);
 }
 
 

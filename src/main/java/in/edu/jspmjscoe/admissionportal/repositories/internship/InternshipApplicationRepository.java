@@ -10,11 +10,15 @@ public interface InternshipApplicationRepository extends JpaRepository<Internshi
 
     List<InternshipApplication> findByStudentStudentId(Long studentId);
 
+    List<InternshipApplication> findByStudentProfileProfileId(Long profileId);
+
     List<InternshipApplication> findByInternshipInternshipId(Long internshipId);
 
     List<InternshipApplication> findByStatus(ApplicationStatus status);
 
     boolean existsByStudentStudentIdAndInternshipInternshipId(Long studentId, Long internshipId);
+
+    boolean existsByStudentProfileProfileIdAndInternshipInternshipId(Long profileId, Long internshipId);
 }
 
 

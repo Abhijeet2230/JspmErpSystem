@@ -178,11 +178,14 @@ public class StudentInternshipController {
             @AuthenticationPrincipal UserDetails userDetails) {
         
         Student student = getCurrentStudent(userDetails);
+        StudentProfileDTO profile = studentProfileService.getProfileByStudentId(student.getStudentId())
+                .orElseThrow(() -> new ResourceNotFoundException("Student profile not found"));
         
         try {
             // Set the student info and internship ID
             applicationFormDTO.setStudentId(student.getStudentId());
             applicationFormDTO.setInternshipId(id);
+            applicationFormDTO.setProfileId(profile.getProfileId());
             
             InternshipApplicationDTO createdApplication = applicationFormService.submitInternshipApplication(applicationFormDTO);
             return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
@@ -316,7 +319,9 @@ public class StudentInternshipController {
             @AuthenticationPrincipal UserDetails userDetails) {
         
         Student student = getCurrentStudent(userDetails);
-        List<InternshipApplicationDTO> applications = internshipApplicationService.getApplicationsByStudent(student.getStudentId());
+        StudentProfileDTO profile = studentProfileService.getProfileByStudentId(student.getStudentId())
+                .orElseThrow(() -> new ResourceNotFoundException("Student profile not found"));
+        List<InternshipApplicationDTO> applications = internshipApplicationService.getApplicationsByStudentProfile(profile.getProfileId());
         return ResponseEntity.ok(applications);
     }
 
@@ -343,8 +348,10 @@ public class StudentInternshipController {
             @AuthenticationPrincipal UserDetails userDetails) {
         
         Student student = getCurrentStudent(userDetails);
+        StudentProfileDTO profile = studentProfileService.getProfileByStudentId(student.getStudentId())
+                .orElseThrow(() -> new ResourceNotFoundException("Student profile not found"));
         
-        List<InternshipApplicationDTO> internshipApps = internshipApplicationService.getApplicationsByStudent(student.getStudentId());
+        List<InternshipApplicationDTO> internshipApps = internshipApplicationService.getApplicationsByStudentProfile(profile.getProfileId());
         List<PlacementApplicationDTO> placementApps = placementApplicationService.getApplicationsByStudent(student.getStudentId());
         List<ConsultancyProjectApplicationDTO> consultancyApps = consultancyProjectApplicationService.getApplicationsByStudent(student.getStudentId());
         
