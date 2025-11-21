@@ -15,6 +15,8 @@ public interface GuestLectureRepository extends JpaRepository<GuestLecture, Long
     List<GuestLecture> findByOrganizationContainingIgnoreCase(String organization);
 
     List<GuestLecture> findByLectureDate(LocalDate lectureDate);
+    
+    List<GuestLecture> findByReferredBy_UserId(Long userId);
 }
 
 

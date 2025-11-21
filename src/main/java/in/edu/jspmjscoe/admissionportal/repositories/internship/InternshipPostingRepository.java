@@ -13,6 +13,8 @@ public interface InternshipPostingRepository extends JpaRepository<InternshipPos
     List<InternshipPosting> findByStatus(PostingStatus status);
 
     List<InternshipPosting> findByTitleContainingIgnoreCase(String title);
+    
+    List<InternshipPosting> findByReferredBy_UserId(Long userId);
 }
 
 

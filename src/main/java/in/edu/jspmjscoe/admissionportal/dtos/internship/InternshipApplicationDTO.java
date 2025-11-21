@@ -15,6 +15,7 @@ public class InternshipApplicationDTO {
     // Application entity fields
     private Long applicationId;
     private Long studentId;
+    private Long profileId;
     private String studentName; // for display purposes
     private Long internshipId;
     private String internshipTitle; // for display purposes

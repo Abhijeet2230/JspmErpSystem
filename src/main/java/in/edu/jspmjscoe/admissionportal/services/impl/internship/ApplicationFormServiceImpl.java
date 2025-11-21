@@ -47,6 +47,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
         // Build form DTO with pre-filled data
         return InternshipApplicationDTO.builder()
                 .internshipId(internshipId)
+                .profileId(profile.getProfileId())
                 // Student data
                 .prnNumber(student.getPrnNumber())
                 .candidateName(student.getCandidateName())
@@ -165,6 +166,12 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
     public InternshipApplicationDTO submitInternshipApplication(InternshipApplicationDTO applicationDTO) {
         log.info("Submitting internship application for student {} to internship {}", 
                 applicationDTO.getStudentId(), applicationDTO.getInternshipId());
+
+        if (applicationDTO.getProfileId() == null) {
+            StudentProfileDTO profile = studentProfileService.getProfileByStudentId(applicationDTO.getStudentId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Student profile not found with ID: " + applicationDTO.getStudentId()));
+            applicationDTO.setProfileId(profile.getProfileId());
+        }
         
         // Validate student profile completeness
         List<String> missingFields = validateStudentProfileForApplication(applicationDTO.getStudentId());
@@ -248,8 +255,11 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
     @Override
     @Transactional(readOnly = true)
     public boolean canApplyForInternship(Long studentId, Long internshipId) {
+        StudentProfileDTO profile = studentProfileService.getProfileByStudentId(studentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Student profile not found with ID: " + studentId));
+
         // Check if already applied
-        if (internshipApplicationService.hasStudentAppliedForInternship(studentId, internshipId)) {
+        if (internshipApplicationService.hasProfileAppliedForInternship(profile.getProfileId(), internshipId)) {
             return false;
         }
         

@@ -1,5 +1,6 @@
 package in.edu.jspmjscoe.admissionportal.model.internship;
 
+import in.edu.jspmjscoe.admissionportal.model.security.User;
 import in.edu.jspmjscoe.admissionportal.model.student.Student;
 import jakarta.persistence.*;
 import lombok.*;
@@ -38,6 +39,10 @@ public class TrainingSkillWorkshop {
 
     @Column(name = "certificate_provided")
     private Boolean certificateProvided;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "referred_by_user_id")
+    private User referredBy;
 
     // Many students can attend many workshops
     @ManyToMany

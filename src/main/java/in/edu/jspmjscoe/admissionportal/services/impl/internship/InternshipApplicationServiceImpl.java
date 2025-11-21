@@ -27,8 +27,13 @@ public class InternshipApplicationServiceImpl implements InternshipApplicationSe
 
     @Override
     public InternshipApplicationDTO applyForInternship(InternshipApplicationDTO applicationDTO) {
+        Long profileId = applicationDTO.getProfileId();
+        if (profileId == null) {
+            throw new IllegalArgumentException("Student profile is required to apply for an internship");
+        }
+
         // Check if student has already applied for this internship
-        if (hasStudentAppliedForInternship(applicationDTO.getStudentId(), applicationDTO.getInternshipId())) {
+        if (hasProfileAppliedForInternship(profileId, applicationDTO.getInternshipId())) {
             throw new DuplicateResourceException("Student has already applied for this internship");
         }
         
@@ -64,8 +69,8 @@ public class InternshipApplicationServiceImpl implements InternshipApplicationSe
 
     @Override
     @Transactional(readOnly = true)
-    public List<InternshipApplicationDTO> getApplicationsByStudent(Long studentId) {
-        return applicationRepository.findByStudentStudentId(studentId)
+    public List<InternshipApplicationDTO> getApplicationsByStudentProfile(Long profileId) {
+        return applicationRepository.findByStudentProfileProfileId(profileId)
                 .stream()
                 .map(applicationMapper::toDTO)
                 .collect(Collectors.toList());
@@ -125,8 +130,8 @@ public class InternshipApplicationServiceImpl implements InternshipApplicationSe
 
     @Override
     @Transactional(readOnly = true)
-    public boolean hasStudentAppliedForInternship(Long studentId, Long internshipId) {
-        return applicationRepository.existsByStudentStudentIdAndInternshipInternshipId(studentId, internshipId);
+    public boolean hasProfileAppliedForInternship(Long profileId, Long internshipId) {
+        return applicationRepository.existsByStudentProfileProfileIdAndInternshipInternshipId(profileId, internshipId);
     }
 
     @Override

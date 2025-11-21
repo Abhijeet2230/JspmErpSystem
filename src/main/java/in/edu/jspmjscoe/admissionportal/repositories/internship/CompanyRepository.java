@@ -27,8 +27,6 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
     List<Company> findByDefaultBondRequired(String bondRequired);
 
     List<Company> findByAgreementRequired(String agreementRequired);
-
-    List<Company> findByInternshipOpportunity(String internshipOpportunity);
 }
 
 

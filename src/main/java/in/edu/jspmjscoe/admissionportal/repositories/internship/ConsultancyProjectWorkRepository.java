@@ -13,6 +13,8 @@ public interface ConsultancyProjectWorkRepository extends JpaRepository<Consulta
     List<ConsultancyProjectWork> findByStatus(ProjectStatus status);
 
     List<ConsultancyProjectWork> findByProjectTitleContainingIgnoreCase(String projectTitle);
+    
+    List<ConsultancyProjectWork> findByReferredBy_UserId(Long userId);
 }
 
 
