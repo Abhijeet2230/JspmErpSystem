@@ -2,7 +2,7 @@
 services:
   frontend :
     build:
-      context: ./frontend
+      context: ../frontend
     container_name: erp_frontend
     ports:
       - "8080:80"
@@ -11,7 +11,8 @@ services:
         condition: service_healthy
 
   app:
-    build: .
+    build:
+      context: .
     container_name: erp_backend
     depends_on:
       postgres:
